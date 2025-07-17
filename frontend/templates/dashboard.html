@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - SB Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/static/theme/startbootstrap-sb-admin-gh-pages/css/styles.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+</head>
+<body class="sb-nav-fixed">
+    
+
+<nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+    <a class="navbar-brand ps-3" href="#">Panel de Usuarios</a>
+    <ul class="navbar-nav ms-auto me-3 me-lg-4">
+        <li class="nav-item">
+            <a class="nav-link" href="#" id="cerrarSesion"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+        </li>
+    </ul>
+</nav>
+    
+<!-- Layout general -->
+<div id="layoutSidenav">
+  
+    <div id="layoutSidenav_nav">
+        <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+            <div class="sb-sidenav-menu">
+                <div class="nav">
+                    <a class="nav-link" href="#" id="linkInicio">
+                        <div class="sb-nav-link-icon"><i class="fas fa-home"></i></div>
+                        Inicio
+                    </a>
+                    <a class="nav-link" href="#" id="linkUsuarios">
+                        <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
+                        Usuarios
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Contenido principal -->
+    <div id="layoutSidenav_content">
+        <main class="container-fluid p-4">
+
+            <!-- Vista Inicio -->
+            <div id="vistaInicio">
+                <h1 class="mt-4">Bienvenido, <span id="nombreUsuario"></span></h1>
+            </div>
+
+            <!-- Vista Usuarios -->
+            <div id="vistaUsuarios" style="display:none;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2>Gestión de Usuarios</h2>
+                    <button class="btn btn-success" id="btnNuevoUsuario"><i class="fas fa-user-plus"></i> Registrar Usuario</button>
+                </div>
+
+                <!-- Formulario de registro -->
+                <div id="formRegistroUsuario" class="card p-4 mb-4" style="display: none;">
+                    <h5 class="mb-3">Nuevo Usuario</h5>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <input type="text" class="form-control mb-2" id="regNombre" placeholder="Nombre completo">
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control mb-2" id="regUsuario" placeholder="Usuario">
+                        </div>
+                        <div class="col-md-3">
+                            <input type="email" class="form-control mb-2" id="regCorreo" placeholder="Correo electrónico">
+                        </div>
+                        <div class="col-md-2">
+                            <input type="password" class="form-control mb-2" id="regContrasenia" placeholder="Contraseña">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="guardarNuevoUsuario">Guardar Usuario</button>
+                </div>
+
+                <!-- Tabla de usuarios -->
+                <table class="table table-bordered" id="tablaUsuarios">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Usuario</th>
+                            <th>Correo</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/static/js/dashboard.js"></script>
+</body>
+</html>
+
