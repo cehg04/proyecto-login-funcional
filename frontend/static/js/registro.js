@@ -1,12 +1,12 @@
-$(document).ready(function() {
-    $("#formRegistro").on("submit", function(e) {
+$(document).ready(function () {
+    $("#formRegistro").on("submit", function (e) {
         e.preventDefault();
 
         const datos = {
-            nombre: $("input[name='nombre']").val(),
-            usuario: $("input[name='usuario']").val(),
-            contrasenia: $("input[name='contrasenia']").val(),
-            correo: $("input[name='correo']").val()
+            nombre: $("#regNombre").val(),
+            usuario: $("#regUsuario").val(),
+            contrasenia: $("#regContrasenia").val(),
+            correo: $("#regCorreo").val()
         };
 
         $.ajax({
@@ -14,16 +14,27 @@ $(document).ready(function() {
             method: "POST",
             contentType: "application/json",
             data: JSON.stringify(datos),
-            success: function(res) {
-                if (res.mensaje) {
-                    $("#msg").html(`<div class="alert alert-success">${res.mensaje}</div>`);
-                } else {
-                    $("#msg").html(`<div class="alert alert-warning">Operación completada, pero sin respuesta clara.</div>`);
-                }
+            success: function (res) {
+                $("#msg").html(`<div class="alert alert-success">${res.mensaje || 'Usuario registrado exitosamente.'}</div>`);
+
+                // Limpiar el formulario inmediatamente
+                limpiaformulario();
             },
-            error: function(xhr, status, error) {
+            error: function (xhr) {
                 $("#msg").html(`<div class="alert alert-danger">Error del servidor: ${xhr.responseText}</div>`);
             }
         });
     });
 });
+
+function limpiaformulario() {
+    $("#regNombre").val("");
+    $("#regUsuario").val("");
+    $("#regContrasenia").val("");
+    $("#regCorreo").val("");
+}
+
+
+
+
+

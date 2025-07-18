@@ -3,7 +3,8 @@ from ..utils.security import hash_password
 from mysql.connector import Error
 from fastapi import HTTPException
 
-def obtener_usuario():
+# obtenemos los datos del usuario
+def obtener_usuarios():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT cod_usuario, nombre, usuario, correo, estado FROM usuarios")
@@ -12,6 +13,7 @@ def obtener_usuario():
     conn.close()
     return resultado
 
+# creamos un nuevo usuario
 def crear_usuario(data):
     conn = None
     cursor = None
@@ -43,7 +45,7 @@ def crear_usuario(data):
         if conn and conn.is_connected():
             conn.close()
 
-
+# Actualizar un usuario existente
 def actualizar_usuario(cod_usuario: int, data):
     conn = get_connection()
     cursor = conn.cursor()
@@ -55,7 +57,7 @@ def actualizar_usuario(cod_usuario: int, data):
         valores.append(valor)
 
     if not campos:
-        raise HTTPException(status_code=400, detail="No hay datos para poder Actualizar")
+        raise HTTPException(status_code=400, detail="No hay datos para actualizar")
     
     valores.append(cod_usuario)
     query = f"UPDATE usuarios SET {', '.join(campos)} WHERE cod_usuario = %s"
@@ -64,4 +66,4 @@ def actualizar_usuario(cod_usuario: int, data):
     conn.commit()
     cursor.close()
     conn.close()
-    return {"msg": "Usuario actualizado con Exito"}
+    return {"mensaje": "Usuario actualizado con éxito"}

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Request
 from ..models.usuario_model import UsuarioCreate, UsuarioUpdate
-from ..services.usuario_service import crear_usuario
+from ..services.usuario_service import crear_usuario, obtener_usuarios, actualizar_usuario
 from ..db.connection import get_connection
 
 router = APIRouter(prefix="/api/usuarios", tags=["Usuarios"])
@@ -12,33 +12,29 @@ def registrar_usuario(data: UsuarioCreate):
     return crear_usuario(data)
 
 # Obtener todos los usuarios
+
 @router.get("/")
 def listar_usuarios():
+    return obtener_usuarios()
+
+# Obtener usuario por ID
+@router.get("/{cod_usuario}")
+def obtener_usuario(cod_usuario: int):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT cod_usuario, nombre, usuario, correo, estado FROM usuarios")
-    usuarios = cursor.fetchall()
+    cursor.execute("SELECT cod_usuario, nombre, usuario, correo, estado FROM usuarios WHERE cod_usuario = %s", (cod_usuario,))
+    usuario = cursor.fetchone()
     cursor.close()
     conn.close()
-    return usuarios    
+    if usuario:
+        return usuario
+    else:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
 
 @router.put("/{cod_usuario}")
-def actualizar_usuario(cod_usuario: int, data: UsuarioUpdate):
-    conn = get_connection()
-    cursor = conn.cursor()
-    try:
-        cursor.execute("""
-            UPDATE usuarios
-            SET nombre=%s, usuario=%s, correo=%s
-            WHERE cod_usuario=%s
-        """, (data.nombre, data.usuario, data.correo, cod_usuario))
-        conn.commit()
-        return {"mensaje": "Usuario actualizado correctamente"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    finally:
-        cursor.close()
-        conn.close()
+def modificar_usuario(cod_usuario: int, data: UsuarioUpdate):
+    return actualizar_usuario(cod_usuario, data)
 
 @router.put("/estado/{cod_usuario}")
 def cambiar_estado_usuario(cod_usuario: int):

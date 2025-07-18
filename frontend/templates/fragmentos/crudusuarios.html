@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Gestión de Usuarios</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="container">
+        <h2 class="mt-4">Gestión de Usuarios</h2>
+        <table class="table table-bordered mt-4" id="tablaUsuarios">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Usuario</th>
+                    <th>Correo</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- Modal para editar usuario -->
+    <div class="modal fade" id="modalEditarUsuario" tabindex="-1" aria-labelledby="modalEditarUsuarioLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalEditarUsuarioLabel">Editar Usuario</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <form id="formEditarUsuario">
+              <input type="hidden" id="edit_cod_usuario" />
+              <div class="mb-3">
+                <label for="edit_nombre" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="edit_nombre" required />
+              </div>
+              <div class="mb-3">
+                <label for="edit_usuario" class="form-label">Usuario</label>
+                <input type="text" class="form-control" id="edit_usuario" required />
+              </div>
+              <div class="mb-3">
+                <label for="edit_correo" class="form-label">Correo</label>
+                <input type="email" class="form-control" id="edit_correo" />
+              </div>
+              <div class="mb-3">
+                <label for="edit_estado" class="form-label">Estado</label>
+                <select class="form-select" id="edit_estado">
+                  <option value="A">Activo</option>
+                  <option value="I">Inactivo</option>
+                </select>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="btnGuardarCambios">Guardar Cambios</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap Bundle JS (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Tu JS -->
+    <script src="/static/js/crudusuarios.js"></script>
+</body>
+</html>

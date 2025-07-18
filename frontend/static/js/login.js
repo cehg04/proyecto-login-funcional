@@ -6,7 +6,7 @@ $(document).ready(function(){
         const contrasenia = $("input[name='contrasenia']").val().trim();
 
         if (!usuario || !contrasenia){
-            $("#msg").html(`<div class="alert alert-warning">Por favor, completa todos los campos.</div>`);
+            $("#msg").html(`<div class="alert alert-warning">Por favor, Primero completa los campos.</div>`);
             return;
         }
 
@@ -25,7 +25,8 @@ $(document).ready(function(){
 
                     $("#msg").html(`<div class="alert alert-success">Bienvenido ${res.usuario}</div>`);
                     setTimeout(() => {
-                        window.location.href = "/dashboard";
+                        // redirecciona a donde queremos que vaya
+                        window.location.href = "/menu.html";
                     }, 1000);
                 } else {
                     $("#msg").html(`<div class="alert alert-danger">${res.error || "Credenciales incorrectas"}</div>`);
