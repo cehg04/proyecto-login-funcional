@@ -1,12 +1,20 @@
 $(document).ready(function () {
+    cargarOpciones();
+
     $("#formRegistro").on("submit", function (e) {
         e.preventDefault();
+
+        const permisosSeleccionados = [];
+        $("input.permiso-opcion:checked").each(function () {
+            permisosSeleccionados.push(parseInt($(this).val()));
+        });
 
         const datos = {
             nombre: $("#regNombre").val(),
             usuario: $("#regUsuario").val(),
             contrasenia: $("#regContrasenia").val(),
-            correo: $("#regCorreo").val()
+            correo: $("#regCorreo").val(),
+            permisos: permisosSeleccionados
         };
 
         $.ajax({
@@ -16,8 +24,6 @@ $(document).ready(function () {
             data: JSON.stringify(datos),
             success: function (res) {
                 $("#msg").html(`<div class="alert alert-success">${res.mensaje || 'Usuario registrado exitosamente.'}</div>`);
-
-                // Limpiar el formulario inmediatamente
                 limpiaformulario();
             },
             error: function (xhr) {
@@ -26,6 +32,29 @@ $(document).ready(function () {
         });
     });
 });
+function cargarOpciones(){
+    $.ajax({
+        url: "/api/usuarios/opciones",
+        method: "GET",
+        success: function (opciones) {
+            const contenedor = $("#opcionesChecklist");
+            contenedor.empty();
+            opciones.forEach(opcion => {
+                contenedor.append(`
+                    <div class="form-check">
+                        <input class="form-check-input permiso-opcion" type="checkbox" value="${opcion.cod_opcion}" id="permiso_${opcion.cod_opcion}">
+                        <label class="form-check-label" for="permiso_${opcion.cod_opcion}">
+                            ${opcion.nombre_opcion}
+                        </label>
+                    </div>
+                `);
+            });
+        },
+        error: function () {
+            $("#opcionesChecklist").html('<div class="alert alert-danger">Error al cargar las opciones.</div>');
+        }
+    });
+}
 
 function limpiaformulario() {
     $("#regNombre").val("");
