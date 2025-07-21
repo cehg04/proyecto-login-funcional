@@ -43,3 +43,8 @@ def mostrar_menu(request: Request):
 @app.get("/fragmentos/crudusuarios.html", response_class=HTMLResponse)
 def crud_usuarios(request: Request):
     return templates.TemplateResponse("fragmentos/crudusuarios.html", {"request": request})
+
+# referencia hacia el inicio
+@app.get("/fragmentos/inicio.html", response_class=HTMLResponse)
+def mostrar_inicio(request: Request, sesion: str = Depends(verificar_sesion)):
+    return templates.TemplateResponse("fragmentos/inicio.html", {"request": request, "sesion": sesion})
