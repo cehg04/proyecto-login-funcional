@@ -86,3 +86,32 @@ def actualizar_usuario(cod_usuario: int, data):
     cursor.close()
     conn.close()
     return {"mensaje": "Usuario actualizado con éxito"}
+
+# actualizar los permisos de un usuario
+def actualizar_permisos_usuario(cod_usuario: int, nuevas_opciones: list):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Primero marcamos todo como "N"
+        cursor.execute("""
+            UPDATE permisos SET permiso = 'N' WHERE cod_usuario = %s
+        """, (cod_usuario,))
+
+        # Luego, actualizamos a "S" solo las opciones recibidas
+        for cod_opcion in nuevas_opciones:
+            cursor.execute("""
+                UPDATE permisos
+                SET permiso = 'S'
+                WHERE cod_usuario = %s AND cod_opcion = %s
+            """, (cod_usuario, cod_opcion))
+
+        conn.commit()
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    finally:
+        cursor.close()
+        conn.close()
+

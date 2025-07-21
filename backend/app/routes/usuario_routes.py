@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Request
 from ..models.usuario_model import UsuarioCreate, UsuarioUpdate
 from ..services.usuario_service import crear_usuario, obtener_usuarios, actualizar_usuario
+from ..services.usuario_service import actualizar_permisos_usuario
 from ..db.connection import get_connection
 
 router = APIRouter(prefix="/api/usuarios", tags=["Usuarios"])
@@ -67,3 +68,30 @@ def cambiar_estado_usuario(cod_usuario: int):
         conn.close()
     
 
+# Obtener permisos de un usuario
+@router.get("/permisos/{cod_usuario}")
+def obtener_permisos_usuario(cod_usuario: int):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("""
+            SELECT p.cod_opcion, o.nombre_opcion, p.permiso
+            FROM permisos p
+            JOIN opciones o ON o.cod_opcion = p.cod_opcion
+            WHERE p.cod_usuario = %s
+        """, (cod_usuario,))
+        permisos = cursor.fetchall()
+        return permisos
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@router.put("/permisos/{cod_usuario}")
+def modificar_permisos(cod_usuario: int, data: dict):
+    nuevas_opciones = data.get("permisos", [])
+    if not isinstance(nuevas_opciones, list):
+        raise HTTPException(status_code=400, detail="Formato de permisos inválido")
+    return actualizar_permisos_usuario(cod_usuario, nuevas_opciones)
