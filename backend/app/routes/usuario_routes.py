@@ -1,8 +1,11 @@
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Depends
 from ..models.usuario_model import UsuarioCreate, UsuarioUpdate
 from ..services.usuario_service import crear_usuario, obtener_usuarios, actualizar_usuario
 from ..services.usuario_service import actualizar_permisos_usuario
 from ..db.connection import get_connection
+from ..utils.jwt_handler import verificar_token
+from ..db.connection import get_connection
+
 
 router = APIRouter(prefix="/api/usuarios", tags=["Usuarios"])
 
@@ -88,10 +91,12 @@ def obtener_permisos_usuario(cod_usuario: int):
         cursor.close()
         conn.close()
 
-
+# Modificar permisos de un usuario
 @router.put("/permisos/{cod_usuario}")
 def modificar_permisos(cod_usuario: int, data: dict):
     nuevas_opciones = data.get("permisos", [])
     if not isinstance(nuevas_opciones, list):
         raise HTTPException(status_code=400, detail="Formato de permisos inválido")
     return actualizar_permisos_usuario(cod_usuario, nuevas_opciones)
+
+
