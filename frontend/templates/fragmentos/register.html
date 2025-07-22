@@ -15,15 +15,15 @@
     <div id="msg"></div>
 
     <form id="formRegistro">
-        <div class="mb-3">
-            <label for="regNombre" class="form-label">Nombre</label>
+        <div class="mb-2">
+            <label for="regNombre" class="form-label">Nombre Completo</label>
             <input type="text" class="form-control" id="regNombre" required>
         </div>
-        <div class="mb-3">
-            <label for="regUsuario" class="form-label">Usuario</label>
+        <div class="mb-2">
+            <label for="regUsuario" class="form-label">Nombre de Usuario</label>
             <input type="text" class="form-control" id="regUsuario" required>
         </div>
-        <div class="mb-3">
+        <div class="mb-2">
             <label for="regCorreo" class="form-label">Correo</label>
             <input type="email" class="form-control" id="regCorreo" required>
         </div>
@@ -34,13 +34,13 @@
 
         <!-- Opciones / Permisos -->
         <div class="mb-3">
-            <label class="form-label">Permisos:</label>
+            <label class="form-label">Permisos Disponibles:</label>
             <div id="opcionesChecklist" class="form-check">
                 <!-- Aquí se llenarán dinámicamente las opciones desde el backend -->
             </div>
         </div>
-
-        <button type="submit" class="btn btn-primary">Registrar</button>
+        <div class="mb-4"></div>
+        <button type="submit" class="btn btn-primary">Crear Usuario</button>
     </form>
 </div>
 
