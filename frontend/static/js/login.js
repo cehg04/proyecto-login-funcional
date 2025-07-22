@@ -22,12 +22,12 @@ $(document).ready(function(){
                     document.cookie = `token=${res.token}; path=/; max-age=3600; samesite=strict`;
                     
                     // 2. Mostrar mensaje de éxito
-                    $("#msg").html(`<div class="alert alert-success">Bienvenido ${res.usuario}</div>`);
+                    $("#msg").html(`<div class="alert alert-success">Bienvenido Usuairo</div>`);
                     
                     // 3. Redireccionar después de 1 segundo
                     setTimeout(() => {
                         window.location.href = "/menu.html";
-                    }, 1000);
+                    }, 100);
                 } else {
                     $("#msg").html(`<div class="alert alert-danger">Error: No se recibió token</div>`);
                 }

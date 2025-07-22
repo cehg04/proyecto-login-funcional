@@ -11,19 +11,18 @@ def login(data: LoginData):
     usuario_autenticado = autenticar_usuario(data)
     
     if not usuario_autenticado:
-        raise HTTPException(
-            status_code=401,
-            detail="Usuario o contraseña incorrectos"
-        )
+        raise HTTPException(status_code=401, detail="Credenciales inválidas")
 
     token = crear_token({
         "cod_usuario": usuario_autenticado["cod_usuario"],
-        "usuario": usuario_autenticado["usuario"]
+        "usuario": usuario_autenticado["usuario"],
+        "nombre": usuario_autenticado["nombre"],  # Nuevo campo
+
     })
     
     return {
         "token": token,
-        "cod_usuario": usuario_autenticado["cod_usuario"],
-        "usuario": usuario_autenticado["usuario"],
-        "nombre": usuario_autenticado.get("nombre", "")
+        "user_data": {  # Datos adicionales para el frontend
+            "nombre": usuario_autenticado["nombre"],
+        }
     }
