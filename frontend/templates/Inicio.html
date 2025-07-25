@@ -58,7 +58,7 @@
     <script>
         $(document).ready(function () {
             // Cargar menú lateral y luego su JavaScript
-            $("#menu-container").load("/static/menu.html", function () {
+            $('#menu-container').load('/menu', function () {
                 $.getScript("/static/js/menu.js");
             });
         });

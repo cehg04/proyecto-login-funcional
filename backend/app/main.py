@@ -41,7 +41,7 @@ def mostrar_inicio(request: Request, sesion: str = Depends(verificar_sesion)):
     return templates.TemplateResponse("inicio.html", {"request": request, "sesion": sesion})
 
 # Cargar el menú lateral centralizado (menu.html)
-@app.get("/static/menu.html", response_class=HTMLResponse)
+@app.get("/menu", response_class=HTMLResponse)
 def mostrar_menu(request: Request):
     return templates.TemplateResponse("menu.html", {"request": request})
 
