@@ -7,7 +7,7 @@ $(document).ready(function(){
 
         if (!usuario || !contrasenia){
             $("#msg").html(`<div class="alert alert-warning">Por favor, completa los campos.</div>`);
-            return;
+            return;     
         }
 
         $.ajax({
@@ -17,17 +17,16 @@ $(document).ready(function(){
             data: JSON.stringify({ usuario, contrasenia }),
             success: function (res) {
                 if (res.token) {
-                    // 1. Guardar token en localStorage y cookies
+                    // ✅ Corrección aquí
                     localStorage.setItem("token", res.token);
+                    
+                    // Opcional: también guardar en cookie
                     document.cookie = `token=${res.token}; path=/; max-age=3600; samesite=strict`;
-                    
-                    // 2. Mostrar mensaje de éxito
-                    $("#msg").html(`<div class="alert alert-success">Bienvenido Usuairo</div>`);
-                    
-                    // 3. Redireccionar después de 1 segundo
+
+                    $("#msg").html(`<div class="alert alert-success">Bienvenido Usuario</div>`);
                     setTimeout(() => {
-                        window.location.href = "/menu.html";
-                    }, 100);
+                        window.location.href = "/inicio.html";
+                    }, 1000);
                 } else {
                     $("#msg").html(`<div class="alert alert-danger">Error: No se recibió token</div>`);
                 }
@@ -42,6 +41,3 @@ $(document).ready(function(){
         });
     });
 });
-
-
-

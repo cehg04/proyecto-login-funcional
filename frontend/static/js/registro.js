@@ -19,7 +19,7 @@ $(document).ready(function () {
 
         $.ajax({
             url: "http://127.0.0.1:8000/api/usuarios",
-            method: "POST",
+            method: "POST",     
             contentType: "application/json",
             data: JSON.stringify(datos),
             success: function (res) {

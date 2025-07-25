@@ -1,10 +1,16 @@
 from fastapi import Request
 from fastapi.responses import RedirectResponse
 from jose import jwt, JWTError
+from fastapi import Depends, HTTPException
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
 
 SECRET_KEY = "clave_secreta_segura"
 ALGORITHM = "HS256"
 
+security = HTTPBearer()
+
+# Verifica si el token de sesión es válido
 def verificar_sesion(request: Request):
     token = request.cookies.get("token")
 
@@ -15,3 +21,5 @@ def verificar_sesion(request: Request):
         return payload
     except JWTError:
         return RedirectResponse("/", status_code=302)
+
+

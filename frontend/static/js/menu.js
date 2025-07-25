@@ -1,57 +1,68 @@
-// Mostrar información de sesión
 function mostrarSesionUsuario() {
     const token = localStorage.getItem('token');
-    
+
     if (!token) {
-        window.location.href = "/";
+        window.location.href = "/login.html";
         return;
     }
 
     try {
-        // Decodificar token
         const payload = JSON.parse(atob(token.split('.')[1]));
-        
-        // Actualizar UI
-        $('#nombre-usuario').text(payload.nombre || payload.usuario);
-        $('#rol-usuario').text(payload.rol === "admin" ? "Administrador" : "Usuario");
-        
-        // Opcional: Mostrar tiempo restante de sesión
-        const expDate = new Date(payload.exp * 1000);
-        actualizarContadorSesion(expDate);
-        
+
+        const nombre = payload.nombre || payload.usuario || "Usuario";
+        const rol = payload.rol === "admin" ? "Administrador" : "Usuario";
+
+        $('#nombre-usuario').text(nombre);
+        $('#rol-usuario').text(rol);
+        $('#user-avatar').text(nombre.charAt(0).toUpperCase());
+
     } catch (e) {
-        console.error("Error al decodificar token:", e);
+        console.error("Error al decodificar el token:", e);
         cerrarSesion();
     }
 }
 
-// Contador de sesión
-function actualizarContadorSesion(expDate) {
-    const timer = setInterval(() => {
-        const ahora = new Date();
-        const segundosRestantes = Math.floor((expDate - ahora) / 1000);
-        
-        if (segundosRestantes <= 0) {
-            clearInterval(timer);
-            cerrarSesion();
-        } else {
-            const minutos = Math.floor(segundosRestantes / 60);
-            const segundos = segundosRestantes % 60;
-            $('#contador-sesion').text(`Sesión activa (${minutos}m ${segundos}s)`);
-        }
-    }, 1000);
-}
-
-// Cerrar sesión
 function cerrarSesion() {
     localStorage.removeItem('token');
     window.location.href = "/";
 }
 
-// Al cargar la página
-$(document).ready(function() {
-    mostrarSesionUsuario();
-    
-    // Manejador para el botón de cerrar sesión
-    $('#cerrarSesion').click(cerrarSesion);
+function cargarVista(pagina) {
+    if (!localStorage.getItem('token')) {
+        window.location.href = "/";
+        return;
+    }
+
+    $(".menu-item").removeClass("active");
+    $(`[data-page="${pagina}"]`).addClass("active");
+
+    $("#contenido-dinamico").load(`/static/fragmentos/${pagina}.html`, function (response, status) {
+        if (status === "error") {
+            $("#contenido-dinamico").html(`
+                <div class="alert alert-danger m-3">
+                    <strong>Error:</strong> No se pudo cargar la vista <code>${pagina}.html</code>
+                </div>
+            `);
+        }
+    });
+}
+
+$(document).ready(function () {
+    mostrarSesionUsuario(); // Mostrar datos al cargar el menú
+    cargarVista("inicio"); // Cargar vista por defecto
+
+    $(document).on('click', '.menu-item', function (e) {
+        e.preventDefault();
+        const pagina = $(this).data("page");
+        if (pagina) {
+            cargarVista(pagina);
+        }
+    });
+
+    $(document).on('click', '#cerrarSesion', function (e) {
+        e.preventDefault();
+        cerrarSesion();
+    });
 });
+
+

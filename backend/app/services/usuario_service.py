@@ -115,3 +115,6 @@ def actualizar_permisos_usuario(cod_usuario: int, nuevas_opciones: list):
         cursor.close()
         conn.close()
 
+
+
+
