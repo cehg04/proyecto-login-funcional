@@ -33,12 +33,13 @@
 </head>
 <body>
 
-    <!-- Menú se carga aquí -->
+    <!-- Contenedor del menú lateral -->
     <div id="menu-container"></div>
 
-    <!-- Contenido principal -->
+    <!-- Contenedor principal donde se carga el contenido -->
     <div id="main-content">
         <div id="contenido-dinamico">
+            <!-- Este contenido se reemplaza dinámicamente por el fragmento -->
             <div class="d-flex align-items-center justify-content-center" style="height: 70vh;">
                 <div class="text-center">
                     <i class="bi bi-house" style="font-size: 3rem; color: #09af00;"></i>
@@ -49,21 +50,21 @@
         </div>
     </div>
 
-    <!-- jQuery y Bootstrap JS -->
+    <!-- jQuery y Bootstrap Bundle -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- Cargar el menú y su JS -->
     <script>
         $(document).ready(function () {
+            // Cargar menú lateral y luego su JavaScript
             $("#menu-container").load("/static/menu.html", function () {
-                $.getScript("/static/js/menu.js", function () {
-                    mostrarSesionUsuario();  // Ejecuta la función después de cargar el menú y el JS
-                });
+                $.getScript("/static/js/menu.js");
             });
         });
     </script>
-
 </body>
 </html>
+
 
 
