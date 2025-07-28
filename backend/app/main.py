@@ -29,7 +29,6 @@ templates = Jinja2Templates(directory="frontend/templates")
 
 # RUTAS DE TEMPLATES PRINCIPALES
 
-
 # Página de login (página principal)
 @app.get("/", response_class=HTMLResponse)
 def mostrar_login(request: Request):
@@ -44,34 +43,37 @@ def mostrar_inicio(request: Request, sesion: str = Depends(verificar_sesion)):
 @app.get("/menu", response_class=HTMLResponse)
 def mostrar_menu(request: Request):
     return templates.TemplateResponse("menu.html", {"request": request})
+# Fragmento de inicio (para cargar en el menú)
+@app.get("/fragmento_inicio.html", response_class=HTMLResponse)
+def fragmento_inicio(request: Request):
+    return templates.TemplateResponse("fragmento_inicio.html", {"request": request})
 
 # RUTAS PARA CARGAR FRAGMENTOS (vistas dinámicas)
 
-@app.get("/fragmentos/register.html", response_class=HTMLResponse)
+@app.get("/register.html", response_class=HTMLResponse)
 def mostrar_registro(request: Request):
-    return templates.TemplateResponse("fragmentos/register.html", {"request": request})
+    return templates.TemplateResponse("register.html", {"request": request})
 
-@app.get("/fragmentos/crudusuarios.html", response_class=HTMLResponse)
+@app.get("/crudusuarios.html", response_class=HTMLResponse)
 def crud_usuarios(request: Request):
-    return templates.TemplateResponse("fragmentos/crudusuarios.html", {"request": request})
+    return templates.TemplateResponse("crudusuarios.html", {"request": request})
 
-@app.get("/fragmentos/contrasenias.html", response_class=HTMLResponse)
+@app.get("/contrasenias.html", response_class=HTMLResponse)
 def mostrar_contrasenias(request: Request):
-    return templates.TemplateResponse("fragmentos/contrasenias.html", {"request": request})
+    return templates.TemplateResponse("contrasenias.html", {"request": request})
 
-@app.get("/fragmentos/gestionentrega.html", response_class=HTMLResponse)
+@app.get("/gestionentrega.html", response_class=HTMLResponse)
 def mostrar_gestionentrega(request: Request):
-    return templates.TemplateResponse("fragmentos/gestionentrega.html", {"request": request})
+    return templates.TemplateResponse("gestionentrega.html", {"request": request})
 
-@app.get("/fragmentos/recepcionentrega.html", response_class=HTMLResponse)
+@app.get("/recepcionentrega.html", response_class=HTMLResponse)
 def mostrar_recepcion_entrega(request: Request):
-    return templates.TemplateResponse("fragmentos/recepcionentrega.html", {"request": request})
+    return templates.TemplateResponse("recepcionentrega.html", {"request": request})
 
-@app.get("/fragmentos/documentosvarios.html", response_class=HTMLResponse)
+@app.get("/documentosvarios.html", response_class=HTMLResponse)
 def mostrar_documentos_varios(request: Request):
-    return templates.TemplateResponse("fragmentos/documentosvarios.html", {"request": request})
+    return templates.TemplateResponse("documentosvarios.html", {"request": request})
 
-@app.get("/fragmentos/reportes.html", response_class=HTMLResponse)
+@app.get("/reportes.html", response_class=HTMLResponse)
 def mostrar_reportes(request: Request):
-    return templates.TemplateResponse("fragmentos/reportes.html", {"request": request})
-
+    return templates.TemplateResponse("reportes.html", {"request": request})
