@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
-
+from .routes import contrasenia_routes
 from .routes import usuario_routes, auth_routes
 from .utils.dependencies import verificar_sesion
 
@@ -12,6 +12,7 @@ app = FastAPI()
 # Routers
 app.include_router(usuario_routes.router)
 app.include_router(auth_routes.router)
+app.include_router(contrasenia_routes.router)
 
 # CORS para permitir peticiones desde el frontend
 app.add_middleware(
@@ -43,10 +44,11 @@ def mostrar_inicio(request: Request, sesion: str = Depends(verificar_sesion)):
 @app.get("/menu", response_class=HTMLResponse)
 def mostrar_menu(request: Request):
     return templates.TemplateResponse("menu.html", {"request": request})
+
 # Fragmento de inicio (para cargar en el menú)
-@app.get("/fragmento_inicio.html", response_class=HTMLResponse)
-def fragmento_inicio(request: Request):
-    return templates.TemplateResponse("fragmento_inicio.html", {"request": request})
+@app.get("/editar.html", response_class=HTMLResponse)
+def muestra_editor(request: Request):
+    return templates.TemplateResponse("editar.html", {"request": request})
 
 # RUTAS PARA CARGAR FRAGMENTOS (vistas dinámicas)
 
@@ -58,9 +60,9 @@ def mostrar_registro(request: Request):
 def crud_usuarios(request: Request):
     return templates.TemplateResponse("crudusuarios.html", {"request": request})
 
-@app.get("/contrasenias.html", response_class=HTMLResponse)
+@app.get("/vercontrasenias.html", response_class=HTMLResponse)
 def mostrar_contrasenias(request: Request):
-    return templates.TemplateResponse("contrasenias.html", {"request": request})
+    return templates.TemplateResponse("vercontrasenias.html", {"request": request})
 
 @app.get("/gestionentrega.html", response_class=HTMLResponse)
 def mostrar_gestionentrega(request: Request):

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Visualizar Contraseñas{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Contraseñas creadas</h2>
+    <table class="table table-bordered" id="tablaContrasenias">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Número</th>
+                <th>Proveedor</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Detalle</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<!-- Modal para detalle -->
+<div class="modal fade" id="modalDetalle" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Detalle de Contraseña</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-sm table-striped">
+          <thead>
+            <tr>
+              <th>Factura</th>
+              <th>Moneda</th>
+              <th>Monto</th>
+              <th>IVA</th>
+              <th>ISR</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tablaDetalleBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

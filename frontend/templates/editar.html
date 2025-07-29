@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Usuario{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Editar Usuario</h2>
+    <a href="/crudusuarios.html" class="btn btn-secondary">Cancelar</a>
+  </div>
+
+  <form id="formEditarUsuario">
+    <input type="hidden" id="edit_cod_usuario" name="cod_usuario">
+
+    <div class="mb-3">
+      <label for="edit_usuario" class="form-label">Usuario</label>
+      <input type="text" class="form-control bg-light" id="edit_usuario" readonly required>
+    </div>
+
+    <div class="mb-3">
+      <label for="edit_nombre" class="form-label">Nombre</label>
+      <input type="text" class="form-control" id="edit_nombre" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="edit_correo" class="form-label">Correo</label>
+      <input type="email" class="form-control" id="edit_correo">
+    </div>
+
+    <div class="mb-3">
+      <label for="edit_estado" class="form-label">Estado</label>
+      <select class="form-select" id="edit_estado">
+        <option value="A">Activo</option>
+        <option value="I">Inactivo</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Permisos</label>
+      <div id="edit_permisos" class="row row-cols-2"></div>
+    </div>
+
+    <button id="btnGuardarCambios" type="submit" class="btn btn-primary">Guardar Cambios</button>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/validar_permisos.js"></script>
+<script src="/static/js/editar.js"></script>
+{% endblock %}
+

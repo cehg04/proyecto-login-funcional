@@ -1,0 +1,55 @@
+<div class="container mt-4">
+    <h2>Crear Contraseña</h2>
+
+    <!-- 🔹 Formulario Encabezado -->
+    <form id="form-encabezado">
+        <div class="mb-3">
+            <label for="nombre_sitio" class="form-label">Nombre del Sitio</label>
+            <input type="text" class="form-control" id="nombre_sitio" required>
+        </div>
+        <div class="mb-3">
+            <label for="observaciones" class="form-label">Observaciones</label>
+            <textarea class="form-control" id="observaciones"></textarea>
+        </div>
+    </form>
+
+    <hr>
+
+    <!-- 🔹 Formulario Detalle -->
+    <h5>Agregar Detalle</h5>
+    <form id="form-detalle" class="row g-3">
+        <div class="col-md-4">
+            <input type="text" class="form-control" id="usuario" placeholder="Usuario" required>
+        </div>
+        <div class="col-md-4">
+            <input type="text" class="form-control" id="clave" placeholder="Contraseña" required>
+        </div>
+        <div class="col-md-3">
+            <input type="text" class="form-control" id="descripcion" placeholder="Descripción" required>
+        </div>
+        <div class="col-md-1">
+            <button type="button" class="btn btn-success" id="btnAgregarDetalle">+</button>
+        </div>
+    </form>
+
+    <!-- 🔹 Vista previa de los detalles -->
+    <div class="mt-4">
+        <h5>Detalles Agregados</h5>
+        <table class="table table-bordered" id="tabla-detalles">
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Clave</th>
+                    <th>Descripción</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Se irán agregando dinámicamente -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 🔹 Botón final para crear la contraseña -->
+    <button class="btn btn-primary mt-3" id="btnCrearContrasenia">Crear Contraseña</button>
+</div>

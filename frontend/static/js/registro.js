@@ -1,9 +1,16 @@
 $(document).ready(function () {
+    // Validación de permisos
+    if (validar_permisos(2) !== 'S') {
+        alert("No tienes permiso para registrar usuarios.");
+        window.location.href = "inicio.html";
+        return;
+    }
+
+    // El resto de tu código existente
     cargarOpciones();
 
     $("#formRegistro").on("submit", function (e) {
         e.preventDefault();
-
         const permisosSeleccionados = [];
         $("input.permiso-opcion:checked").each(function () {
             permisosSeleccionados.push(parseInt($(this).val()));
@@ -19,7 +26,7 @@ $(document).ready(function () {
 
         $.ajax({
             url: "http://127.0.0.1:8000/api/usuarios",
-            method: "POST",     
+            method: "POST",
             contentType: "application/json",
             data: JSON.stringify(datos),
             success: function (res) {
@@ -32,6 +39,7 @@ $(document).ready(function () {
         });
     });
 });
+
 function cargarOpciones(){
     $.ajax({
         url: "/api/usuarios/opciones",

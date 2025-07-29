@@ -15,7 +15,7 @@ function mostrarSesionUsuario() {
         console.error("Error al decodificar el token:", e);
         cerrarSesion();
     }
-}
+}   
 
 function cerrarSesion() {
     localStorage.removeItem('token');

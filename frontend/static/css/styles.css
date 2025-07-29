@@ -1,0 +1,13 @@
+#sidebar.collapsed {
+    width: 0;
+    overflow: hidden;
+    transition: width 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    #sidebar.collapsed {
+        height: 0;
+        overflow: hidden;
+        transition: height 0.3s ease;
+    }
+}
