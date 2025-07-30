@@ -1,5 +1,11 @@
 $(document).ready(function () {
-    const cod_empresa = 1; // Puedes cambiar esto según sesión
+    const cod_empresa = 1; 
+    // Puedes cambiar esto según sesión
+
+    $("#btnCrearContrasenia").on("click", function () {
+    window.location.href = "crear_contrasenia.html"; // Cambia por tu ruta
+    });
+
 
     $.ajax({
         url: `/contrasenias/?cod_empresa=${cod_empresa}`,

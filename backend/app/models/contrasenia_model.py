@@ -13,18 +13,20 @@ class DetalleContrasenia(BaseModel):
     numero_retension_isr: Optional[int]
     estado: str
 
-class EncaContrasenia(BaseModel):
-    cod_contrasenia: int
+class EntradaDetalleContrasenia(BaseModel):
+    usuario: str
+    contrasenia: str
+    sistema: str
+    observacion: str
+    tipo_contrasenia: str
+
+class EntradaContrasenia(BaseModel):
     cod_empresa: int
-    cod_empresa_proveedor: int
-    num_contrasenia: str
-    cod_proveedor: str
+    cod_proveedor: int
     fecha_contrasenia: date
-    usuarios_creacion: int
-    fecha_creacion: datetime
+    tipo_contrasenia: str
     estado: str
-    usuario_x: Optional[int]
-    fecha_x: Optional[datetime]
-    comentario: Optional[str]
-    detalles: Optional[List[DetalleContrasenia]] = []
-    
+
+class EntradaCompletaContrasenia(BaseModel):
+    encabezado: EntradaContrasenia
+    detalles: List[EntradaDetalleContrasenia]
