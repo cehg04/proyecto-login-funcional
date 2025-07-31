@@ -1,9 +1,10 @@
 $(document).ready(function () {
     let detalles = [];
+    let contadorLinea = 0;
 
-    cargarEmpresas(); // Cargar empresas al iniciar
+    cargarEmpresas();
+ 
 
-    // Cuando cambia la empresa, cargar los proveedores asociados
     $("#cod_empresa").on("change", function () {
         const cod_empresa = $(this).val();
         if (cod_empresa) {
@@ -11,21 +12,39 @@ $(document).ready(function () {
         }
     });
 
-    // Agregar un nuevo detalle a la tabla temporal
-    $("#agregarDetalle").click(function () {
-        const cod_documento = $("#cod_documento").val();
-        const cod_usuario = $("#cod_usuario").val();
-        const contrasenia = $("#contrasenia").val();
+    // Habilitar o deshabilitar inputs de retención según checkbox
+    $("#retension_isr").on("change", function () {
+        $("#numero_retension_isr").prop("disabled", !this.checked).val("");
+    });
 
-        if (!cod_documento || !cod_usuario || !contrasenia) {
-            alert("Completa todos los campos del detalle.");
+    $("#retension_iva").on("change", function () {
+        $("#numero_retension_iva").prop("disabled", !this.checked).val("");
+    });
+
+    cargarMonedas();
+
+    $("#agregarDetalle").click(function () {
+        const cod_moneda = $("#cod_moneda").val();
+        const monto = parseFloat($("#monto").val());
+        const retension_iva = $("#retension_iva").is(":checked");
+        const retension_isr = $("#retension_isr").is(":checked");
+        const numero_retension_iva = retension_iva ? $("#numero_retension_iva").val() : null;
+        const numero_retension_isr = retension_isr ? $("#numero_retension_isr").val() : null;
+
+        if (!cod_moneda || isNaN(monto)) {
+            alert("Completa todos los campos obligatorios del detalle.");
             return;
         }
 
         const nuevoDetalle = {
-            cod_documento,
-            cod_usuario,
-            contrasenia
+            linea: contadorLinea++,
+            cod_moneda,
+            monto,
+            retension_iva,
+            retension_isr,
+            numero_retension_iva,
+            numero_retension_isr,
+            estado: "P"
         };
 
         detalles.push(nuevoDetalle);
@@ -33,31 +52,29 @@ $(document).ready(function () {
         limpiarFormularioDetalle();
     });
 
-    // Enviar todo al backend
     $("#guardarContrasenia").click(function () {
-        const encabezado = {
-            numero_contrasenia: $("#numero_contrasenia").val(),
+        const data = {
+            fecha_contrasenia: $("#fecha_contrasenia").val(),
             cod_empresa: $("#cod_empresa").val(),
             cod_proveedor: $("#cod_proveedor").val(),
-            
+            detalles
         };
 
+        if (!data.cod_empresa || !data.cod_proveedor || !data.fecha_contrasenia) {
+            alert("Completa todos los campos del encabezado.");
+            return;
+        }
 
         if (detalles.length === 0) {
             alert("Agrega al menos un detalle.");
             return;
         }
 
-        const datos = {
-            encabezado,
-            detalles
-        };
-
         $.ajax({
             url: "/contrasenias/crear",
             type: "POST",
             contentType: "application/json",
-            data: JSON.stringify(datos),
+            data: JSON.stringify(data),
             success: function (response) {
                 alert("Contraseña creada correctamente.");
                 location.reload();
@@ -75,9 +92,15 @@ $(document).ready(function () {
         detalles.forEach((item, index) => {
             cuerpoTabla.append(`
                 <tr>
-                    <td>${item.cod_documento}</td>
-                    <td>${item.cod_usuario}</td>
-                    <td>${item.contrasenia}</td>
+                    <td>${item.cod_moneda}</td>
+                    <td>${item.monto.toFixed(2)}</td>
+                    <td>${item.retension_isr ? 'Sí' : 'No'}</td>
+                    <td>${item.retension_iva ? 'Sí' : 'No'}</td>
+                    <td>
+                        ISR: ${item.numero_retension_isr || '-'}<br>
+                        IVA: ${item.numero_retension_iva || '-'}
+                    </td>
+                    <td>${item.estado}</td>
                     <td><button class="btn btn-danger btn-sm" onclick="eliminarDetalle(${index})">Eliminar</button></td>
                 </tr>
             `);
@@ -90,10 +113,23 @@ $(document).ready(function () {
     };
 
     function limpiarFormularioDetalle() {
-        $("#cod_documento").val("");
-        $("#cod_usuario").val("");
-        $("#contrasenia").val("");
+        $("#cod_moneda").val("");
+        $("#monto").val("");
+        $("#retension_iva").prop("checked", false);
+        $("#retension_isr").prop("checked", false);
+        $("#numero_retension_iva").val("").prop("disabled", true);
+        $("#numero_retension_isr").val("").prop("disabled", true);
     }
+
+        function cargarMonedas() {
+            $.get("/contrasenias/monedas", function (data) {
+                $("#cod_moneda").empty().append('<option value="">Seleccione</option>');
+                data.forEach(mon => {
+                    $("#cod_moneda").append(`<option value="${mon.cod_moneda}">${mon.abreviatura}</option>`);
+                });
+            });
+        }
+
 
     function cargarEmpresas() {
         $.get("/contrasenias/empresas", function (data) {
@@ -105,14 +141,49 @@ $(document).ready(function () {
     }
 
     function cargarProveedores(cod_empresa) {
-        $.get(`/contrasenias/proveedores?cod_empresa=${cod_empresa}`, function (data) {
-            $("#cod_proveedor").empty().append('<option value="">Seleccione Proveedor</option>');
-            data.forEach(prov => {
-                $("#cod_proveedor").append(`<option value="${prov.cod_proveedor}">${prov.nombre}</option>`);
-            });
-        });
+        $("#proveedor_nombre").val("");
+        $("#cod_proveedor").val("");
     }
+
+    // Autocompletado para proveedor
+    $("#proveedor_nombre").autocomplete({
+        source: function (request, response) {
+            const cod_empresa = $("#cod_empresa").val();
+            if (!cod_empresa) {
+                response([]);
+                return;
+            }
+
+            $.ajax({
+                url: `/contrasenias/proveedores-autocomplete`,
+                dataType: "json",
+                data: {
+                    q: request.term,
+                    cod_empresa: cod_empresa
+                },
+                success: function (data) {
+                    response(data.map(prov => ({
+                        label: `${prov.nit} - ${prov.cod_proveedor} - ${prov.nombre}`,
+                        value: prov.nombre,
+                        cod_proveedor: prov.cod_proveedor
+                    })));
+                }
+            });
+        },
+        minLength: 2,
+        select: function (event, ui) {
+            $("#cod_proveedor").val(ui.item.cod_proveedor);
+        },
+        focus: function (event, ui) {
+            $("#proveedor_nombre").val(ui.item.label);
+            return false;
+        }
+    });
 });
+
+
+
+
 
 
 

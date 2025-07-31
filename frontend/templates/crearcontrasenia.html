@@ -8,6 +8,7 @@
         <h2 class="mb-0">Registrar contraseñas</h2>
         <a href="/vercontrasenias.html" class="btn btn-secondary">Regresar</a>
     </div>
+
     <!-- ENCABEZADO -->
     <div class="card mb-4">
         <div class="card-header">Encabezado</div>
@@ -15,67 +16,83 @@
             <form id="formEncabezado">
                 <div class="row mb-3">
                     <div class="col-md-4">
-                        <label for="numero_contrasenia" class="form-label">Número de Contraseña</label>
-                        <input type="text" class="form-control" id="numero_contrasenia" required>
+                        <label for="fecha_contrasenia" class="form-label">Fecha</label>
+                        <input type="date" class="form-control" id="fecha_contrasenia" required>
                     </div>
                     <div class="col-md-4">
                         <label for="cod_empresa" class="form-label">Empresa</label>
-                        <select class="form-select" id="cod_empresa" required>
-                            <option value="">Cargando empresas...</option>
-                        </select>
+                        <select class="form-select" id="cod_empresa" required></select>
                     </div>
                     <div class="col-md-4">
-                        <label for="cod_proveedor" class="form-label">Proveedor</label>
-                        <select class="form-select" id="cod_proveedor" required>
-                            <option value="">Seleccione una empresa primero</option>
-                        </select>
+                        <label for="proveedor_nombre" class="form-label">Proveedor</label>
+                        <input type="text" class="form-control" id="proveedor_nombre" required placeholder="Buscar proveedor...">
+                        <input type="hidden" id="cod_proveedor">
                     </div>
-                </div>
                 </div>
             </form>
         </div>
     </div>
 
-    <!--
+    <!-- DETALLE -->
     <div class="card mb-4">
-        <div class="card-header">Detalle</div>
-        <div class="card-body">
-            <form id="formDetalle" class="row g-3">
-                <div class="col-md-4">
-                    <label for="cod_documento" class="form-label">Documento</label>
-                    <input type="text" class="form-control" id="cod_documento">
+    <div class="card-header">Detalle</div>
+    <div class="card-body">
+        <form id="formDetalle" class="row g-3">
+            <div class="col-md-2">
+                <label for="cod_moneda" class="form-label">Moneda</label>
+                <select class="form-select" id="cod_moneda" required>
+                    <option value="">Seleccione</option>
+                    <!-- Llenado dinámico en JS -->
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="monto" class="form-label">Monto</label>
+                <input type="number" class="form-control" id="monto" required>
+            </div>
+            <div class="col-md-1 d-flex align-items-center">
+                <div class="form-check mt-4">
+                    <input class="form-check-input" type="checkbox" id="retension_isr">
+                    <label class="form-check-label" for="retension_isr">Retención ISR</label>
                 </div>
-                <div class="col-md-4">
-                    <label for="cod_usuario" class="form-label">Usuario</label>
-                    <input type="text" class="form-control" id="cod_usuario">
+            </div>
+            <div class="col-md-2">
+                <label for="numero_retension_isr" class="form-label">N° Ret. ISR</label>
+                <input type="number" class="form-control" id="numero_retension_isr" disabled>
+            </div>
+            <div class="col-md-1 d-flex align-items-center">
+                <div class="form-check mt-4">
+                    <input class="form-check-input" type="checkbox" id="retension_iva">
+                    <label class="form-check-label" for="retension_iva">Retención IVA</label>
                 </div>
-                <div class="col-md-4">
-                    <label for="contrasenia" class="form-label">Contraseña</label>
-                    <input type="text" class="form-control" id="contrasenia">
-                </div>
-                <div class="col-12 text-end">
-                    <button type="button" class="btn btn-primary mt-2" id="agregarDetalle">Agregar Detalle</button>
-                </div>
-            </form>
-        </div>
-        
-    </div> 
- -->
-    <!-- TABLA DETALLE -->
+            </div>
+            <div class="col-md-2">
+                <label for="numero_retension_iva" class="form-label">N° Ret. IVA</label>
+                <input type="number" class="form-control" id="numero_retension_iva" disabled>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="button" class="btn btn-primary w-100" id="agregarDetalle">Agregar Detalle</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+    <!-- TABLA DE DETALLES -->
     <div class="card mb-4">
         <div class="card-header">Detalles Agregados</div>
         <div class="card-body">
             <table class="table table-bordered" id="tablaDetalles">
                 <thead class="table-light">
                     <tr>
-                        <th>Documento</th>
-                        <th>Usuario</th>
-                        <th>Contraseña</th>
-                        <th>Acción</th>
+                        <th>Moneda</th>
+                        <th>Monto</th>
+                        <th>ISR</th>
+                        <th>IVA</th>
+                        <th>N° Retención</th>
+                        <th>Estado</th> 
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Detalles agregados dinámicamente -->
+                    <!-- Se llenará dinámicamente -->
                 </tbody>
             </table>
         </div>
@@ -89,5 +106,10 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- jQuery UI Autocomplete -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 <script src="/static/js/crearcontrasenia.js"></script>
 {% endblock %}
+
+

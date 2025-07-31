@@ -14,11 +14,14 @@ class DetalleContrasenia(BaseModel):
     estado: str
 
 class EntradaDetalleContrasenia(BaseModel):
-    usuario: str
-    contrasenia: str
-    sistema: str
-    observacion: str
-    tipo_contrasenia: str
+    num_factura: int
+    cod_moneda: str
+    monto: float
+    retension_iva: Optional[str] = 'N'
+    retension_isr: Optional[str] = 'N'
+    numero_retension_iva: Optional[int] = None
+    numero_retension_isr: Optional[int] = None
+    estado: str = 'R'
 
 class EntradaContrasenia(BaseModel):
     cod_empresa: int

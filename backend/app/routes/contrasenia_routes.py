@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Query, HTTPException
-from ..services.contrasenia_service import obtener_contrasenias, crear_contrasenias, obtener_empresas, obtener_proveedores
+from ..services.contrasenia_service import obtener_contrasenias, crear_contrasenias, obtener_empresas, obtener_proveedores, obtener_monedas
 from ..models.contrasenia_model import EntradaCompletaContrasenia
+from ..db.connection import get_connection
+
 router = APIRouter(
     prefix="/contrasenias",
     tags=["contrasenias"]
@@ -25,7 +27,28 @@ def crear_contrasenia_endpoint(data: EntradaCompletaContrasenia):
 def listar_empresa():
     return obtener_empresas()
 
-@router.get("/proveedores")
-def listar_proveedores(cod_empresa: int = Query(...)):
-    return obtener_proveedores(cod_empresa)
+@router.get("/proveedores-autocomplete")
+def autocomplete_proveedores(q: str, cod_empresa: int):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    consulta = """
+        SELECT cod_proveedor, nombre, nit
+        FROM proveedores
+        WHERE cod_empresa = %s AND (
+            nombre LIKE %s OR
+            cod_proveedor LIKE %s OR
+            nit LIKE %s
+        )
+        LIMIT 15
+    """
+    like = f"%{q}%"
+    cursor.execute(consulta, (cod_empresa, like, like, like))
+    return cursor.fetchall()
+
+
+# end-point para listar monedas
+@router.get("/monedas")
+def listar_monedas():
+    return obtener_monedas()
+
 
