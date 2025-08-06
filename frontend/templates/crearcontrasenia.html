@@ -4,103 +4,115 @@
 
 {% block content %}
 <div class="container mt-5">
+
+    <!-- Encabezado con botón -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">Registrar contraseñas</h2>
-        <a href="/vercontrasenias.html" class="btn btn-secondary">Regresar</a>
+        <h2 class="mb-0">
+            <i class="bi bi-shield-lock me-2"></i>Registrar Contraseña
+        </h2>
+        <a href="/vercontrasenias.html" class="btn btn-outline-secondary">
+            <i class="bi bi-eye me-1"></i>Ver Contraseñas
+        </a>
     </div>
 
-    <!-- ENCABEZADO -->
-    <div class="card mb-4">
-        <div class="card-header">Encabezado</div>
+    <!-- Formulario ENCABEZADO -->
+    <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
-            <form id="formEncabezado">
-                <div class="row mb-3">
+            <form id="formulario-contrasenia">
+                <div class="row g-3">
                     <div class="col-md-4">
-                        <label for="fecha_contrasenia" class="form-label">Fecha</label>
+                        <label for="fecha_contrasenia" class="form-label">
+                            <i class="bi bi-calendar-event me-1"></i>Fecha:
+                        </label>
                         <input type="date" class="form-control" id="fecha_contrasenia" required>
                     </div>
                     <div class="col-md-4">
-                        <label for="cod_empresa" class="form-label">Empresa</label>
-                        <select class="form-select" id="cod_empresa" required></select>
+                        <label for="cod_empresa" class="form-label">
+                            <i class="bi bi-buildings me-1"></i>Empresa:
+                        </label>
+                        <select class="form-select" id="cod_empresa" required>
+                            <option value="">Seleccione una empresa</option>
+                        </select>
                     </div>
                     <div class="col-md-4">
-                        <label for="proveedor_nombre" class="form-label">Proveedor</label>
-                        <input type="text" class="form-control" id="proveedor_nombre" required placeholder="Buscar proveedor...">
+                        <label for="proveedor_nombre" class="form-label">
+                            <i class="bi bi-person-vcard me-1"></i>Proveedor:
+                        </label>
+                        <input type="text" class="form-control" id="proveedor_nombre" placeholder="Buscar proveedor..." required>
                         <input type="hidden" id="cod_proveedor">
                     </div>
+                </div>
+
+                <div class="text-end mt-4">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-save me-1"></i>Guardar Contraseña
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- DETALLE -->
-    <div class="card mb-4">
-    <div class="card-header">Detalle</div>
-    <div class="card-body">
-        <form id="formDetalle" class="row g-3">
-            <div class="col-md-2">
-                <label for="cod_moneda" class="form-label">Moneda</label>
-                <select class="form-select" id="cod_moneda" required>
-                    <option value="">Seleccione</option>
-                    <!-- Llenado dinámico en JS -->
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label for="monto" class="form-label">Monto</label>
-                <input type="number" class="form-control" id="monto" required>
-            </div>
-            <div class="col-md-1 d-flex align-items-center">
-                <div class="form-check mt-4">
-                    <input class="form-check-input" type="checkbox" id="retension_isr">
-                    <label class="form-check-label" for="retension_isr">Retención ISR</label>
-                </div>
-            </div>
-            <div class="col-md-2">
-                <label for="numero_retension_isr" class="form-label">N° Ret. ISR</label>
-                <input type="number" class="form-control" id="numero_retension_isr" disabled>
-            </div>
-            <div class="col-md-1 d-flex align-items-center">
-                <div class="form-check mt-4">
-                    <input class="form-check-input" type="checkbox" id="retension_iva">
-                    <label class="form-check-label" for="retension_iva">Retención IVA</label>
-                </div>
-            </div>
-            <div class="col-md-2">
-                <label for="numero_retension_iva" class="form-label">N° Ret. IVA</label>
-                <input type="number" class="form-control" id="numero_retension_iva" disabled>
-            </div>
-            <div class="col-md-2 d-flex align-items-end">
-                <button type="button" class="btn btn-primary w-100" id="agregarDetalle">Agregar Detalle</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-    <!-- TABLA DE DETALLES -->
-    <div class="card mb-4">
-        <div class="card-header">Detalles Agregados</div>
-        <div class="card-body">
-            <table class="table table-bordered" id="tablaDetalles">
-                <thead class="table-light">
-                    <tr>
-                        <th>Moneda</th>
-                        <th>Monto</th>
-                        <th>ISR</th>
-                        <th>IVA</th>
-                        <th>N° Retención</th>
-                        <th>Estado</th> 
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Se llenará dinámicamente -->
-                </tbody>
-            </table>
+    <!-- Formulario DETALLE -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="bi bi-file-earmark-plus me-2"></i>Agregar Detalle</h5>
         </div>
-    </div>
+        <div class="card-body">
+            <form id="formulario-detalle">
+                <div class="row g-3">
 
-    <!-- BOTÓN GUARDAR -->
-    <div class="text-end">
-        <button class="btn btn-success" id="guardarContrasenia">Guardar Contraseña</button>
+                    <input type="hidden" id="cod_contrasenia">
+                    <!-- num_factura -->
+                    <div class="col-md-2">
+                        <label class="form-label">N° Factura:</label>
+                        <input type="number" class="form-control" id="num_factura" required>
+                    </div>
+
+                    <!-- cod_moneda -->
+                    <div class="col-md-2">
+                        <label class="form-label">Moneda:</label>
+                        <select id="cod_moneda" class="form-select" required>
+                            <option value="">Seleccionar</option>
+                            <option value="GTQ">GTQ</option>
+                            <option value="USD">USD</option>
+                            <!-- Agrega más si es necesario -->
+                        </select>
+                    </div>
+
+                    <!-- monto -->
+                    <div class="col-md-2">
+                        <label class="form-label">Monto:</label>
+                        <input type="number" step="0.01" class="form-control" id="monto" required>
+                    </div>
+
+                    <!-- retensiones -->
+                    <div class="col-md-2">
+                        <div class="form-check mt-4">
+                            <input type="checkbox" class="form-check-input" id="retension_iva">
+                            <label class="form-check-label" for="retension_iva">Ret. IVA</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="retension_isr">
+                            <label class="form-check-label" for="retension_isr">Ret. ISR</label>
+                        </div>
+                    </div>
+
+                    <!-- números de retension -->
+                    <div class="col-md-2">
+                        <label class="form-label">N° Ret. IVA:</label>
+                        <input type="number" class="form-control mb-2" id="numero_retension_iva">
+                        <label class="form-label">N° Ret. ISR:</label>
+                        <input type="number" class="form-control" id="numero_retension_isr">
+                    </div>
+                </div>
+
+                <div class="text-end mt-4">
+                    <button type="button" id="btnGuardarDetalle" class="btn btn-success px-4">
+                        <i class="bi bi-plus-circle me-1"></i>Guardar Detalle
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -110,6 +122,10 @@
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 <script src="/static/js/crearcontrasenia.js"></script>
+
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 {% endblock %}
+
 
 

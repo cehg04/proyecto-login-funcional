@@ -23,12 +23,26 @@ class EntradaDetalleContrasenia(BaseModel):
     numero_retension_isr: Optional[int] = None
     estado: str = 'R'
 
+# ------------ modelo del encabezado de la contraseña ----------------------------
 class EntradaContrasenia(BaseModel):
     cod_empresa: int
-    cod_proveedor: int
+    cod_proveedor: str
     fecha_contrasenia: date
-    tipo_contrasenia: str
-    estado: str
+# --------------------------------------------------------------------------------
+
+# ------------ modelo del detalle de la contraseña -------------------------------
+class DetalleContrasenia(BaseModel):
+    cod_contrasenia: int
+    cod_empresa: int
+    num_factura: int
+    linea: int
+    cod_moneda: str
+    monto: float
+    retension_iva: Optional[str] = 'N'
+    retension_isr: Optional[str] = 'N'
+    numero_retension_iva: Optional[int] = None
+    numero_retension_isr: Optional[int] = None
+# --------------------------------------------------------------------------------
 
 class EntradaCompletaContrasenia(BaseModel):
     encabezado: EntradaContrasenia

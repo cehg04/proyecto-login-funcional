@@ -16,5 +16,3 @@ def verificar_token(token: str):
         return decoded
     except Exception:
         return None
-    
-

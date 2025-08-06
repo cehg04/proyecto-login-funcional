@@ -1,9 +1,60 @@
-$(document).ready(function () {
-    let detalles = [];
-    let contadorLinea = 0;
+let codContraseniaActual = null;
+let codEmpresaActual = null;
 
+$(document).ready(function () {
     cargarEmpresas();
- 
+
+    // variables globales para el detalle
+    
+
+     // Intercepta el submit del formulario
+    $("#formulario-contrasenia").on("submit", function (e) {
+        e.preventDefault(); // 
+
+        const data = {
+            fecha_contrasenia: $("#fecha_contrasenia").val(),
+            cod_empresa: $("#cod_empresa").val(),
+            cod_proveedor: $("#cod_proveedor").val()
+        };
+
+        if (!data.cod_empresa || !data.cod_proveedor || !data.fecha_contrasenia) {
+            alert("Completa todos los campos del encabezado.");
+            return;
+        }
+
+        $.ajax({
+            url: "/contrasenias/crear-contrasenia",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(data),
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`
+            },
+            success: function (response) {
+            alert(response.mensaje);
+
+                $("#cod_contrasenia").val(response.cod_contrasenia);
+
+                // Guardamos los valores globales
+                codContraseniaActual = response.cod_contrasenia;
+                codEmpresaActual = $("#cod_empresa").val();
+
+                // Deshabilitamos los campos del encabezado para que no los cambien después
+                $("#fecha_contrasenia").prop("disabled", true);
+                $("#cod_empresa").prop("disabled", true);
+                $("#cod_proveedor").prop("disabled", true);
+                $("#guardarContrasenia").prop("disabled", true);
+
+                // Mostramos el formulario de detalle si estaba oculto
+                $("#formulario-detalle").show();
+            },
+
+            error: function (xhr) {
+                alert("Error al guardar: " + xhr.responseText);
+            }
+        });
+
+    });
 
     $("#cod_empresa").on("change", function () {
         const cod_empresa = $(this).val();
@@ -12,52 +63,12 @@ $(document).ready(function () {
         }
     });
 
-    // Habilitar o deshabilitar inputs de retención según checkbox
-    $("#retension_isr").on("change", function () {
-        $("#numero_retension_isr").prop("disabled", !this.checked).val("");
-    });
-
-    $("#retension_iva").on("change", function () {
-        $("#numero_retension_iva").prop("disabled", !this.checked).val("");
-    });
-
-    cargarMonedas();
-
-    $("#agregarDetalle").click(function () {
-        const cod_moneda = $("#cod_moneda").val();
-        const monto = parseFloat($("#monto").val());
-        const retension_iva = $("#retension_iva").is(":checked");
-        const retension_isr = $("#retension_isr").is(":checked");
-        const numero_retension_iva = retension_iva ? $("#numero_retension_iva").val() : null;
-        const numero_retension_isr = retension_isr ? $("#numero_retension_isr").val() : null;
-
-        if (!cod_moneda || isNaN(monto)) {
-            alert("Completa todos los campos obligatorios del detalle.");
-            return;
-        }
-
-        const nuevoDetalle = {
-            linea: contadorLinea++,
-            cod_moneda,
-            monto,
-            retension_iva,
-            retension_isr,
-            numero_retension_iva,
-            numero_retension_isr,
-            estado: "P"
-        };
-
-        detalles.push(nuevoDetalle);
-        mostrarDetalles();
-        limpiarFormularioDetalle();
-    });
-
+    // Botón guardar solo encabezado
     $("#guardarContrasenia").click(function () {
         const data = {
             fecha_contrasenia: $("#fecha_contrasenia").val(),
             cod_empresa: $("#cod_empresa").val(),
-            cod_proveedor: $("#cod_proveedor").val(),
-            detalles
+            cod_proveedor: $("#cod_proveedor").val()
         };
 
         if (!data.cod_empresa || !data.cod_proveedor || !data.fecha_contrasenia) {
@@ -65,71 +76,24 @@ $(document).ready(function () {
             return;
         }
 
-        if (detalles.length === 0) {
-            alert("Agrega al menos un detalle.");
-            return;
-        }
-
         $.ajax({
-            url: "/contrasenias/crear",
+            url: "/contrasenias/crear-contrasenia",
             type: "POST",
             contentType: "application/json",
             data: JSON.stringify(data),
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}` 
+            },
             success: function (response) {
-                alert("Contraseña creada correctamente.");
-                location.reload();
+                alert(response.mensaje);
+                location();
             },
             error: function (xhr) {
                 alert("Error al guardar: " + xhr.responseText);
             }
         });
+
     });
-
-    function mostrarDetalles() {
-        const cuerpoTabla = $("#tablaDetalles tbody");
-        cuerpoTabla.empty();
-
-        detalles.forEach((item, index) => {
-            cuerpoTabla.append(`
-                <tr>
-                    <td>${item.cod_moneda}</td>
-                    <td>${item.monto.toFixed(2)}</td>
-                    <td>${item.retension_isr ? 'Sí' : 'No'}</td>
-                    <td>${item.retension_iva ? 'Sí' : 'No'}</td>
-                    <td>
-                        ISR: ${item.numero_retension_isr || '-'}<br>
-                        IVA: ${item.numero_retension_iva || '-'}
-                    </td>
-                    <td>${item.estado}</td>
-                    <td><button class="btn btn-danger btn-sm" onclick="eliminarDetalle(${index})">Eliminar</button></td>
-                </tr>
-            `);
-        });
-    }
-
-    window.eliminarDetalle = function (index) {
-        detalles.splice(index, 1);
-        mostrarDetalles();
-    };
-
-    function limpiarFormularioDetalle() {
-        $("#cod_moneda").val("");
-        $("#monto").val("");
-        $("#retension_iva").prop("checked", false);
-        $("#retension_isr").prop("checked", false);
-        $("#numero_retension_iva").val("").prop("disabled", true);
-        $("#numero_retension_isr").val("").prop("disabled", true);
-    }
-
-        function cargarMonedas() {
-            $.get("/contrasenias/monedas", function (data) {
-                $("#cod_moneda").empty().append('<option value="">Seleccione</option>');
-                data.forEach(mon => {
-                    $("#cod_moneda").append(`<option value="${mon.cod_moneda}">${mon.abreviatura}</option>`);
-                });
-            });
-        }
-
 
     function cargarEmpresas() {
         $.get("/contrasenias/empresas", function (data) {
@@ -144,9 +108,8 @@ $(document).ready(function () {
         $("#proveedor_nombre").val("");
         $("#cod_proveedor").val("");
     }
-
-    // Autocompletado para proveedor
-    $("#proveedor_nombre").autocomplete({
+        // Autocompletado para proveedor
+        $("#proveedor_nombre").autocomplete({
         source: function (request, response) {
             const cod_empresa = $("#cod_empresa").val();
             if (!cod_empresa) {
@@ -180,8 +143,65 @@ $(document).ready(function () {
         }
     });
 });
+// --------------------------------------------------------------------------------------------------------
 
+$(document).ready(function () {
+    $("#btnGuardarDetalle").on("click", function (e) {
+        e.preventDefault();
 
+        // Usamos variables globales
+        if (!codContraseniaActual || !codEmpresaActual) {
+            alert("Debe seleccionar una contraseña y una empresa antes de agregar un detalle.");
+            return;
+        }
+
+        const detalle = {
+            cod_contrasenia: codContraseniaActual,
+            cod_empresa: codEmpresaActual,
+            num_factura: parseInt($("#num_factura").val()),
+            cod_moneda: $("#cod_moneda").val(),
+            monto: parseFloat($("#monto").val()),
+            retension_iva: $("#retension_iva").is(":checked") ? "S" : "N",
+            retension_isr: $("#retension_isr").is(":checked") ? "S" : "N",
+            numero_retension_iva: $("#numero_retension_iva").val() || null,
+            numero_retension_isr: $("#numero_retension_isr").val() || null
+        };
+
+        // Paso 1: obtener la siguiente línea disponible
+        $.get(`/contrasenias/linea`, {
+            cod_contrasenia: detalle.cod_contrasenia,
+            cod_empresa: detalle.cod_empresa
+        }, function (response) {
+            detalle.linea = response.linea;
+
+            // Paso 2: enviar el detalle al backend
+            $.ajax({
+                type: "POST",
+                url: "/contrasenias/detalle",
+                data: JSON.stringify(detalle),
+                contentType: "application/json",
+                success: function (data) {
+                    alert("Detalle guardado exitosamente");
+
+                    // Limpiar campos
+                    $("#num_factura").val("");
+                    $("#cod_moneda").val("");
+                    $("#monto").val("");
+                    $("#retension_iva").prop("checked", false);
+                    $("#retension_isr").prop("checked", false);
+                    $("#numero_retension_iva").val("");
+                    $("#numero_retension_isr").val("");
+                },
+                error: function (xhr) {
+                    console.error(xhr.responseText);
+                    alert("Error al guardar el detalle");
+                }
+            });
+        }).fail(function () {
+            alert("Error al calcular la línea del detalle");
+        });
+    });
+});
 
 
 
