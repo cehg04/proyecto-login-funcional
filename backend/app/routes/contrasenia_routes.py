@@ -1,16 +1,12 @@
 from fastapi import APIRouter, Query, HTTPException,Depends
-from ..services.contrasenia_service import obtener_contrasenias, crear_contrasenias, obtener_empresas, obtener_proveedores, obtener_monedas, crear_detalle_contrasenia, obtener_siguiente_linea
+from ..services.contrasenia_service import crear_contrasenias, obtener_empresas, obtener_proveedores, obtener_monedas, crear_detalle_contrasenia, obtener_siguiente_linea
 from ..models.contrasenia_model import DetalleContrasenia, EntradaContrasenia
 from ..db.connection import get_connection
 from ..utils.dependencies import obtener_usuario_desde_token
 
 router = APIRouter(prefix="/contrasenias", tags=["contrasenias"])
 
-# end-point de listar las contraseñas
-@router.get("/")
-def listar_contrasenias(cod_empresa: int = Query(...)):
-    contrasenias = obtener_contrasenias(cod_empresa)
-    return contrasenias
+
 
 # ---------------- creacion de encabezados para la contrasela ------------------------------------------------------------
 # end-point para crear contraseñas

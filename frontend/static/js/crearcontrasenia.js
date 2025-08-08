@@ -2,11 +2,9 @@ $(document).ready(function () {
   let codContrasenia = null;
   let detalles = [];
 
-  // Inicializar estado
-  $('#formulario-detalle').find('input, select, button').prop('disabled', true);
-    // Inicializa todo
-    cargarEmpresas();
-  // Cargar empresas
+  cargarEmpresas();
+  cargarMonedas();
+
   function cargarEmpresas() {
     $.get("/contrasenias/empresas", function (data) {
       const $empresa = $("#cod_empresa");
@@ -17,109 +15,59 @@ $(document).ready(function () {
     });
   }
 
-  // Cuando cambia la empresa, limpiar proveedor
-$("#cod_empresa").on("change", function () {
-    const cod_empresa = $(this).val();
+  function cargarMonedas() {
+    $.get("/contrasenias/monedas", function (data) {
+      const select = $("#cod_moneda");
+      select.empty();
+      select.append('<option value="">Selecciona moneda</option>');
+      data.forEach(m => {
+        select.append(`<option value="${m.cod_moneda}">${m.abreviatura}</option>`);
+      });
+    });
+  }
+
+  $("#cod_empresa").on("change", function () {
     $("#proveedor_nombre").val("");
     $("#cod_proveedor").val("");
+  });
 
-});
-
-// Autocompletado para proveedor filtrado por empresa
-$("#proveedor_nombre").autocomplete({
+  $("#proveedor_nombre").autocomplete({
     source: function (request, response) {
-        const cod_empresa = $("#cod_empresa").val();
-        if (!cod_empresa) {
-            response([]); // No hay empresa, no buscar
-            return;
+      const cod_empresa = $("#cod_empresa").val();
+      if (!cod_empresa) {
+        response([]);
+        return;
+      }
+      $.ajax({
+        url: `/contrasenias/proveedores-autocomplete`,
+        dataType: "json",
+        data: { q: request.term, cod_empresa: cod_empresa },
+        success: function (data) {
+          response(data.map(prov => ({
+            label: `${prov.nit} - ${prov.cod_proveedor} - ${prov.nombre}`,
+            value: prov.nombre,
+            cod_proveedor: prov.cod_proveedor
+          })));
         }
-
-        $.ajax({
-            url: `/contrasenias/proveedores-autocomplete`,
-            dataType: "json",
-            data: {
-                q: request.term,
-                cod_empresa: cod_empresa
-            },
-            success: function (data) {
-                response(data.map(prov => ({
-                    label: `${prov.nit} - ${prov.cod_proveedor} - ${prov.nombre}`,
-                    value: prov.nombre,
-                    cod_proveedor: prov.cod_proveedor
-                })));
-            }
-        });
+      });
     },
     minLength: 2,
     select: function (event, ui) {
-        $("#cod_proveedor").val(ui.item.cod_proveedor);
+      $("#cod_proveedor").val(ui.item.cod_proveedor);
     },
     focus: function (event, ui) {
-        $("#proveedor_nombre").val(ui.item.label);
-        return false;
+      $("#proveedor_nombre").val(ui.item.label);
+      return false;
     }
-});
-
-// Si el usuario borra o cambia el nombre, limpiar cod_proveedor
-$("#proveedor_nombre").on("input", function () {
-    $("#cod_proveedor").val("");
-});
-
-  // Guardar encabezado y obtener cod_contrasenia
-  $("#guardarContrasenia").click(function () {
-    const data = {
-      fecha_contrasenia: $("#fecha_contrasenia").val(),
-      cod_empresa: $("#cod_empresa").val(),
-      cod_proveedor: $("#cod_proveedor").val()
-    };
-
-    if (!data.cod_empresa || !data.cod_proveedor || !data.fecha_contrasenia) {
-      alert("Completa todos los campos del encabezado.");
-      return;
-    }
-
-    $.ajax({
-      url: "/contrasenias/crear-contrasenia",
-      type: "POST",
-      contentType: "application/json",
-      data: JSON.stringify(data),
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`
-      },
-      success: function (response) {
-        alert(response.mensaje);
-        codContrasenia = response.cod_contrasenia; // Asume que el backend devuelve esto
-        // Habilitar formulario detalle
-        $('#formulario-detalle').find('input, select, button').prop('disabled', false);
-        $('#cod_contrasenia').val(codContrasenia);
-      },
-      error: function (xhr) {
-        alert("Error al guardar: " + xhr.responseText);
-      }
-    });
   });
 
-   cargarMonedas();
+  $("#proveedor_nombre").on("input", function () {
+    $("#cod_proveedor").val("");
+  });
 
-    function cargarMonedas() {
-        $.get("/contrasenias/monedas", function (data) {
-            const select = $("#cod_moneda");
-            select.empty();
-            select.append('<option value="">Selecciona moneda</option>');
-            data.forEach(m => {
-                select.append(`<option value="${m.cod_moneda}">${m.abreviatura}</option>`);
-            });
-        });
-    }
-
-  // -----------------------------------------------------------
   // Agregar detalle a lista y tabla
   $("#btnGuardarDetalle").click(function () {
-    if (!codContrasenia) {
-      alert('Primero debes guardar el encabezado.');
-      return;
-    }
-
+    
     const detalle = {
       cod_contrasenia: codContrasenia,
       num_factura: $("#num_factura").val(),
@@ -165,94 +113,116 @@ $("#proveedor_nombre").on("input", function () {
     });
   }
 
-  // Enviar todos los detalles juntos
+  // Enviar todo: primero encabezado, luego detalles
   $("#btnEnviarTodo").click(function () {
-  if (detalles.length === 0) {
-    alert('No hay detalles para enviar.');
-    return;
-  }
-  if (!codContrasenia) {
-    alert('No hay un encabezado guardado. Guarda primero el encabezado.');
-    return;
-  }
+    const $btn = $(this);
 
-  // Deshabilitar boton para evitar clicks múltiples
-  const $btn = $(this);
-  $btn.prop('disabled', true).text('Enviando...');
-
-  let errores = 0;
-  let procesados = 0;
-
-  // función que envía un detalle a la vez (recursiva)
-  function enviarDetalleIndice(i) {
-    if (i >= detalles.length) {
-      // terminado
-      $btn.prop('disabled', false).text('Enviar Todo');
-      if (errores === 0) {
-        alert('Detalles guardados exitosamente.');
-        // limpieza UI
-        detalles = [];
-        $("#tabla-detalles tbody").empty();
-        $("#formulario-contrasenia")[0].reset();
-        $("#formulario-detalle")[0].reset();
-        codContrasenia = null;
-        $('#formulario-detalle').find('input, select, button').prop('disabled', true);
-      } else {
-        alert(`Proceso completado con ${errores} error(es). Revisa la consola para más detalles.`);
-      }
+    if (detalles.length === 0) {
+      alert('No hay detalles para enviar.');
       return;
     }
 
-    const det = detalles[i];
-
-    // Normalizar/construir payload con tipos que espera el backend
-    const payload = {
-      cod_contrasenia: codContrasenia,
-      cod_empresa: $("#cod_empresa").val() ? parseInt($("#cod_empresa").val()) : null,
-      num_factura: parseInt(det.num_factura),
-      cod_moneda: det.cod_moneda,
-      monto: parseFloat(det.monto),
-      // convertir a 'S'/'N' si tu backend espera strings
-      retension_iva: det.retension_iva ? 'S' : 'N',
-      retension_isr: det.retension_isr ? 'S' : 'N',
-      numero_retension_iva: det.numero_retension_iva ? parseInt(det.numero_retension_iva) : null,
-      numero_retension_isr: det.numero_retension_isr ? parseInt(det.numero_retension_isr) : null
+    // Validar campos encabezado
+    const dataEncabezado = {
+      fecha_contrasenia: $("#fecha_contrasenia").val(),
+      cod_empresa: $("#cod_empresa").val(),
+      cod_proveedor: $("#cod_proveedor").val()
     };
 
-    // Validación adicional antes de enviar
-    if (!payload.num_factura || !payload.cod_moneda || isNaN(payload.monto) || !payload.cod_empresa) {
-      console.error('Detalle inválido, se omite:', payload);
-      errores++;
-      procesados++;
-      enviarDetalleIndice(i + 1);
+    if (!dataEncabezado.cod_empresa || !dataEncabezado.cod_proveedor || !dataEncabezado.fecha_contrasenia) {
+      alert("Completa todos los campos del encabezado.");
       return;
     }
 
+    $btn.prop('disabled', true).text('Enviando...');
+
+    // Paso 1: Crear encabezado
     $.ajax({
-      url: "/contrasenias/detalle",
+      url: "/contrasenias/crear-contrasenia",
       type: "POST",
       contentType: "application/json",
-      data: JSON.stringify(payload),
+      data: JSON.stringify(dataEncabezado),
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      success: function (resp) {
-        procesados++;
-        // opcional: leer resp.linea si tu backend la devuelve
-        enviarDetalleIndice(i + 1);
+      success: function (response) {
+        codContrasenia = response.cod_contrasenia;
+        if (!codContrasenia) {
+          alert('No se recibió código de contraseña del servidor.');
+          $btn.prop('disabled', false).text('Enviar Todo');
+          return;
+        }
+        // Habilitar formulario detalle para agregar si es que quieres seguir usando el mismo flujo
+        $('#cod_contrasenia').val(codContrasenia);
+
+        // Paso 2: Enviar detalles uno a uno
+        let errores = 0;
+        let procesados = 0;
+
+        function enviarDetalleIndice(i) {
+          if (i >= detalles.length) {
+            $btn.prop('disabled', false).text('Enviar Todo');
+            if (errores === 0) {
+              alert('Encabezado y detalles guardados exitosamente.');
+              detalles = [];
+              $("#tabla-detalles tbody").empty();
+              $("#formulario-contrasenia")[0].reset();
+              $("#formulario-detalle")[0].reset();
+              codContrasenia = null;
+            } else {
+              alert(`Proceso completado con ${errores} error(es). Revisa la consola para más detalles.`);
+            }
+            return;
+          }
+
+          const det = detalles[i];
+          const payload = {
+            cod_contrasenia: codContrasenia,
+            cod_empresa: parseInt(dataEncabezado.cod_empresa),
+            num_factura: parseInt(det.num_factura),
+            cod_moneda: det.cod_moneda,
+            monto: parseFloat(det.monto),
+            retension_iva: det.retension_iva ? 'S' : 'N',
+            retension_isr: det.retension_isr ? 'S' : 'N',
+            numero_retension_iva: det.numero_retension_iva ? parseInt(det.numero_retension_iva) : null,
+            numero_retension_isr: det.numero_retension_isr ? parseInt(det.numero_retension_isr) : null
+          };
+
+          if (!payload.num_factura || !payload.cod_moneda || isNaN(payload.monto) || !payload.cod_empresa) {
+            console.error('Detalle inválido, se omite:', payload);
+            errores++;
+            procesados++;
+            enviarDetalleIndice(i + 1);
+            return;
+          }
+
+          $.ajax({
+            url: "/contrasenias/detalle",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(payload),
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+            success: function () {
+              procesados++;
+              enviarDetalleIndice(i + 1);
+            },
+            error: function (xhr) {
+              errores++;
+              procesados++;
+              console.error('Error al guardar detalle:', xhr.responseText || xhr);
+              enviarDetalleIndice(i + 1);
+            }
+          });
+        }
+
+        enviarDetalleIndice(0);
       },
       error: function (xhr) {
-        errores++;
-        procesados++;
-        console.error('Error al guardar detalle:', xhr.responseText || xhr);
-        enviarDetalleIndice(i + 1);
+        alert("Error al guardar el encabezado: " + xhr.responseText);
+        $btn.prop('disabled', false).text('Enviar Todo');
       }
     });
-  }
 
-  // iniciar envío
-  enviarDetalleIndice(0);
-});
+  });
 
-  
 });
 
 
