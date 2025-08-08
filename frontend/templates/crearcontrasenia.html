@@ -3,129 +3,116 @@
 {% block title %}Crear Contraseña{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container mt-4">
+    <h2>Crear Contraseña</h2>
 
-    <!-- Encabezado con botón -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">
-            <i class="bi bi-shield-lock me-2"></i>Registrar Contraseña
-        </h2>
-        <a href="/vercontrasenias.html" class="btn btn-outline-secondary">
-            <i class="bi bi-eye me-1"></i>Ver Contraseñas
-        </a>
+    <!-- Formulario Encabezado -->
+    <form id="formulario-contrasenia">
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label>Fecha Contraseña</label>
+                <input type="date" id="fecha_contrasenia" class="form-control" required>
+            </div>
+            <div class="col-md-4">
+                <label>Empresa</label>
+                <select id="cod_empresa" class="form-control" required></select>
+            </div>
+            <div class="col-md-4">
+                <label>Proveedor</label>
+                <input type="text" id="proveedor_nombre" class="form-control" placeholder="Buscar proveedor..." required>
+                <input type="hidden" id="cod_proveedor">
+            </div>
+        </div>
+        <button type="button" id="guardarContrasenia" class="btn btn-primary">Guardar Encabezado</button>
+    </form>
+
+    <hr>
+
+    <!-- Formulario Detalle -->
+    <form id="formulario-detalle" class="mt-4">
+        <input type="hidden" id="cod_contrasenia">
+
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <label>Número Factura</label>
+                <input type="text" id="num_factura" class="form-control" required>
+            </div>
+            <div class="col-md-2">
+                <label>Moneda</label>
+                <select id="cod_moneda" class="form-control" required></select>
+            </div>
+            <div class="col-md-2">
+                <label>Monto</label>
+                <input type="number" step="0.01" id="monto" class="form-control" required>
+            </div>
+            <div class="col-md-2 d-flex align-items-center">
+                <div class="form-check me-3">
+                    <input class="form-check-input" type="checkbox" id="retension_iva">
+                    <label class="form-check-label" for="retension_iva">Retención IVA</label>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <input type="text" id="numero_retension_iva" class="form-control" placeholder="No. Retención IVA">
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-2 d-flex align-items-center">
+                <div class="form-check me-3">
+                    <input class="form-check-input" type="checkbox" id="retension_isr">
+                    <label class="form-check-label" for="retension_isr">Retención ISR</label>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <input type="text" id="numero_retension_isr" class="form-control" placeholder="No. Retención ISR">
+            </div>
+        </div>
+
+        <button type="button" id="btnGuardarDetalle" class="btn btn-success">Agregar Detalle</button>
+    </form>
+
+    <!-- Tabla de detalles -->
+    <div class="mt-4">
+        <h4>Detalles Agregados</h4>
+        <table class="table table-bordered" id="tabla-detalles">
+            <thead>
+                <tr>
+                    <th>Factura</th>
+                    <th>Moneda</th>
+                    <th>Monto</th>
+                    <th>Ret. IVA</th>
+                    <th>Ret. ISR</th>
+                    <th>No. Ret. IVA</th>
+                    <th>No. Ret. ISR</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
     </div>
 
-    <!-- Formulario ENCABEZADO -->
-    <div class="card shadow-sm border-0 mb-4">
-        <div class="card-body">
-            <form id="formulario-contrasenia">
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <label for="fecha_contrasenia" class="form-label">
-                            <i class="bi bi-calendar-event me-1"></i>Fecha:
-                        </label>
-                        <input type="date" class="form-control" id="fecha_contrasenia" required>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="cod_empresa" class="form-label">
-                            <i class="bi bi-buildings me-1"></i>Empresa:
-                        </label>
-                        <select class="form-select" id="cod_empresa" required>
-                            <option value="">Seleccione una empresa</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="proveedor_nombre" class="form-label">
-                            <i class="bi bi-person-vcard me-1"></i>Proveedor:
-                        </label>
-                        <input type="text" class="form-control" id="proveedor_nombre" placeholder="Buscar proveedor..." required>
-                        <input type="hidden" id="cod_proveedor">
-                    </div>
-                </div>
-
-                <div class="text-end mt-4">
-                    <button type="submit" class="btn btn-primary px-4">
-                        <i class="bi bi-save me-1"></i>Guardar Contraseña
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Formulario DETALLE -->
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-light">
-            <h5 class="mb-0"><i class="bi bi-file-earmark-plus me-2"></i>Agregar Detalle</h5>
-        </div>
-        <div class="card-body">
-            <form id="formulario-detalle">
-                <div class="row g-3">
-
-                    <input type="hidden" id="cod_contrasenia">
-                    <!-- num_factura -->
-                    <div class="col-md-2">
-                        <label class="form-label">N° Factura:</label>
-                        <input type="number" class="form-control" id="num_factura" required>
-                    </div>
-
-                    <!-- cod_moneda -->
-                    <div class="col-md-2">
-                        <label class="form-label">Moneda:</label>
-                        <select id="cod_moneda" class="form-select" required>
-                            <option value="">Seleccionar</option>
-                            <option value="GTQ">GTQ</option>
-                            <option value="USD">USD</option>
-                            <!-- Agrega más si es necesario -->
-                        </select>
-                    </div>
-
-                    <!-- monto -->
-                    <div class="col-md-2">
-                        <label class="form-label">Monto:</label>
-                        <input type="number" step="0.01" class="form-control" id="monto" required>
-                    </div>
-
-                    <!-- retensiones -->
-                    <div class="col-md-2">
-                        <div class="form-check mt-4">
-                            <input type="checkbox" class="form-check-input" id="retension_iva">
-                            <label class="form-check-label" for="retension_iva">Ret. IVA</label>
-                        </div>
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="retension_isr">
-                            <label class="form-check-label" for="retension_isr">Ret. ISR</label>
-                        </div>
-                    </div>
-
-                    <!-- números de retension -->
-                    <div class="col-md-2">
-                        <label class="form-label">N° Ret. IVA:</label>
-                        <input type="number" class="form-control mb-2" id="numero_retension_iva">
-                        <label class="form-label">N° Ret. ISR:</label>
-                        <input type="number" class="form-control" id="numero_retension_isr">
-                    </div>
-                </div>
-
-                <div class="text-end mt-4">
-                    <button type="button" id="btnGuardarDetalle" class="btn btn-success px-4">
-                        <i class="bi bi-plus-circle me-1"></i>Guardar Detalle
-                    </button>
-                </div>
-            </form>
-        </div>
+    <!-- Botón enviar todo -->
+    <div class="mt-3">
+        <button type="button" id="btnEnviarTodo" class="btn btn-primary">Enviar Todo</button>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<!-- jQuery UI Autocomplete -->
-<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
-<script src="/static/js/crearcontrasenia.js"></script>
+<!-- jQuery ya cargado (asegúrate que es antes de jQuery UI) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<!-- Bootstrap Icons -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+<!-- jQuery UI CSS -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+
+<!-- jQuery UI JS -->
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>  
+<script src="/static/js/crearcontrasenia.js"></script>
 {% endblock %}
+
+
+
+
 
 
 
