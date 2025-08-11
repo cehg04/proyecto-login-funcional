@@ -6,9 +6,8 @@ from ..utils.dependencies import obtener_usuario_desde_token
 
 router = APIRouter(prefix="/contrasenias", tags=["contrasenias"])
 
-
-
 # ---------------- creacion de encabezados para la contrasela ------------------------------------------------------------
+
 # end-point para crear contraseñas
 @router.post("/crear-contrasenia")
 def crear_contrasenia_endpoint(data: EntradaContrasenia, usuario_actual: int = Depends(obtener_usuario_desde_token)):
@@ -22,6 +21,7 @@ def crear_contrasenia_endpoint(data: EntradaContrasenia, usuario_actual: int = D
 def listar_empresa():
     return obtener_empresas()
 
+# end-point para el autocompletado de los proveedores
 @router.get("/proveedores-autocomplete")
 def autocomplete_proveedores(q: str, cod_empresa: int):
     conn = get_connection()
@@ -39,10 +39,10 @@ def autocomplete_proveedores(q: str, cod_empresa: int):
     like = f"%{q}%"
     cursor.execute(consulta, (cod_empresa, like, like, like))
     return cursor.fetchall()
-# ------------------------------------------------------------------------------------------------------------------------
 
 # ---------------- creacion de lo detalles para la contrasela ------------------------------------------------------------
 
+# end-point para los detalles de la contraseña
 @router.post("/detalle")
 def guardar_detalle_contrasenia(detalle: DetalleContrasenia):
     try:
@@ -64,6 +64,6 @@ def get_siguiente_linea(cod_contrasenia: int, cod_empresa: int):
 @router.get("/monedas")
 def listar_monedas():
     return obtener_monedas()
-# ------------------------------------------------------------------------------------------------------------------------
+
 
 

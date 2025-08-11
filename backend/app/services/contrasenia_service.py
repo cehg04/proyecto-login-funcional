@@ -4,7 +4,6 @@ from ..models.contrasenia_model import EntradaContrasenia, DetalleContrasenia
 from datetime import datetime
 from fastapi import HTTPException
 
-
 # ---------------------- creacion del servicio de encabezado de la contrasenia ------------------------------------
 # creacion de contraseñas
 def crear_contrasenias(data: EntradaContrasenia, usuario_actual: int):
@@ -14,8 +13,15 @@ def crear_contrasenias(data: EntradaContrasenia, usuario_actual: int):
         conn = get_connection()
         cursor = conn.cursor()
 
+        cod_empresa = data.cod_empresa
+
         # Obtener siguiente código de encabezado
-        cursor.execute("SELECT MAX(cod_contrasenia) FROM enca_contrasenias")
+        cursor.execute("""
+            SELECT MAX(cod_contrasenia) 
+            FROM enca_contrasenias
+            WHERE cod_empresa = %s
+            """, (cod_empresa,))
+
         resultado = cursor.fetchone()
         nuevo_codigo = (resultado[0] or 0) + 1
 
@@ -59,7 +65,7 @@ def crear_contrasenias(data: EntradaContrasenia, usuario_actual: int):
         if conn and conn.is_connected():
             conn.close()
 
-# Aqui creamos el numero de contraseña
+# funcion para crear el numero de la contraseña
 def generar_num_contrasenia(cod_empresa: int, nuevo_codigo: int) -> str:
     conn = None
     cursor = None
@@ -88,8 +94,7 @@ def generar_num_contrasenia(cod_empresa: int, nuevo_codigo: int) -> str:
         if cursor: cursor.close()
         if conn: conn.close()
 
-# requerimientos de la funcionalidad
-# lista para las empresas
+# funcion para listar las empresas
 def obtener_empresas():
     conn = get_connection()
     cursor = conn.cursor()
@@ -104,7 +109,7 @@ def obtener_empresas():
         cursor.close()
         conn.close()
 
-# lista para los proveedores
+# funcion listar los proveedores
 def obtener_proveedores(cod_empresa):
     conn = get_connection()
     cursor = conn.cursor()
@@ -119,16 +124,24 @@ def obtener_proveedores(cod_empresa):
     finally:
         cursor.close()
         conn.close()
-# --------------------------------------------------------------------------------------------------------------
+
 
 # ---------------------- creacion del servicio de detalle de la contrasenia ------------------------------------
-
+# funcion para crear los detalles de la contraseña
 def crear_detalle_contrasenia(detalle: DetalleContrasenia):
     conn = None
     cursor = None
     try:
         conn = get_connection()
         cursor = conn.cursor()
+
+        # Validar que num_factura no exista ya para esa contraseña y empresa
+        cursor.execute("""
+        SELECT 1 FROM detalle_contrasenias WHERE num_factura = %s
+        """, (detalle.num_factura,))
+        existe = cursor.fetchone()
+        if existe:
+            raise HTTPException(status_code=400, detail="Número de factura ya existe")
 
         # Obtener el valor máximo actual de línea para esa contraseña + empresa
         cursor.execute("""
@@ -171,6 +184,7 @@ def crear_detalle_contrasenia(detalle: DetalleContrasenia):
         if conn:
             conn.close()
 
+# funcion para obtener la linea siguiente
 def obtener_siguiente_linea(cod_contrasenia: int, cod_empresa: int):
     conn = get_connection()
     try:
@@ -188,7 +202,7 @@ def obtener_siguiente_linea(cod_contrasenia: int, cod_empresa: int):
     finally:
         conn.close()
 
-# lista para los tipo monedas
+# funcion para lista para los tipo monedas
 def obtener_monedas():
     conn = get_connection()
     cursor = conn.cursor()
@@ -201,7 +215,7 @@ def obtener_monedas():
     finally:
         cursor.close()
         conn.close()
-# --------------------------------------------------------------------------------------------------------------
+
 
 
 

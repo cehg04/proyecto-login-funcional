@@ -1,12 +1,8 @@
 {% extends "base.html" %}
-
 {% block title %}Crear Contraseña{% endblock %}
-
 {% block content %}
 <div class="container mt-4">
     <h2>Crear Contraseña</h2>
-
-    <!-- Formulario Encabezado -->
     <form id="formulario-contrasenia">
         <div class="row mb-3">
             <div class="col-md-4">
@@ -23,16 +19,10 @@
                 <input type="hidden" id="cod_proveedor">
             </div>
         </div>
-        <!-- Botón quitar, ahora solo enviar todo -->
-        <!-- <button type="button" id="guardarContrasenia" class="btn btn-primary">Guardar Encabezado</button> -->
     </form>
-
     <hr>
-
-    <!-- Formulario Detalle -->
     <form id="formulario-detalle" class="mt-4">
         <input type="hidden" id="cod_contrasenia">
-
         <div class="row mb-3">
             <div class="col-md-3">
                 <label>Número Factura</label>
@@ -56,7 +46,6 @@
                 <input type="text" id="numero_retension_iva" class="form-control" placeholder="No. Retención IVA">
             </div>
         </div>
-
         <div class="row mb-3">
             <div class="col-md-2 d-flex align-items-center">
                 <div class="form-check me-3">
@@ -71,8 +60,6 @@
 
         <button type="button" id="btnGuardarDetalle" class="btn btn-success">Agregar Detalle</button>
     </form>
-
-    <!-- Tabla de detalles -->
     <div class="mt-4">
         <h4>Detalles Agregados</h4>
         <table class="table table-bordered" id="tabla-detalles">
@@ -91,22 +78,15 @@
             <tbody></tbody>
         </table>
     </div>
-
-    <!-- Botón enviar todo -->
     <div class="mt-3">
         <button type="button" id="btnEnviarTodo" class="btn btn-primary">Enviar Todo</button>
     </div>
 </div>
 {% endblock %}
-
 {% block extra_js %}
-<!-- jQuery ya cargado (asegúrate que es antes de jQuery UI) -->
+<script src="/static/js/validar_permisos.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<!-- jQuery UI CSS -->
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-
-<!-- jQuery UI JS -->
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>  
 <script src="/static/js/crearcontrasenia.js"></script>
 {% endblock %}

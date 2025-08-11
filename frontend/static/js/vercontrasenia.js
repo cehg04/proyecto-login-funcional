@@ -1,9 +1,20 @@
 $(document).ready(function () {
+
+    // Validar permisos 
+    if (validar_permisos(4) !== 'S') {
+        alert("No tienes permiso para ver Contrasenias.");
+        window.location.href = "inicio.html"; // Redirigir al menú principal
+        return;
+    }
+    if (validar_permisos(5) !== 'S') {
+        $("#btnCrearContrasenia").hide();
+    }
+
     const cod_empresa = 1; 
     // Puedes cambiar esto según sesión
 
     $("#btnCrearContrasenia").on("click", function () {
-    window.location.href = "crear_contrasenia.html"; // Cambia por tu ruta
+    window.location.href = "crear_contrasenia.html"; 
     });
 
 

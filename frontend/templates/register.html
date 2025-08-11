@@ -1,16 +1,12 @@
 {% extends "base.html" %}
-
 {% block title %}Registro de Usuario{% endblock %}
-
 {% block content %}
 <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0">Registrar Nuevo Usuario</h2>
         <a href="/crudusuarios.html" class="btn btn-secondary">Regresar</a>
     </div>
-
     <div id="msg"></div>
-
     <form id="formRegistro">
         <div class="mb-2">
             <label for="regNombre" class="form-label">Nombre Completo</label>
@@ -28,7 +24,6 @@
             <label for="regContrasenia" class="form-label">Contraseña</label>
             <input type="password" class="form-control" id="regContrasenia" required>
         </div>
-
         <!-- Opciones / Permisos -->
         <div class="mb-3">
             <label class="form-label">Permisos Disponibles:</label>
@@ -41,7 +36,6 @@
     </form>
 </div>
 {% endblock %}
-
 {% block extra_js %}
 <script src="/static/js/validar_permisos.js"></script>
 <script src="/static/js/registro.js"></script>

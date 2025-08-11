@@ -1,4 +1,11 @@
 $(document).ready(function () {
+
+  if (validar_permisos(5) !== 'S') {
+    alert("No tienes permiso para Crear Contraseñas");
+    window.location.href = "inicio.html";
+    return;
+  }
+   
   let codContrasenia = null;
   let detalles = [];
 
@@ -84,6 +91,13 @@ $(document).ready(function () {
       return;
     }
 
+    // Valida si existe el num_factura
+    const facturaExiste = detalles.some(d => d.num_factura === detalle.num_factura);
+    if (facturaExiste) {
+      alert("Ya existe una factura con ese número en la lista.");
+      return;
+    }
+
     detalles.push(detalle);
     agregarDetalleATabla(detalle);
     $('#formulario-detalle')[0].reset();
@@ -136,7 +150,7 @@ $(document).ready(function () {
 
     $btn.prop('disabled', true).text('Enviando...');
 
-    // Paso 1: Crear encabezado
+    //Crear encabezado
     $.ajax({
       url: "/contrasenias/crear-contrasenia",
       type: "POST",
@@ -153,7 +167,7 @@ $(document).ready(function () {
         // Habilitar formulario detalle para agregar si es que quieres seguir usando el mismo flujo
         $('#cod_contrasenia').val(codContrasenia);
 
-        // Paso 2: Enviar detalles uno a uno
+        //Enviar detalles uno a uno
         let errores = 0;
         let procesados = 0;
 
@@ -205,10 +219,13 @@ $(document).ready(function () {
               enviarDetalleIndice(i + 1);
             },
             error: function (xhr) {
-              errores++;
-              procesados++;
-              console.error('Error al guardar detalle:', xhr.responseText || xhr);
-              enviarDetalleIndice(i + 1);
+              let mensaje = "Error desconocido";
+              if (xhr.responseJSON && xhr.responseJSON.detail) {
+                mensaje = xhr.responseJSON.detail;
+              } else if (xhr.responseText) {
+                mensaje = xhr.responseText;
+              }
+              alert(mensaje);
             }
           });
         }

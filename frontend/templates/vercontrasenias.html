@@ -1,15 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Visualizar Contraseñas{% endblock %}
-
 {% block content %}
 <div class="container mt-4">
     <h2>Contraseñas creadas</h2>
-
     <a href="/crearcontrasenia.html" id="btnCrearContrasenia" class="btn btn-primary mb-3">Crear Contraseñas</a>
-
 </div>
-
-<!-- Modal para detalle -->
 <div class="modal fade" id="modalDetalle" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -35,4 +30,8 @@
     </div>
   </div>
 </div>
+{% endblock %}
+{% block extra_js %}
+<script src="/static/js/validar_permisos.js"></script>
+<script src="/static/js/vercontrasenia.js"></script>
 {% endblock %}

@@ -1,15 +1,9 @@
 {% extends "base.html" %}
-
 {% block title %}Gestión de Usuarios{% endblock %}
-
 {% block content %}
 <div class="container mt-4">
     <h1 class="mb-4">Gestión de Usuarios</h1>
-
-    <!-- Botón de Crear Usuario con ID para poder ocultarlo si no tiene permiso -->
     <a href="/register.html" id="btnCrearUsuario" class="btn btn-primary mb-3">Crear usuario nuevo</a>
-
-    <!-- Tabla responsiva -->
     <div class="table-responsive">
         <table id="tablaUsuarios" class="table table-bordered table-hover table-striped align-middle">
             <thead class="table-dark">
@@ -27,7 +21,6 @@
     </div>
 </div>
 {% endblock %}
-
 {% block extra_js %}
 <script src="/static/js/validar_permisos.js"></script>
 <script src="/static/js/crudusuarios.js"></script>
