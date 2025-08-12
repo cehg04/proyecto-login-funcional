@@ -3,6 +3,58 @@ from mysql.connector import Error
 from ..models.contrasenia_model import EntradaContrasenia, DetalleContrasenia
 from datetime import datetime
 from fastapi import HTTPException
+from typing import Optional
+
+# ---------------------- creacion de la vista de contrasenias  ----------------------------------------------------
+# obtener el encabezado
+def obtener_encabezados_filtrados(cod_contrasenia: Optional[int] = None, cod_empresa: Optional[int] = None):
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        sql = """
+            SELECT
+                e.cod_contrasenia,
+                e.cod_empresa,
+                DATE_FORMAT(e.fecha_creacion, '%Y-%m-%d %H:%i:%s') AS fecha_creacion,
+                emp.nombre AS empresa_nombre,
+                prov.nombre AS proveedor_nombre
+            FROM enca_contrasenias e
+            JOIN empresas emp ON e.cod_empresa = emp.cod_empresa
+            JOIN proveedores prov ON e.cod_proveedor = prov.cod_proveedor AND e.cod_empresa_proveedor = prov.cod_empresa
+        """
+
+        filtros = []
+        params = []
+
+        if cod_contrasenia is not None:
+            filtros.append("e.cod_contrasenia = %s")
+            params.append(cod_contrasenia)
+
+        if cod_empresa is not None:
+            filtros.append("e.cod_empresa = %s")
+            params.append(cod_empresa)
+
+        if filtros:
+            sql += " WHERE " + " AND ".join(filtros)
+
+        sql += " ORDER BY e.fecha_creacion DESC"
+
+        cursor.execute(sql, tuple(params))
+        resultados = cursor.fetchall()
+        return resultados
+
+    except Error as e:
+        print(f"Error en obtener encabezados filtrados: {e}")
+        raise
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
 
 # ---------------------- creacion del servicio de encabezado de la contrasenia ------------------------------------
 # creacion de contraseñas

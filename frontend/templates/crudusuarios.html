@@ -2,11 +2,12 @@
 {% block title %}Gestión de Usuarios{% endblock %}
 {% block content %}
 <div class="container mt-4">
-    <h1 class="mb-4">Gestión de Usuarios</h1>
+    <h1>Gestión de Usuarios</h1>
+    <div class="container mt-4">
     <a href="/register.html" id="btnCrearUsuario" class="btn btn-primary mb-3">Crear usuario nuevo</a>
-    <div class="table-responsive">
-        <table id="tablaUsuarios" class="table table-bordered table-hover table-striped align-middle">
-            <thead class="table-dark">
+     <div class="table-responsive">
+    <table id="tablaUsuarios" class="table table-bordered table-hover table-striped align-middle">
+        <thead class="table-dark">
                 <tr>
                     <th>Código</th>
                     <th>Nombre</th>
@@ -18,6 +19,7 @@
             </thead>
             <tbody></tbody>
         </table>
+        </div>
     </div>
 </div>
 {% endblock %}

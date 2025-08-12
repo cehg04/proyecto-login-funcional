@@ -3,65 +3,41 @@ $(document).ready(function () {
     // Validar permisos 
     if (validar_permisos(4) !== 'S') {
         alert("No tienes permiso para ver Contrasenias.");
-        window.location.href = "inicio.html"; // Redirigir al menú principal
+        window.location.href = "inicio.html"; 
         return;
     }
     if (validar_permisos(5) !== 'S') {
         $("#btnCrearContrasenia").hide();
     }
 
-    const cod_empresa = 1; 
-    // Puedes cambiar esto según sesión
-
-    $("#btnCrearContrasenia").on("click", function () {
-    window.location.href = "crear_contrasenia.html"; 
-    });
-
-
-    $.ajax({
-        url: `/contrasenias/?cod_empresa=${cod_empresa}`,
-        method: "GET",
-        success: function (data) {
-            const tbody = $("#tablaContrasenias tbody");
-            tbody.empty();
-
-            data.forEach(item => {
-                const row = `
-                    <tr>
-                        <td>${item.cod_contrasenia}</td>
-                        <td>${item.num_contrasenia}</td>
-                        <td>${item.cod_proveedor}</td>
-                        <td>${item.fecha_contrasenia}</td>
-                        <td>${item.estado}</td>
-                        <td><button class="btn btn-primary btn-sm btn-detalle" data-detalles='${JSON.stringify(item.detalles)}'>Ver</button></td>
-                    </tr>
-                `;
-                tbody.append(row);
-            });
-
-            $(".btn-detalle").on("click", function () {
-                const detalles = $(this).data("detalles");
-                const detalleBody = $("#tablaDetalleBody");
-                detalleBody.empty();
-
-                detalles.forEach(det => {
-                    detalleBody.append(`
-                        <tr>
-                            <td>${det.num_factura}</td>
-                            <td>${det.cod_moneda}</td>
-                            <td>${det.monto}</td>
-                            <td>${det.retension_iva || ''}</td>
-                            <td>${det.retension_isr || ''}</td>
-                            <td>${det.estado}</td>
-                        </tr>
-                    `);
-                });
-
-                $("#modalDetalle").modal("show");
-            });
+    // Inicializamos DataTable
+    let table = $('#tablaContrasenias').DataTable({
+        ajax: {
+            url: '/contrasenias/ver-encabezados',
+            data: function(d) {
+                // Agregar filtros como parámetros
+                d.cod_contrasenia = $('#filtroCodContrasenia').val();
+                d.cod_empresa = $('#filtroCodEmpresa').val();
+            },
+            dataSrc: ''
         },
-        error: function () {
-            alert("Error al cargar las contraseñas.");
-        }
+        columns: [
+            { data: 'fecha_creacion', title: 'Fecha Creación' },
+            { data: 'empresa_nombre', title: 'Empresa' },
+            { data: 'proveedor_nombre', title: 'Proveedor' },
+            {
+                data: null,
+                title: 'Acciones',
+                orderable: false,
+                render: function(data, type, row) {
+                    return `
+                        <button class="btn btn-info btn-mostrar" data-cod="${row.cod_contrasenia}" data-empresa="${row.cod_empresa}">Mostrar</button>
+                        <button class="btn btn-danger btn-anular" data-cod="${row.cod_contrasenia}" data-empresa="${row.cod_empresa}">Anular</button>
+                    `;
+                }
+            }
+        ],
     });
 });
+
+

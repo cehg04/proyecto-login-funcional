@@ -2,36 +2,49 @@
 {% block title %}Visualizar Contraseñas{% endblock %}
 {% block content %}
 <div class="container mt-4">
-    <h2>Contraseñas creadas</h2>
-    <a href="/crearcontrasenia.html" id="btnCrearContrasenia" class="btn btn-primary mb-3">Crear Contraseñas</a>
+  <h1>Contraseñas Creadas</h1>
+
+  <a href="/crearcontrasenia.html" id="btnCrearContrasenia" class="btn btn-primary mb-3">Crear Contraseñas</a>
+  <div class="table-responsive">
+    <table id="tablaContrasenias" class="table table-bordered table-hover table-striped align-middle" style="width:100%">
+      <thead class="table-dark">
+        <tr>
+          <th>Fecha Creación</th>
+          <th>Empresa</th>
+          <th>Proveedor</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Aquí el JS inyectará las filas, incluyendo los botones Mostrar, Anular y Ver Detalle -->
+      </tbody>
+    </table>
+  </div>
 </div>
-<div class="modal fade" id="modalDetalle" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
+
+<!-- Modal para Anular -->
+<div class="modal fade" id="modalAnular" tabindex="-1" aria-labelledby="modalAnularLabel" aria-hidden="true">
+  <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Detalle de Contraseña</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <h5 class="modal-title" id="modalAnularLabel">Anular Contraseña</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
-        <table class="table table-sm table-striped">
-          <thead>
-            <tr>
-              <th>Factura</th>
-              <th>Moneda</th>
-              <th>Monto</th>
-              <th>IVA</th>
-              <th>ISR</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody id="tablaDetalleBody"></tbody>
-        </table>
+        <label for="comentarioAnular">Comentario:</label>
+        <textarea id="comentarioAnular" class="form-control" rows="3"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="btnAceptarAnular">Aceptar</button>
       </div>
     </div>
   </div>
 </div>
 {% endblock %}
+
 {% block extra_js %}
 <script src="/static/js/validar_permisos.js"></script>
 <script src="/static/js/vercontrasenia.js"></script>
 {% endblock %}
+

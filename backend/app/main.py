@@ -64,6 +64,10 @@ def crud_usuarios(request: Request):
 def mostrar_contrasenias(request: Request):
     return templates.TemplateResponse("vercontrasenias.html", {"request": request})
 
+@app.get("/contrasenia_completa.html", response_class=HTMLResponse)
+def ver_contrasenia(request: Request):
+    return templates.TemplateResponse("contrasenia_completa.html", {"request": request})
+
 @app.get("/crearcontrasenia.html", response_class=HTMLResponse)
 def crear_contrasenias(request: Request):
     return templates.TemplateResponse("crearcontrasenia.html", {"request": request})

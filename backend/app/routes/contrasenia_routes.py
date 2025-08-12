@@ -1,10 +1,32 @@
 from fastapi import APIRouter, Query, HTTPException,Depends
-from ..services.contrasenia_service import crear_contrasenias, obtener_empresas, obtener_proveedores, obtener_monedas, crear_detalle_contrasenia, obtener_siguiente_linea
+from fastapi.responses import JSONResponse
+from typing import List, Optional
+from ..services.contrasenia_service import crear_contrasenias, obtener_empresas, obtener_monedas, crear_detalle_contrasenia
+from ..services.contrasenia_service import obtener_siguiente_linea, obtener_encabezados_filtrados
 from ..models.contrasenia_model import DetalleContrasenia, EntradaContrasenia
 from ..db.connection import get_connection
 from ..utils.dependencies import obtener_usuario_desde_token
 
 router = APIRouter(prefix="/contrasenias", tags=["contrasenias"])
+
+# ---------------- Obtener todos los encabezados -------------------------------------------------------------------------
+
+# end-point para obtener los encabezados
+@router.get("/ver-encabezados")
+def listar_encabezados(
+    cod_contrasenia: Optional[str] = Query(None),
+    cod_empresa: Optional[str] = Query(None)
+):
+    try:
+        cod_contrasenia_int = int(cod_contrasenia) if cod_contrasenia and cod_contrasenia.isdigit() else None
+        cod_empresa_int = int(cod_empresa) if cod_empresa and cod_empresa.isdigit() else None
+
+        resultados = obtener_encabezados_filtrados(cod_contrasenia_int, cod_empresa_int)
+        return resultados
+    except Exception as e:
+        print("Error en listar_encabezados:", e)
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
 
 # ---------------- creacion de encabezados para la contrasela ------------------------------------------------------------
 
