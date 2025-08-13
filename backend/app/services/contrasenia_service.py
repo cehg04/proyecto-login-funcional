@@ -6,7 +6,7 @@ from fastapi import HTTPException
 from typing import Optional
 
 # ---------------------- creacion de la vista de contrasenias  ----------------------------------------------------
-# obtener el encabezado
+# obtener el encabezado filtrado
 def obtener_encabezados_filtrados(cod_contrasenia: Optional[int] = None, cod_empresa: Optional[int] = None):
     conn = None
     cursor = None
@@ -17,10 +17,12 @@ def obtener_encabezados_filtrados(cod_contrasenia: Optional[int] = None, cod_emp
         sql = """
             SELECT
                 e.cod_contrasenia,
+                e.num_contrasenia,
                 e.cod_empresa,
                 DATE_FORMAT(e.fecha_creacion, '%Y-%m-%d %H:%i:%s') AS fecha_creacion,
                 emp.nombre AS empresa_nombre,
-                prov.nombre AS proveedor_nombre
+                prov.nombre AS proveedor_nombre,
+                e.estado
             FROM enca_contrasenias e
             JOIN empresas emp ON e.cod_empresa = emp.cod_empresa
             JOIN proveedores prov ON e.cod_proveedor = prov.cod_proveedor AND e.cod_empresa_proveedor = prov.cod_empresa
@@ -55,6 +57,62 @@ def obtener_encabezados_filtrados(cod_contrasenia: Optional[int] = None, cod_emp
         if conn:
             conn.close()
 
+# obtener el detalle y el encabezado juntos
+def obtener_contrasenia_completa_filtrada(cod_contrasenia: int, cod_empresa: int):
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # === Encabezado filtrado ===
+        query_encabezado = """
+            SELECT 
+                e.cod_empresa,
+                e.cod_proveedor,
+                e.num_contrasenia,
+                e.estado,
+                emp.nombre AS empresa_nombre,
+                prov.nombre AS proveedor_nombre
+            FROM enca_contrasenias e
+            JOIN empresas emp ON e.cod_empresa = emp.cod_empresa
+            JOIN proveedores prov ON e.cod_proveedor = prov.cod_proveedor
+                AND e.cod_empresa_proveedor = prov.cod_empresa
+            WHERE e.cod_contrasenia = %s
+              AND e.cod_empresa = %s
+        """
+        cursor.execute(query_encabezado, (cod_contrasenia, cod_empresa))
+        encabezado = cursor.fetchone()
+
+        if not encabezado:
+            raise HTTPException(status_code=404, detail="Encabezado no encontrado")
+
+        # === Detalle filtrado ===
+        query_detalle = """
+            SELECT num_factura, cod_moneda, monto,
+                   retension_iva, retension_isr,
+                   numero_retension_iva, numero_retension_isr,
+                   estado
+            FROM detalle_contrasenias
+            WHERE cod_contrasenia = %s AND cod_empresa = %s
+        """
+        cursor.execute(query_detalle, (cod_contrasenia, cod_empresa))
+        detalles = cursor.fetchall()
+
+        return {
+            "encabezado": encabezado,
+            "detalles": detalles
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al obtener la contraseña: {str(e)}")
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 # ---------------------- creacion del servicio de encabezado de la contrasenia ------------------------------------
 # creacion de contraseñas

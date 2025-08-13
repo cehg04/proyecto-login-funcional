@@ -2,7 +2,7 @@ from fastapi import APIRouter, Query, HTTPException,Depends
 from fastapi.responses import JSONResponse
 from typing import List, Optional
 from ..services.contrasenia_service import crear_contrasenias, obtener_empresas, obtener_monedas, crear_detalle_contrasenia
-from ..services.contrasenia_service import obtener_siguiente_linea, obtener_encabezados_filtrados
+from ..services.contrasenia_service import obtener_siguiente_linea, obtener_encabezados_filtrados, obtener_contrasenia_completa_filtrada
 from ..models.contrasenia_model import DetalleContrasenia, EntradaContrasenia
 from ..db.connection import get_connection
 from ..utils.dependencies import obtener_usuario_desde_token
@@ -26,6 +26,14 @@ def listar_encabezados(
     except Exception as e:
         print("Error en listar_encabezados:", e)
         raise HTTPException(status_code=500, detail="Error interno del servidor")
+    
+
+@router.get("/ver-completa-filtrada")
+def ver_contrasenia_completa_filtrada(
+    cod_contrasenia: int = Query(..., description="Código de la contraseña"),
+    cod_empresa: int = Query(..., description="Código de la empresa")
+):
+    return obtener_contrasenia_completa_filtrada(cod_contrasenia, cod_empresa)
 
 
 # ---------------- creacion de encabezados para la contrasela ------------------------------------------------------------
@@ -61,6 +69,8 @@ def autocomplete_proveedores(q: str, cod_empresa: int):
     like = f"%{q}%"
     cursor.execute(consulta, (cod_empresa, like, like, like))
     return cursor.fetchall()
+
+
 
 # ---------------- creacion de lo detalles para la contrasela ------------------------------------------------------------
 

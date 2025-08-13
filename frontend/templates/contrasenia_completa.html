@@ -1,2 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle de Contraseña{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-primary"><i class="bi bi-file-earmark-text me-2"></i>Detalle de Contraseña</h2>
+        <a href="/vercontrasenias.html" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Volver
+        </a>
+    </div>
+
+    <!-- Encabezado -->
+    <div class="card mb-5 shadow-sm border-0 rounded-4">
+        <div class="card-header bg-primary text-white rounded-top-4 fw-semibold">
+            Información General
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-3 fw-semibold">Número Contraseña:</div>
+                <div class="col-md-3" id="numContrasenia"></div>
+
+                <div class="col-md-3 fw-semibold">Estado:</div>
+                <div class="col-md-3" id="estadoContrasenia"></div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-3 fw-semibold">Empresa:</div>
+                <div class="col-md-3" id="empresaNombre"></div>
+
+                <div class="col-md-3 fw-semibold">Proveedor:</div>
+                <div class="col-md-3" id="proveedorNombre"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detalles -->
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-header bg-secondary text-white rounded-top-4 fw-semibold">
+            Detalles
+        </div>
+        <div class="card-body table-responsive">
+            <table id="tablaDetalles" class="table table-hover table-striped table-bordered align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="text-center">Número Factura</th>
+                        <th class="text-center">Moneda</th>
+                        <th class="text-end">Monto</th>
+                        <th class="text-center">Retención IVA</th>
+                        <th class="text-center">Retención ISR</th>
+                        <th class="text-center">Número Ret. IVA</th>
+                        <th class="text-center">Número Ret. ISR</th>
+                        <th class="text-center">Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Los detalles se inyectan con JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/contrasenia_completa.js"></script>
+{% endblock %}
+
 
 

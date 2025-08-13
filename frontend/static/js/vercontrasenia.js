@@ -22,21 +22,29 @@ $(document).ready(function () {
             dataSrc: ''
         },
         columns: [
+            { data: 'num_contrasenia', title: 'N° Contraseña' },
             { data: 'fecha_creacion', title: 'Fecha Creación' },
             { data: 'empresa_nombre', title: 'Empresa' },
             { data: 'proveedor_nombre', title: 'Proveedor' },
+            { data: 'estado', title: 'Estado' },
             {
                 data: null,
                 title: 'Acciones',
                 orderable: false,
                 render: function(data, type, row) {
                     return `
-                        <button class="btn btn-info btn-mostrar" data-cod="${row.cod_contrasenia}" data-empresa="${row.cod_empresa}">Mostrar</button>
+                        <button class="btn btn-success btn-completa" data-cod="${row.cod_contrasenia}" data-empresa="${row.cod_empresa}">Mostrar</button>
                         <button class="btn btn-danger btn-anular" data-cod="${row.cod_contrasenia}" data-empresa="${row.cod_empresa}">Anular</button>
                     `;
                 }
             }
         ],
+    });
+      $('#tablaContrasenias').on('click', '.btn-completa', function() {
+        const codContrasenia = $(this).data('cod');
+        const codEmpresa = $(this).data('empresa');
+
+        window.location.href = `/contrasenia_completa.html?cod_contrasenia=${codContrasenia}&cod_empresa=${codEmpresa}`;
     });
 });
 
