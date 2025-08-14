@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Query, HTTPException,Depends
+from datetime import datetime
 from fastapi.responses import JSONResponse
 from typing import List, Optional
 from ..services.contrasenia_service import crear_contrasenias, obtener_empresas, obtener_monedas, crear_detalle_contrasenia
@@ -12,22 +13,34 @@ router = APIRouter(prefix="/contrasenias", tags=["contrasenias"])
 # ---------------- Obtener todos los encabezados -------------------------------------------------------------------------
 
 # end-point para obtener los encabezados
+from datetime import datetime, timedelta
+
 @router.get("/ver-encabezados")
 def listar_encabezados(
     cod_contrasenia: Optional[str] = Query(None),
-    cod_empresa: Optional[str] = Query(None)
+    cod_empresa: Optional[str] = Query(None),
+    fecha_inicio: Optional[str] = Query(None),  # Nueva: fecha inicial
+    fecha_fin: Optional[str] = Query(None)     # Nueva: fecha final
 ):
     try:
         cod_contrasenia_int = int(cod_contrasenia) if cod_contrasenia and cod_contrasenia.isdigit() else None
         cod_empresa_int = int(cod_empresa) if cod_empresa and cod_empresa.isdigit() else None
+        
+        # Fechas por defecto (hoy como inicio, y fin opcional)
+        fecha_inicio_val = fecha_inicio if fecha_inicio else datetime.now().strftime('%Y-%m-%d')
+        fecha_fin_val = fecha_fin if fecha_fin else fecha_inicio_val  # Si no hay fin, usa la inicio
 
-        resultados = obtener_encabezados_filtrados(cod_contrasenia_int, cod_empresa_int)
+        resultados = obtener_encabezados_filtrados(
+            cod_contrasenia_int,
+            cod_empresa_int,
+            fecha_inicio_val,
+            fecha_fin_val
+        )
         return resultados
     except Exception as e:
-        print("Error en listar_encabezados:", e)
-        raise HTTPException(status_code=500, detail="Error interno del servidor")
+        raise HTTPException(status_code=500, detail=str(e))
     
-
+# end-point para toda la contraseña
 @router.get("/ver-completa-filtrada")
 def ver_contrasenia_completa_filtrada(
     cod_contrasenia: int = Query(..., description="Código de la contraseña"),

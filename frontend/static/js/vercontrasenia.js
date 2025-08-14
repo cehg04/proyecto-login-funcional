@@ -1,4 +1,5 @@
 $(document).ready(function () {
+    
     // Validar permisos 
     if (validar_permisos(4) !== 'S') {
         alert("No tienes permiso para ver Contrasenias.");
@@ -9,16 +10,58 @@ $(document).ready(function () {
         $("#btnCrearContrasenia").hide();
     }
 
+
+    $('#filtrosContainer').append(`
+        <div class="row mb-3">
+            <div class="row mb-3">
+            <div class="col-md-3">
+                <label for="fechaInicio">Fecha Inicio:</label>
+                <input type="date" id="fechaInicio" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label for="fechaFin">Fecha Fin (opcional):</label>
+                <input type="date" id="fechaFin" class="form-control">
+            </div>  
+            <div class="col-md-3">
+                <label for="empresaSelect">Empresa:</label>
+                <select id="empresaSelect" class="form-select">
+                    <option value="">Todas</option>
+                    <!-- Las opciones se llenarán dinámicamente -->
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button id="btnFiltrar" class="btn btn-primary">Buscar</button>
+            </div>
+        </div>
+    `);
+    
+    // Setear fecha actual por defecto
+    const today = new Date().toISOString().split('T')[0];
+    $('#fechaInput').val(today);
+    
+    // Cargar empresas para el select 
+    cargarEmpresas();
+    
+    function cargarEmpresas() {
+        $.get('/contrasenias/empresas', function(data) {
+            const select = $('#empresaSelect');
+            data.forEach(empresa => {
+                select.append(`<option value="${empresa.cod_empresa}">${empresa.nombre}</option>`);
+            });
+        });
+    }
+
     // Inicializamos DataTable
-    let table = $('#tablaContrasenias').DataTable({
+        let table = $('#tablaContrasenias').DataTable({
         ajax: {
             url: '/contrasenias/ver-encabezados',
             data: function(d) {
-            let cod_contrasenia = $('#filtroCodContrasenia').val();
-            let cod_empresa = $('#empresaSelect').val();
-
-            d.cod_contrasenia = cod_contrasenia ? cod_contrasenia : null;
-            d.cod_empresa = cod_empresa ? cod_empresa : null;
+                return {
+                    cod_contrasenia: $('#filtroCodContrasenia').val(),
+                    cod_empresa: $('#empresaSelect').val(),
+                    fecha_inicio: $('#fechaInicio').val(),
+                    fecha_fin: $('#fechaFin').val() || null
+                };
             },
             dataSrc: ''
         },
@@ -40,6 +83,11 @@ $(document).ready(function () {
                 }
             }
         ],
+    });
+
+       // Botón para aplicar filtros
+    $('#btnFiltrar').click(function() {
+        table.ajax.reload();
     });
 
     // Botón Mostrar 

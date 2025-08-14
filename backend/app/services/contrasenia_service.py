@@ -7,7 +7,7 @@ from typing import Optional
 
 # ---------------------- creacion de la vista de contrasenias  ----------------------------------------------------
 # obtener el encabezado filtrado
-def obtener_encabezados_filtrados(cod_contrasenia: Optional[int] = None, cod_empresa: Optional[int] = None):
+def obtener_encabezados_filtrados(cod_contrasenia: Optional[int] = None, cod_empresa: Optional[int] = None,     fecha_inicio: Optional[str] = None, fecha_fin: Optional[str] = None ):
     conn = None
     cursor = None
     try:
@@ -30,6 +30,14 @@ def obtener_encabezados_filtrados(cod_contrasenia: Optional[int] = None, cod_emp
 
         filtros = []
         params = []
+
+        if fecha_inicio and fecha_fin:
+            filtros.append("DATE(e.fecha_contrasenia) BETWEEN %s AND %s")
+            params.extend([fecha_inicio, fecha_fin])
+
+        elif fecha_inicio:  # Solo fecha inicio (busca solo ese día)
+            filtros.append("DATE(e.fecha_contrasenia) = %s")
+            params.append(fecha_inicio)
 
         if cod_contrasenia is not None:
             filtros.append("e.cod_contrasenia = %s")
