@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from typing import List, Optional
 from ..services.contrasenia_service import crear_contrasenias, obtener_empresas, obtener_monedas, crear_detalle_contrasenia
 from ..services.contrasenia_service import obtener_siguiente_linea, obtener_encabezados_filtrados, obtener_contrasenia_completa_filtrada
-from ..models.contrasenia_model import DetalleContrasenia, EntradaContrasenia
+from ..models.contrasenia_model import DetalleContrasenia, EntradaContrasenia, AnularRequest
 from ..db.connection import get_connection
 from ..utils.dependencies import obtener_usuario_desde_token
 
@@ -20,7 +20,7 @@ def listar_encabezados(
     cod_contrasenia: Optional[str] = Query(None),
     cod_empresa: Optional[str] = Query(None),
     fecha_inicio: Optional[str] = Query(None),  # Nueva: fecha inicial
-    fecha_fin: Optional[str] = Query(None)     # Nueva: fecha final
+    fecha_fin: Optional[str] = Query(None)     # Nueva: fecha finalhit s
 ):
     try:
         cod_contrasenia_int = int(cod_contrasenia) if cod_contrasenia and cod_contrasenia.isdigit() else None
@@ -47,6 +47,9 @@ def ver_contrasenia_completa_filtrada(
     cod_empresa: int = Query(..., description="Código de la empresa")
 ):
     return obtener_contrasenia_completa_filtrada(cod_contrasenia, cod_empresa)
+
+
+# ---------------- Anulacion de encabezados para la contrasela ------------------------------------------------------------
 
 
 # ---------------- creacion de encabezados para la contrasela ------------------------------------------------------------

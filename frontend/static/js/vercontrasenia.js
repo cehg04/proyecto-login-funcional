@@ -10,7 +10,6 @@ $(document).ready(function () {
         $("#btnCrearContrasenia").hide();
     }
 
-
     $('#filtrosContainer').append(`
         <div class="row mb-3">
             <div class="row mb-3">
@@ -96,6 +95,9 @@ $(document).ready(function () {
         const codEmpresa = $(this).data('empresa');
         window.location.href = `/contrasenia_completa.html?cod_contrasenia=${codContrasenia}&cod_empresa=${codEmpresa}`;
     });
+
+    
+
 
 });
 

@@ -22,7 +22,11 @@ def obtener_encabezados_filtrados(cod_contrasenia: Optional[int] = None, cod_emp
                 DATE_FORMAT(e.fecha_contrasenia, '%Y-%m-%d') AS fecha_contrasenia,
                 emp.nombre AS empresa_nombre,
                 prov.nombre AS proveedor_nombre,
-                e.estado
+                CASE
+                    WHEN e.estado = 'R' THEN 'Realizado'
+                    WHEN e.estado = 'X' THEN 'Anulado'
+                    ELSE e.estado
+                END AS estado
             FROM enca_contrasenias e
             JOIN empresas emp ON e.cod_empresa = emp.cod_empresa
             JOIN proveedores prov ON e.cod_proveedor = prov.cod_proveedor AND e.cod_empresa_proveedor = prov.cod_empresa
@@ -73,13 +77,17 @@ def obtener_contrasenia_completa_filtrada(cod_contrasenia: int, cod_empresa: int
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
 
-        # === Encabezado filtrado ===
+        # Encabezado filtrado 
         query_encabezado = """
             SELECT 
                 e.cod_empresa,
                 e.cod_proveedor,
                 e.num_contrasenia,
-                e.estado,
+                CASE
+                    WHEN e.estado = 'R' THEN 'Realizado'
+                    WHEN e.estado = 'X' THEN 'Anulado'
+                    ELSE e.estado
+                END AS estado,
                 emp.nombre AS empresa_nombre,
                 prov.nombre AS proveedor_nombre
             FROM enca_contrasenias e
@@ -95,12 +103,23 @@ def obtener_contrasenia_completa_filtrada(cod_contrasenia: int, cod_empresa: int
         if not encabezado:
             raise HTTPException(status_code=404, detail="Encabezado no encontrado")
 
-        # === Detalle filtrado ===
+        # Detalle filtrado 
         query_detalle = """
             SELECT num_factura, cod_moneda, monto,
                    retension_iva, retension_isr,
-                   numero_retension_iva, numero_retension_isr,
-                   estado
+                CASE
+                    WHEN retension_iva = 'S' THEN 'Si Tiene'
+                    WHEN retension_iva = 'N' THEN 'No Tiene'
+                END AS retension_iva, 
+                CASE
+                    WHEN retension_isr = 'S' THEN 'Si Tiene'
+                    WHEN retension_isr = 'N' THEN 'No Tiene'
+                END AS retension_isr, 
+                CASE
+                    WHEN estado = 'R' THEN 'Recibido'
+                    WHEN estado = 'P' THEN 'Pendiente'
+                    WHEN estado = 'E' THEN 'Entregado'
+                END AS estado
             FROM detalle_contrasenias
             WHERE cod_contrasenia = %s AND cod_empresa = %s
         """
