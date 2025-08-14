@@ -1,5 +1,4 @@
 $(document).ready(function () {
-
     // Validar permisos 
     if (validar_permisos(4) !== 'S') {
         alert("No tienes permiso para ver Contrasenias.");
@@ -15,15 +14,17 @@ $(document).ready(function () {
         ajax: {
             url: '/contrasenias/ver-encabezados',
             data: function(d) {
-                // Agregar filtros como parámetros
-                d.cod_contrasenia = $('#filtroCodContrasenia').val();
-                d.cod_empresa = $('#filtroCodEmpresa').val();
+            let cod_contrasenia = $('#filtroCodContrasenia').val();
+            let cod_empresa = $('#empresaSelect').val();
+
+            d.cod_contrasenia = cod_contrasenia ? cod_contrasenia : null;
+            d.cod_empresa = cod_empresa ? cod_empresa : null;
             },
             dataSrc: ''
         },
         columns: [
             { data: 'num_contrasenia', title: 'N° Contraseña' },
-            { data: 'fecha_creacion', title: 'Fecha Creación' },
+            { data: 'fecha_contrasenia', title: 'Fecha Contraseña' },
             { data: 'empresa_nombre', title: 'Empresa' },
             { data: 'proveedor_nombre', title: 'Proveedor' },
             { data: 'estado', title: 'Estado' },
@@ -40,12 +41,14 @@ $(document).ready(function () {
             }
         ],
     });
-      $('#tablaContrasenias').on('click', '.btn-completa', function() {
+
+    // Botón Mostrar 
+    $('#tablaContrasenias').on('click', '.btn-completa', function() {
         const codContrasenia = $(this).data('cod');
         const codEmpresa = $(this).data('empresa');
-
         window.location.href = `/contrasenia_completa.html?cod_contrasenia=${codContrasenia}&cod_empresa=${codEmpresa}`;
     });
+
 });
 
 

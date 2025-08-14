@@ -19,7 +19,7 @@ def obtener_encabezados_filtrados(cod_contrasenia: Optional[int] = None, cod_emp
                 e.cod_contrasenia,
                 e.num_contrasenia,
                 e.cod_empresa,
-                DATE_FORMAT(e.fecha_creacion, '%Y-%m-%d %H:%i:%s') AS fecha_creacion,
+                DATE_FORMAT(e.fecha_contrasenia, '%Y-%m-%d') AS fecha_contrasenia,
                 emp.nombre AS empresa_nombre,
                 prov.nombre AS proveedor_nombre,
                 e.estado
