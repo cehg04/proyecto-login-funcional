@@ -2,9 +2,9 @@ from fastapi import APIRouter, Query, HTTPException,Depends
 from datetime import datetime
 from fastapi.responses import JSONResponse
 from typing import List, Optional
-from ..services.contrasenia_service import crear_contrasenias, obtener_empresas, obtener_monedas, crear_detalle_contrasenia
+from ..services.contrasenia_service import crear_contrasenias, obtener_empresas, obtener_monedas, crear_detalle_contrasenia, anular_contrasenia
 from ..services.contrasenia_service import obtener_siguiente_linea, obtener_encabezados_filtrados, obtener_contrasenia_completa_filtrada
-from ..models.contrasenia_model import DetalleContrasenia, EntradaContrasenia, AnularRequest
+from ..models.contrasenia_model import DetalleContrasenia, EntradaContrasenia, AnulacionContrasenia
 from ..db.connection import get_connection
 from ..utils.dependencies import obtener_usuario_desde_token
 
@@ -50,7 +50,19 @@ def ver_contrasenia_completa_filtrada(
 
 
 # ---------------- Anulacion de encabezados para la contrasela ------------------------------------------------------------
-
+# end-point para anular contraseñas
+@router.post("/anular")
+def anular_contrasenia_endpoint(request: AnulacionContrasenia):
+    try:
+        resultado = anular_contrasenia(
+            cod_contrasenia=request.cod_contrasenia,
+            cod_empresa=request.cod_empresa,
+            usuario_x=request.usuario_x,
+            comentario=request.comentario
+        )
+        return {"message": "Contraseña anulada exitosamente", "data": resultado}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al anular contraseña: {str(e)}")
 
 # ---------------- creacion de encabezados para la contrasela ------------------------------------------------------------
 

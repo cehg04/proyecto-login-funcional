@@ -1,7 +1,13 @@
 $(function () {
     if (validar_permisos(1) !== 'S') {
-        alert("No tienes permiso para ver usuarios.");
-        window.location.href = "inicio.html"; // Redirigir al menú principal
+        Swal.fire({
+            title: "Acceso denegado",
+            text: "No tines permiso para ver Usuarios",
+            icon: "warning",
+            confirmButtonText: "OK"
+        }).then(() => {
+            window.location.href = "inicio.html";
+        });
         return;
     }
 

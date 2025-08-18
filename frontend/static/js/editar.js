@@ -1,4 +1,5 @@
 $(document).ready(function () {
+    // Validar permisos
     if (validar_permisos(3) !== 'S') {
         $("#contenido-dinamico").html('<div class="alert alert-danger">No tienes permiso para editar usuarios.</div>');
         return;
@@ -8,24 +9,29 @@ $(document).ready(function () {
     const cod_usuario = params.get("cod_usuario");
 
     if (!cod_usuario) {
-        alert("Código de usuario no proporcionado.");
-        window.location.href = "crudusuarios.html";
+        Swal.fire({
+            title: "Atención",
+            text: "Código de usuario no proporcionado.",
+            icon: "warning",
+            confirmButtonText: "OK"
+        }).then(() => {
+            window.location.href = "crudusuarios.html";
+        });
         return;
     }
 
     // Cargar datos del usuario
     $.get(`/api/usuarios/${cod_usuario}`, function (usuario) {  
         $("#edit_cod_usuario").val(cod_usuario);
-        $("#edit_usuario").val(usuario.usuario);
-        $("#edit_usuario").prop("readonly", true);
+        $("#edit_usuario").val(usuario.usuario).prop("readonly", true);
         $("#edit_nombre").val(usuario.nombre);
         $("#edit_correo").val(usuario.correo);
-        if (usuario.estado === "A" || usuario.estado === "I") {
-         $("#edit_estado").val(usuario.estado);
-        }  else {
-        console.warn("Estado inesperado:", usuario.estado);
-        }
 
+        if (usuario.estado === "A" || usuario.estado === "I") {
+            $("#edit_estado").val(usuario.estado);
+        } else {
+            console.warn("Estado inesperado:", usuario.estado);
+        }
 
         // Cargar permisos
         const contenedor = $("#edit_permisos").empty();
@@ -61,7 +67,12 @@ $(document).ready(function () {
         };
 
         if (!datosUsuario.nombre || !datosUsuario.usuario) {
-            alert("Nombre y Usuario son obligatorios.");
+            Swal.fire({
+                title: "Atención",
+                text: "Nombre y Usuario son obligatorios.",
+                icon: "warning",
+                confirmButtonText: "OK"
+            });
             return;
         }
 
@@ -82,13 +93,35 @@ $(document).ready(function () {
                     contentType: 'application/json',
                     data: JSON.stringify({ permisos }),
                     success: function () {
-                        alert("Usuario actualizado correctamente.");
-                        window.location.href = "crudusuarios.html";
+                        Swal.fire({
+                            title: "¡Éxito!",
+                            text: "Usuario actualizado correctamente.",
+                            icon: "success",
+                            confirmButtonText: "OK"
+                        }).then(() => {
+                            window.location.href = "crudusuarios.html";
+                        });
                     },
-                    error: () => alert('Error al actualizar permisos')
+                    error: function () {
+                        Swal.fire({
+                            title: "Error",
+                            text: "Error al actualizar permisos",
+                            icon: "error",
+                            confirmButtonText: "OK"
+                        });
+                    }
                 });
             },
-            error: () => alert('Error al actualizar usuario')
+            error: function () {
+                Swal.fire({
+                    title: "Error",
+                    text: "Error al actualizar un usuario",
+                    icon: "error",
+                    confirmButtonText: "OK"
+                });
+            }
         });
     });
+
 });
+

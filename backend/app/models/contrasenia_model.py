@@ -28,5 +28,10 @@ class DetalleContrasenia(BaseModel):
     retension_isr: Optional[str] = 'N'
     numero_retension_iva: Optional[int] = None
     numero_retension_isr: Optional[int] = None
-# ------------ modelo de la anulacion de contraseña --------------------------------
 
+# ------------ modelo de la anulacion de contraseña --------------------------------
+class AnulacionContrasenia(BaseModel):
+    cod_contrasenia: int
+    cod_empresa: int
+    usuario_x: int
+    comentario: str = None

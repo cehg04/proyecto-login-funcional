@@ -3,7 +3,7 @@
 {% block content %}
 <div class="container mt-4">
   <h1>Contraseñas Creadas</h1>
-  
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
   <a href="/crearcontrasenia.html" id="btnCrearContrasenia" class="btn btn-primary mb-3">Crear Contraseñas</a>
   <div class="table-responsive">
     <div class="container mt-4">
@@ -25,11 +25,36 @@
     </table>
   </div>
 </div>
+<!-- Modal para anular contraseña -->
+<div class="modal fade" id="modalAnularContrasenia" tabindex="-1" aria-labelledby="modalAnularLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="modalAnularLabel">Anular Contraseña</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formAnularContrasenia">
+          <input type="hidden" id="modalCodContrasenia">
+          <input type="hidden" id="modalCodEmpresa">
+          <div class="mb-3">
+            <label for="modalComentario" class="form-label">Comentario (Obligatorio):</label>
+            <textarea class="form-control" id="modalComentario" rows="3" placeholder="Ingresa un comentario..."></textarea>
+          </div>
+          <div class="text-center">
+            <button type="button" id="btnConfirmarAnular" class="btn btn-danger">Anular Contraseña</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 
 
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="/static/js/validar_permisos.js"></script>
 <script src="/static/js/vercontrasenia.js"></script>
 {% endblock %}

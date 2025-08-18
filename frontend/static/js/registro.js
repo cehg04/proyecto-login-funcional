@@ -30,13 +30,26 @@ $(document).ready(function () {
             contentType: "application/json",
             data: JSON.stringify(datos),
             success: function (res) {
-                $("#msg").html(`<div class="alert alert-success">${res.mensaje || 'Usuario registrado exitosamente.'}</div>`);
-                limpiaformulario();
+                Swal.fire({
+                    title: "¡Éxito!",
+                    text: res.mensaje || "Usuario registrado exitosamente.",
+                    icon: "success",
+                    confirmButtonText: "OK"
+                }).then(() => {
+                    // Limpiar formulario después de cerrar la alerta
+                    limpiaformulario();
+                });
             },
             error: function (xhr) {
-                $("#msg").html(`<div class="alert alert-danger">Error del servidor: ${xhr.responseText}</div>`);
+                Swal.fire({
+                    title: "Error",
+                    text: xhr.responseJSON?.mensaje || "Error del servidor: " + xhr.responseText,
+                    icon: "error",
+                    confirmButtonText: "OK"
+                });
             }
         });
+
     });
 });
 

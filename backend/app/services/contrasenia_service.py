@@ -114,7 +114,8 @@ def obtener_contrasenia_completa_filtrada(cod_contrasenia: int, cod_empresa: int
                 CASE
                     WHEN retension_isr = 'S' THEN 'Si Tiene'
                     WHEN retension_isr = 'N' THEN 'No Tiene'
-                END AS retension_isr, 
+                END AS retension_isr,
+                numero_retension_iva, numero_retension_isr,
                 CASE
                     WHEN estado = 'R' THEN 'Recibido'
                     WHEN estado = 'P' THEN 'Pendiente'
@@ -140,6 +141,56 @@ def obtener_contrasenia_completa_filtrada(cod_contrasenia: int, cod_empresa: int
             cursor.close()
         if conn:
             conn.close()
+
+# anular y actualizar el estado de la contraseña
+def anular_contrasenia(cod_contrasenia: int, cod_empresa: int, usuario_x: int, comentario: str = None):
+    conn = None
+    cursor = None
+    try: 
+        conn = get_connection()
+        cursor = conn.cursor()
+        
+        # Verificar existencia
+        check_query = """
+            SELECT estado FROM enca_contrasenias
+            WHERE cod_contrasenia = %s AND cod_empresa = %s
+        """
+        cursor.execute(check_query, (cod_contrasenia, cod_empresa))
+        result = cursor.fetchone()
+
+        if not result:
+            raise HTTPException(status_code=404, detail="La contraseña no existe")
+        
+        if result[0] == 'X':
+            raise HTTPException(status_code=400, detail="La contraseña ya está anulada")
+
+        # Actualizar estado
+        query = """
+            UPDATE enca_contrasenias
+            SET estado = 'X', usuario_x = %s, fecha_x = %s, comentario = %s
+            WHERE cod_contrasenia = %s AND cod_empresa = %s
+        """
+        fecha_actual = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        comentario = comentario if comentario else None
+        cursor.execute(query, (usuario_x, fecha_actual, comentario, cod_contrasenia, cod_empresa))
+        
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=500, detail="No se pudo anular la contraseña")
+
+        conn.commit()
+        return {"status": "ok", "mensaje": "Contraseña anulada correctamente"}
+
+    except Error as e:
+        print("Error al anular contraseña:", e)
+        raise HTTPException(status_code=500, detail=f"Error al anular contraseña: {str(e)}")
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn and conn.is_connected():
+            conn.close()
+
+
 
 # ---------------------- creacion del servicio de encabezado de la contrasenia ------------------------------------
 # creacion de contraseñas

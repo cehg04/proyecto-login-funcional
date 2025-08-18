@@ -1,11 +1,17 @@
 $(document).ready(function () {
 
   if (validar_permisos(5) !== 'S') {
-    alert("No tienes permiso para Crear Contraseñas");
-    window.location.href = "inicio.html";
+    Swal.fire({
+      title: "Acceso denegado",
+      text: "No tienes permiso para Crear Contraseñas",
+      icon: "warning",
+      confirmButtonText: "OK"
+    }).then(() => {
+      window.location.href = "inicio.html";
+    });
     return;
   }
-   
+
   let codContrasenia = null;
   let detalles = [];
 
@@ -25,8 +31,7 @@ $(document).ready(function () {
   function cargarMonedas() {
     $.get("/contrasenias/monedas", function (data) {
       const select = $("#cod_moneda");
-      select.empty();
-      select.append('<option value="">Selecciona moneda</option>');
+      select.empty().append('<option value="">Selecciona moneda</option>');
       data.forEach(m => {
         select.append(`<option value="${m.cod_moneda}">${m.abreviatura}</option>`);
       });
@@ -74,7 +79,6 @@ $(document).ready(function () {
 
   // Agregar detalle a lista y tabla
   $("#btnGuardarDetalle").click(function () {
-    
     const detalle = {
       cod_contrasenia: codContrasenia,
       num_factura: $("#num_factura").val(),
@@ -87,14 +91,13 @@ $(document).ready(function () {
     };
 
     if (!detalle.num_factura || !detalle.cod_moneda || isNaN(detalle.monto)) {
-      alert('Completa todos los campos obligatorios en detalle.');
+      Swal.fire("Campos incompletos", "Completa todos los campos obligatorios en detalle.", "warning");
       return;
     }
 
-    // Valida si existe el num_factura
     const facturaExiste = detalles.some(d => d.num_factura === detalle.num_factura);
     if (facturaExiste) {
-      alert("Ya existe una factura con ese número en la lista.");
+      Swal.fire("Duplicado", "Ya existe una factura con ese número en la lista.", "error");
       return;
     }
 
@@ -119,7 +122,6 @@ $(document).ready(function () {
 
     $("#tabla-detalles tbody").append(fila);
 
-    // Eliminar fila y del array
     $("#tabla-detalles tbody tr:last .btn-eliminar").click(function () {
       const index = $(this).closest("tr").index();
       detalles.splice(index, 1);
@@ -127,16 +129,15 @@ $(document).ready(function () {
     });
   }
 
-  // Enviar todo: primero encabezado, luego detalles
+  // Enviar encabezado + detalles
   $("#btnEnviarTodo").click(function () {
     const $btn = $(this);
 
     if (detalles.length === 0) {
-      alert('No hay detalles para enviar.');
+      Swal.fire("Sin detalles", "No hay detalles para enviar.", "warning");
       return;
     }
 
-    // Validar campos encabezado
     const dataEncabezado = {
       fecha_contrasenia: $("#fecha_contrasenia").val(),
       cod_empresa: $("#cod_empresa").val(),
@@ -144,13 +145,12 @@ $(document).ready(function () {
     };
 
     if (!dataEncabezado.cod_empresa || !dataEncabezado.cod_proveedor || !dataEncabezado.fecha_contrasenia) {
-      alert("Completa todos los campos del encabezado.");
+      Swal.fire("Campos incompletos", "Completa todos los campos del encabezado.", "warning");
       return;
     }
 
     $btn.prop('disabled', true).text('Enviando...');
 
-    //Crear encabezado
     $.ajax({
       url: "/contrasenias/crear-contrasenia",
       type: "POST",
@@ -160,29 +160,27 @@ $(document).ready(function () {
       success: function (response) {
         codContrasenia = response.cod_contrasenia;
         if (!codContrasenia) {
-          alert('No se recibió código de contraseña del servidor.');
+          Swal.fire("Error", "No se recibió código de contraseña del servidor.", "error");
           $btn.prop('disabled', false).text('Enviar Todo');
           return;
         }
-        // Habilitar formulario detalle para agregar si es que quieres seguir usando el mismo flujo
+
         $('#cod_contrasenia').val(codContrasenia);
 
-        //Enviar detalles uno a uno
         let errores = 0;
-        let procesados = 0;
 
         function enviarDetalleIndice(i) {
           if (i >= detalles.length) {
             $btn.prop('disabled', false).text('Enviar Todo');
             if (errores === 0) {
-              alert('Encabezado y detalles guardados exitosamente.');
+              Swal.fire("¡Éxito!", "Encabezado y detalles guardados exitosamente.", "success");
               detalles = [];
               $("#tabla-detalles tbody").empty();
               $("#formulario-contrasenia")[0].reset();
               $("#formulario-detalle")[0].reset();
               codContrasenia = null;
             } else {
-              alert(`Proceso completado con ${errores} error(es). Revisa la consola para más detalles.`);
+              Swal.fire("Atención", `Proceso completado con ${errores} error(es).`, "warning");
             }
             return;
           }
@@ -203,7 +201,6 @@ $(document).ready(function () {
           if (!payload.num_factura || !payload.cod_moneda || isNaN(payload.monto) || !payload.cod_empresa) {
             console.error('Detalle inválido, se omite:', payload);
             errores++;
-            procesados++;
             enviarDetalleIndice(i + 1);
             return;
           }
@@ -215,17 +212,18 @@ $(document).ready(function () {
             data: JSON.stringify(payload),
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
             success: function () {
-              procesados++;
               enviarDetalleIndice(i + 1);
             },
             error: function (xhr) {
               let mensaje = "Error desconocido";
-              if (xhr.responseJSON && xhr.responseJSON.detail) {
+              if (xhr.responseJSON?.detail) {
                 mensaje = xhr.responseJSON.detail;
               } else if (xhr.responseText) {
                 mensaje = xhr.responseText;
               }
-              alert(mensaje);
+              Swal.fire("Error en detalle", mensaje, "error");
+              errores++;
+              enviarDetalleIndice(i + 1);
             }
           });
         }
@@ -233,7 +231,7 @@ $(document).ready(function () {
         enviarDetalleIndice(0);
       },
       error: function (xhr) {
-        alert("Error al guardar el encabezado: " + xhr.responseText);
+        Swal.fire("Error", "Error al guardar el encabezado: " + xhr.responseText, "error");
         $btn.prop('disabled', false).text('Enviar Todo');
       }
     });
@@ -241,6 +239,7 @@ $(document).ready(function () {
   });
 
 });
+
 
 
 
