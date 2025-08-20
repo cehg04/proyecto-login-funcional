@@ -78,10 +78,11 @@ $(document).ready(function () {
   });
 
   // Agregar detalle a lista y tabla
-  $("#btnGuardarDetalle").click(function () {
+$("#btnGuardarDetalle").click(function () {
     const detalle = {
       cod_contrasenia: codContrasenia,
       num_factura: $("#num_factura").val(),
+      fecha_factura: $("#fecha_factura").val(), 
       cod_moneda: $("#cod_moneda").val(),
       monto: parseFloat($("#monto").val()),
       retension_iva: $("#retension_iva").is(":checked"),
@@ -90,7 +91,7 @@ $(document).ready(function () {
       numero_retension_isr: $("#numero_retension_isr").val()
     };
 
-    if (!detalle.num_factura || !detalle.cod_moneda || isNaN(detalle.monto)) {
+    if (!detalle.num_factura || !detalle.cod_moneda || !detalle.fecha_factura || isNaN(detalle.monto)) {
       Swal.fire("Campos incompletos", "Completa todos los campos obligatorios en detalle.", "warning");
       return;
     }
@@ -104,12 +105,12 @@ $(document).ready(function () {
     detalles.push(detalle);
     agregarDetalleATabla(detalle);
     $('#formulario-detalle')[0].reset();
-  });
-
-  function agregarDetalleATabla(detalle) {
+});
+function agregarDetalleATabla(detalle) {
     const fila = `
       <tr>
         <td>${detalle.num_factura}</td>
+        <td>${detalle.fecha_factura}</td> 
         <td>${detalle.cod_moneda}</td>
         <td>${detalle.monto.toFixed(2)}</td>
         <td>${detalle.retension_iva ? 'Sí' : 'No'}</td>
@@ -127,7 +128,7 @@ $(document).ready(function () {
       detalles.splice(index, 1);
       $(this).closest("tr").remove();
     });
-  }
+}
 
   // Enviar encabezado + detalles
   $("#btnEnviarTodo").click(function () {
@@ -187,15 +188,16 @@ $(document).ready(function () {
 
           const det = detalles[i];
           const payload = {
-            cod_contrasenia: codContrasenia,
-            cod_empresa: parseInt(dataEncabezado.cod_empresa),
-            num_factura: parseInt(det.num_factura),
-            cod_moneda: det.cod_moneda,
-            monto: parseFloat(det.monto),
-            retension_iva: det.retension_iva ? 'S' : 'N',
-            retension_isr: det.retension_isr ? 'S' : 'N',
-            numero_retension_iva: det.numero_retension_iva ? parseInt(det.numero_retension_iva) : null,
-            numero_retension_isr: det.numero_retension_isr ? parseInt(det.numero_retension_isr) : null
+              cod_contrasenia: codContrasenia,
+              cod_empresa: parseInt(dataEncabezado.cod_empresa),
+              num_factura: parseInt(det.num_factura),
+              fecha_factura: det.fecha_factura,
+              cod_moneda: det.cod_moneda,
+              monto: parseFloat(det.monto),
+              retension_iva: det.retension_iva ? 'S' : 'N',
+              retension_isr: det.retension_isr ? 'S' : 'N',
+              numero_retension_iva: det.numero_retension_iva ? parseInt(det.numero_retension_iva) : null,
+              numero_retension_isr: det.numero_retension_isr ? parseInt(det.numero_retension_isr) : null
           };
 
           if (!payload.num_factura || !payload.cod_moneda || isNaN(payload.monto) || !payload.cod_empresa) {

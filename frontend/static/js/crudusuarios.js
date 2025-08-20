@@ -25,7 +25,7 @@ $(function () {
                 usuarios.forEach(u => {
                     const estadoTexto = u.estado === "A" ? "Activo" : "Inactivo";
                     const btnEditar = validar_permisos(3) === 'S'
-                        ? `<a href="editar.html?cod_usuario=${u.cod_usuario}" class="btn btn-warning btn-sm">Editar</a>`
+                        ? `<a href="editar.html?cod_usuario=${u.cod_usuario}" class="btn btn-primary btn-sm">Editar</a>`
                         : "";
 
                     tbody.append(`

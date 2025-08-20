@@ -102,8 +102,9 @@ $(document).ready(function () {
                 orderable: false,
                 render: function(data, type, row) {
                     return `
-                        <button class="btn btn-success btn-completa" data-cod="${row.cod_contrasenia}" data-empresa="${row.cod_empresa}">Mostrar</button>
+                        <button class="btn btn-primary btn-completa" data-cod="${row.cod_contrasenia}" data-empresa="${row.cod_empresa}">Mostrar</button>
                         <button class="btn btn-danger btn-anular" data-cod="${row.cod_contrasenia}" data-empresa="${row.cod_empresa}">Anular</button>
+                        <button class="btn btn-warning btn-imprimir" data-cod="${row.cod_contrasenia}" data-empresa="${row.cod_empresa}">Imprimir</button>
                     `;
                 }
             }
@@ -191,6 +192,13 @@ $(document).ready(function () {
         const modal = bootstrap.Modal.getInstance(modalEl);
         modal.hide();
     });
+
+    // Boton Imprimir contraseña
+$('#tablaContrasenias').on('click', '.btn-imprimir', function() {
+    let cod = $(this).data('cod');
+    let empresa = $(this).data('empresa');
+    window.open(`/contrasenias/imprimir-encabezado/${cod}/${empresa}`, '_blank');
+});
 
 });
 

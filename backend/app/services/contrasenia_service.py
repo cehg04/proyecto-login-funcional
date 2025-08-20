@@ -344,20 +344,21 @@ def crear_detalle_contrasenia(detalle: DetalleContrasenia):
         cursor.execute("""
             INSERT INTO detalle_contrasenias (
                 cod_contrasenia, cod_empresa, linea,
-                num_factura, cod_moneda, monto,
+                num_factura, fecha_factura, cod_moneda, monto,
                 retension_iva, retension_isr,
                 numero_retension_iva, numero_retension_isr
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             detalle.cod_contrasenia,
             detalle.cod_empresa,
             nueva_linea,
             detalle.num_factura,
+            detalle.fecha_factura,
             detalle.cod_moneda,
             detalle.monto,
             detalle.retension_iva,
             detalle.retension_isr,
-            detalle.numero_retension_iva,
+            detalle.numero_retension_iva,   
             detalle.numero_retension_isr
         ))
 

@@ -1,6 +1,6 @@
 from pydantic import BaseModel
-from datetime import date, datetime
-from typing import List, Optional
+from datetime import date
+from typing import Optional
 
 # ------------ Obtener el encabezado ---------------------------------------------
 class EncabezadoContrasenia(BaseModel):
@@ -28,6 +28,7 @@ class DetalleContrasenia(BaseModel):
     retension_isr: Optional[str] = 'N'
     numero_retension_iva: Optional[int] = None
     numero_retension_isr: Optional[int] = None
+    fecha_factura: date
 
 # ------------ modelo de la anulacion de contraseña --------------------------------
 class AnulacionContrasenia(BaseModel):
