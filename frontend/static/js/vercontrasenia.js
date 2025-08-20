@@ -30,10 +30,6 @@ $(document).ready(function () {
     if (validar_permisos(5) !== 'S') {
         $("#btnCrearContrasenia").hide();
     }
-    
-    if (validar_permisos(6) !== 'S') {
-        $(".btn-anular").remove();
-    }
 
     // Filtros
     $('#filtrosContainer').append(`
@@ -92,7 +88,21 @@ $(document).ready(function () {
         },
         columns: [
             { data: 'num_contrasenia', title: 'N° Contraseña' },
-            { data: 'fecha_contrasenia', title: 'Fecha Contraseña', render: d => d.split(' ')[0] },
+            {
+            data: 'fecha_contrasenia',
+            title: 'Fecha Contraseña',
+            render: function(d) {
+                if (!d) return '';
+                // Si viene con hora, solo toma la fecha
+                let fecha = d.split(' ')[0];
+                // Convierte yyyy-mm-dd a dd/mm/yyyy
+                const partes = fecha.split('-');
+                if (partes.length === 3) {
+                    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+                }
+                return fecha;
+            }
+        },  
             { data: 'empresa_nombre', title: 'Empresa' },
             { data: 'proveedor_nombre', title: 'Proveedor' },
             { data: 'estado', title: 'Estado' },
@@ -102,13 +112,22 @@ $(document).ready(function () {
                 orderable: false,
                 render: function(data, type, row) {
                     return `
-                        <button class="btn btn-primary btn-completa" data-cod="${row.cod_contrasenia}" data-empresa="${row.cod_empresa}">Mostrar</button>
-                        <button class="btn btn-danger btn-anular" data-cod="${row.cod_contrasenia}" data-empresa="${row.cod_empresa}">Anular</button>
-                        <button class="btn btn-warning btn-imprimir" data-cod="${row.cod_contrasenia}" data-empresa="${row.cod_empresa}">Imprimir</button>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-primary btn-completa" data-cod="${row.cod_contrasenia}" data-empresa="${row.cod_empresa}">Mostrar</button>
+                            <button class="btn btn-danger btn-anular" data-cod="${row.cod_contrasenia}" data-empresa="${row.cod_empresa}">Anular</button>
+                            <button class="btn btn-warning btn-imprimir" data-cod="${row.cod_contrasenia}" data-empresa="${row.cod_empresa}">Imprimir</button>
+                        </div>
                     `;
+                    
                 }
             }
         ]
+    });
+
+    table.on('draw', function () {
+        if (validar_permisos(6) !== 'S') {
+            $(".btn-anular").remove();
+        }
     });
 
     // Función para anular contraseña usando cod_usuario del JWT
