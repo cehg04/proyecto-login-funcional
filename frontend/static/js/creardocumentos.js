@@ -1,5 +1,17 @@
 $(document).ready(function () {
 
+    if (validar_permisos(14) !== 'S') {
+    Swal.fire({
+      title: "Acceso denegado",
+      text: "No tienes permiso para Crear Contraseñas",
+      icon: "warning",
+      confirmButtonText: "OK"
+    }).then(() => {
+      window.location.href = "inicio.html";
+    });
+    return;
+  }
+
     // === Cargar combos al iniciar ===
     cargarEmpresas();
     cargarTipos();

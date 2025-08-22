@@ -24,17 +24,19 @@ $(function () {
 
                 usuarios.forEach(u => {
                     const estadoTexto = u.estado === "A" ? "Activo" : "Inactivo";
+                    const estadoBadgeClass = u.estado === "A" 
+                    ? "bg-success text-white"   // verde
+                    : "bg-danger text-white";   // rojo
                     const btnEditar = validar_permisos(3) === 'S'
                         ? `<a href="editar.html?cod_usuario=${u.cod_usuario}" class="btn btn-primary btn-sm">Editar</a>`
                         : "";
-
                     tbody.append(`
                         <tr data-id="${u.cod_usuario}">
                             <td>${u.cod_usuario}</td>
                             <td>${u.nombre}</td>
                             <td>${u.usuario}</td>
                             <td>${u.correo ?? ""}</td>
-                            <td>${estadoTexto}</td>
+                            <td><span class="badge ${estadoBadgeClass}">${estadoTexto}</span></td>
                             <td>${btnEditar}</td>
                         </tr>
                     `);

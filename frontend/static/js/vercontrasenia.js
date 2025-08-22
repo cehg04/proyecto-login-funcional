@@ -104,7 +104,18 @@ $(document).ready(function () {
         },  
             { data: 'empresa_nombre', title: 'Empresa' },
             { data: 'proveedor_nombre', title: 'Proveedor' },
-            { data: 'estado', title: 'Estado' },
+            { 
+                data: 'estado', 
+                title: 'Estado',
+                render: function(data, type, row) {
+                    let badgeClass = '';
+                    if (data === 'Realizado') badgeClass = 'bg-success text-white'; // verde
+                    else if (data === 'Anulado') badgeClass = 'bg-danger text-white'; // rojo
+                    else badgeClass = 'bg-secondary text-white'; // gris por defecto
+
+                    return `<span class="badge ${badgeClass}">${data}</span>`;
+                }                
+            },
             {
                 data: null,
                 title: 'Acciones',

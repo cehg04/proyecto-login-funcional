@@ -26,6 +26,13 @@ $(document).ready(function () {
                 const tbody = $("#tablaDocumentos tbody");
                 tbody.empty();
                 data.forEach(function (doc) {
+
+                 let badgeClass = '';
+                if (doc.estado === 'Pendiente') badgeClass = 'bg-primary text-white';
+                else if (doc.estado === 'Anulado') badgeClass = 'bg-danger text-white';
+                else if (doc.estado === 'Recibido') badgeClass = 'bg-success text-white';
+                else if (doc.estado === 'Entregado') badgeClass = 'bg-info text-white';
+                else badgeClass = 'bg-secondary text-white'; // gris por defecto
                     tbody.append(`
                         <tr>
                             <td>${doc.empresa_nombre}</td>
@@ -36,7 +43,7 @@ $(document).ready(function () {
                             <td>${doc.moneda}</td>
                             <td>${doc.monto.toLocaleString('es-GT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                             <td>${doc.observaciones || ''}</td>
-                            <td>${doc.estado}</td>
+                            <td><span class="badge ${badgeClass}">${doc.estado}</span></td>
                             <td>
                                 <button class="btn btn-danger btn-sm btn-anular" data-cod="${doc.cod_documento}">Anular</button>
                             </td>
