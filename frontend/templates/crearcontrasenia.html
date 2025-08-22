@@ -19,7 +19,7 @@
             </div>
             <div class="col-md-4">
                 <label>Empresa</label>
-                <select id="cod_empresa" class="form-control" required></select>
+                <select id="cod_empresa" class="form-select" required></select>
             </div>
             <div class="col-md-4">
                 <label>Proveedor</label>
@@ -40,25 +40,25 @@
             <label>Fecha Factura</label>
             <input type="date" id="fecha_factura" class="form-control" required>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-3">
             <label>Moneda</label>
-            <select id="cod_moneda" class="form-control" required></select>
+            <select id="cod_moneda" class="form-select" required></select>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-3">
             <label>Monto</label>
-            <input type="number" step="0.01" id="monto" class="form-control" required>
+            <input type="text"  id="monto" class="form-control ms-2" required>
         </div>
     </div>
     <div class="row mb-3">
         <div class="col-md-3 d-flex align-items-center">
-            <div class="form-check me-2">
+            <div class="form-check me-3">
                 <input class="form-check-input" type="checkbox" id="retension_iva">
                 <label class="form-check-label" for="retension_iva">Retención IVA</label>
             </div>
             <input type="text" id="numero_retension_iva" class="form-control ms-2" placeholder="No. Retención IVA">
         </div>
         <div class="col-md-3 d-flex align-items-center">
-            <div class="form-check me-2">
+            <div class="form-check me-3">
                 <input class="form-check-input" type="checkbox" id="retension_isr">
                 <label class="form-check-label" for="retension_isr">Retención ISR</label>
             </div>

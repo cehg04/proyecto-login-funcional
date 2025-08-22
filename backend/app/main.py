@@ -5,6 +5,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from .routes import contrasenia_routes
 from .routes import usuario_routes, auth_routes
+from .routes import documentos_routes
 from .utils.dependencies import verificar_sesion
 
 app = FastAPI()
@@ -13,6 +14,8 @@ app = FastAPI()
 app.include_router(usuario_routes.router)
 app.include_router(auth_routes.router)
 app.include_router(contrasenia_routes.router)
+app.include_router(documentos_routes.router)
+
 
 # CORS para permitir peticiones desde el frontend
 app.add_middleware(
@@ -80,9 +83,14 @@ def mostrar_gestionentrega(request: Request):
 def mostrar_recepcion_entrega(request: Request):
     return templates.TemplateResponse("recepcionentrega.html", {"request": request})
 
-@app.get("/documentosvarios.html", response_class=HTMLResponse)
+@app.get("/verdocumentos.html", response_class=HTMLResponse)
 def mostrar_documentos_varios(request: Request):
-    return templates.TemplateResponse("documentosvarios.html", {"request": request})
+    return templates.TemplateResponse("verdocumentos.html", {"request": request})
+
+
+@app.get("/creardocumentos.html", response_class=HTMLResponse)
+def mostrar_documentos_varios(request: Request):
+    return templates.TemplateResponse("creardocumentos.html", {"request": request})
 
 @app.get("/reportes.html", response_class=HTMLResponse)
 def mostrar_reportes(request: Request):

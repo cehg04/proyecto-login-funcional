@@ -1,5 +1,4 @@
 $(document).ready(function () {
-
     // Función para extraer cod_usuario del token JWT en localStorage
     function getUsuarioIdFromToken() {
         const token = localStorage.getItem('token');

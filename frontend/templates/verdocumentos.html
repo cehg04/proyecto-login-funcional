@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Visualizar Contraseñas{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h1>Documentos Varios</h1>
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+<div class="container mt-4">
+  <a href="/creardocumentos.html" id="btnCrearDocumento" class="btn btn-success mb-3">Crear Documento</a>
+  <div class="table-responsive">
+    <div class="container mt-4">    
+      <table id="tablaDocumentos" class="table table-bordered table-hover table-striped align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>Empresa</th>
+            <th>Tipo Documento</th>
+            <th>Proveedor</th>
+            <th>Nombre Solicitud</th>
+            <th>Número Documento</th>
+            <th>Moneda</th>
+            <th>Monto</th>
+            <th>Observaciones</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Aquí el JS inyectará las filas -->
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/static/js/validar_permisos.js"></script>
+<script src="/static/js/verdocumentos.js"></script>
+{% endblock %}
