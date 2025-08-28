@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Query, HTTPException, Depends
 from fastapi.responses import StreamingResponse
-from typing import List, Optional
+from typing import List, Optional,  Dict
 from datetime import datetime
-from ..services.contrasenia_service import crear_contrasenias, obtener_empresas, obtener_monedas, crear_detalle_contrasenia, anular_contrasenia
-from ..services.contrasenia_service import obtener_siguiente_linea, obtener_encabezados_filtrados, obtener_contrasenia_completa_filtrada
-from ..models.contrasenia_model import DetalleContrasenia, EntradaContrasenia, AnulacionContrasenia
+from ..services.contrasenia_service import crear_contrasenias, obtener_empresas, obtener_monedas, crear_detalle_contrasenia, anular_contrasenia, marcar_entregado
+from ..services.contrasenia_service import obtener_siguiente_linea, obtener_encabezados_filtrados, obtener_contrasenia_completa_filtrada, obtener_detalles_pendientes
+from ..models.contrasenia_model import DetalleContrasenia, EntradaContrasenia, AnulacionContrasenia, ListaCambiarEstado
 from ..db.connection import get_connection
 from ..utils.dependencies import obtener_usuario_desde_token
 from reportlab.lib.pagesizes import letter
@@ -324,3 +324,21 @@ def imprimir_encabezado(cod_contrasenia: int, cod_empresa: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# ---------------- funcion para obtener los detalles de las contraseñas ------------------------------------------------------------
+@router.get("/detalles-pendientes")
+def obtener_detalles_pendientes_api():
+    try:
+        detalles = obtener_detalles_pendientes()
+        return {
+            "success": True,
+            "data": detalles,
+            "total": len(detalles)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+
+# funcion para cambiar el estado del detalle
+@router.put("/entregar")
+def marcar_entregado_endpoint(lista: ListaCambiarEstado):
+    return marcar_entregado([d.dict() for d in lista.detalles])

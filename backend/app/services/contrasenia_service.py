@@ -1,6 +1,6 @@
 from ..db.connection import get_connection
 from mysql.connector import Error
-from ..models.contrasenia_model import EntradaContrasenia, DetalleContrasenia
+from ..models.contrasenia_model import EntradaContrasenia, DetalleContrasenia, CambiarEstado
 from datetime import datetime
 from fastapi import HTTPException
 from typing import Optional
@@ -405,6 +405,94 @@ def obtener_monedas():
         cursor.close()
         conn.close()
 
+#--------------------------------------------------------------------------------------------------------------
+
+# funcion para obtener los detalles de las contraseñas
+def obtener_detalles_pendientes():
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        sql = """
+            SELECT
+                dc.cod_contrasenia,
+                dc.cod_empresa,
+                dc.linea,
+                dc.num_factura,
+                dc.cod_moneda,
+                dc.monto,
+                CASE
+                    WHEN dc.retension_iva = 'S' THEN 'Si Tiene'
+                    WHEN dc.retension_iva = 'S' THEN 'No Tiene'
+                END AS retension_iva,
+                CASE
+                    WHEN dc.retension_isr = 'S' THEN 'Si Tiene'
+                    WHEN dc.retension_isr = 'S' THEN 'No Tiene'
+                END AS retension_isr,
+                dc.numero_retension_iva,
+                dc.numero_retension_isr,
+                CASE
+                    WHEN dc.estado = 'P' THEN 'Pendiente'
+                    WHEN dc.estado = 'R' THEN 'Recibido'
+                    WHEN dc.estado = 'E' THEN 'Entregado'
+                END AS estado,
+                DATE_FORMAT(dc.fecha_factura, '%Y-%m-%d') AS fecha_factura,
+                emp.nombre AS empresa_nombre,
+                m.abreviatura AS moneda_descripcion
+            FROM detalle_contrasenias dc
+            JOIN empresas emp ON dc.cod_empresa = emp.cod_empresa
+            JOIN monedas m ON dc.cod_moneda = m.cod_moneda
+            WHERE dc.estado = 'P'
+            ORDER BY dc.cod_contrasenia, dc.linea
+        """
+        cursor.execute(sql)
+        resultados = cursor.fetchall()
+        return resultados
+    except Error as e:
+        print(f"Error al obtener detalles pendientes: {e}")
+        raise
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+# funcion para poder cambiar el estado del detalle
+def marcar_entregado(detalles: list[dict]):
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        sql = """
+            UPDATE detalle_contrasenias
+            SET estado = 'E'
+            WHERE cod_contrasenia = %s AND cod_empresa = %s AND estado = 'P'
+        """
+
+        # Ejecutar update por cada detalle
+        for d in detalles:
+            cursor.execute(sql, (d["cod_contrasenia"], d["cod_empresa"]))
+
+        conn.commit()
+
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="No se encontró detalle pendiente para actualizar")
+
+        return {"success": True, "message": f"{cursor.rowcount} detalles cambiados a E"}
+
+    except Error as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Error al actualizar estado: {str(e)}")
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 
 

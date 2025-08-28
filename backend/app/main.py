@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .routes import contrasenia_routes
 from .routes import usuario_routes, auth_routes
 from .routes import documentos_routes
+from .routes import entregas_routes
 from .utils.dependencies import verificar_sesion
 
 app = FastAPI()
@@ -15,6 +16,7 @@ app.include_router(usuario_routes.router)
 app.include_router(auth_routes.router)
 app.include_router(contrasenia_routes.router)
 app.include_router(documentos_routes.router)
+app.include_router(entregas_routes.router)
 
 
 # CORS para permitir peticiones desde el frontend
@@ -75,9 +77,13 @@ def ver_contrasenia(request: Request):
 def crear_contrasenias(request: Request):
     return templates.TemplateResponse("crearcontrasenia.html", {"request": request})
 
-@app.get("/gestionentrega.html", response_class=HTMLResponse)
+@app.get("/verentregas.html", response_class=HTMLResponse)
 def mostrar_gestionentrega(request: Request):
-    return templates.TemplateResponse("gestionentrega.html", {"request": request})
+    return templates.TemplateResponse("verentregas.html", {"request": request})
+
+@app.get("/envioentrega.html", response_class=HTMLResponse)
+def mostrar_gestionentrega(request: Request):
+    return templates.TemplateResponse("envioentrega.html", {"request": request})
 
 @app.get("/recepcionentrega.html", response_class=HTMLResponse)
 def mostrar_recepcion_entrega(request: Request):

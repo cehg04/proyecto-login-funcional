@@ -242,7 +242,6 @@ function agregarDetalleATabla(detalle) {
     const hoy = new Date().toISOString().split('T')[0];
   $("#fecha_contrasenia").val(hoy);
 
-
 });
 
 

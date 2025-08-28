@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import date
-from typing import Optional
+from typing import Optional, List
 
 # ------------ Obtener el encabezado ---------------------------------------------
 class EncabezadoContrasenia(BaseModel):
@@ -36,3 +36,11 @@ class AnulacionContrasenia(BaseModel):
     cod_empresa: int
     usuario_x: int
     comentario: str = None
+
+# ------------ Actualizacion de estado --------------------------------------------
+class CambiarEstado(BaseModel):
+    cod_contrasenia: int
+    cod_empresa: int
+
+class ListaCambiarEstado(BaseModel):
+    detalles: List[CambiarEstado]
