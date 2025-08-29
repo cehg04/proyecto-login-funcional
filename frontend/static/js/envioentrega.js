@@ -95,8 +95,8 @@ function cargarDetallesPendientes() {
                             <td>${d.num_factura || ''}</td>
                             <td>${d.cod_moneda || ''}</td>
                             <td>${d.monto || ''}</td>
-                            <td>${d.retension_iva || ''}</td>
-                            <td>${d.retension_isr || ''}</td>
+                            <td>${d.retension_iva === 'S' ? 'Si Tiene' : (d.retension_iva === 'N' ? 'No Tiene' : '')}</td>
+                            <td>${d.retension_isr === 'S' ? 'Si Tiene' : (d.retension_isr === 'N' ? 'No Tiene' : '')}</td>
                             <td>${d.numero_retension_iva || ''}</td>
                             <td>${d.numero_retension_isr || ''}</td>
                             <td>${d.estado || ''}</td>
@@ -127,11 +127,10 @@ function obtenerSeleccionados() {
 function enviarDetalles(seleccionados, token) {
     if (seleccionados.length === 0) return;
 
-    // Payload para insertar en detalle_entregas
     const payload = seleccionados.map(s => ({
         cod_contrasenia: s.cod_contrasenia,
         cod_empresa_contrasenia: s.cod_empresa,
-        linea_contrasenia: s.linea,
+        linea_contrasenia: s.linea ?? s.linea_contrasenia ?? 0,
         num_factura: s.num_factura,
         cod_moneda: s.cod_moneda,   
         monto: s.monto,
@@ -144,7 +143,7 @@ function enviarDetalles(seleccionados, token) {
         cod_empresa: codEmpresaGlobal
     }));
 
-    console.log("Payload a enviar:", payload);
+    console.log("Payload a enviar a /entregas/detalles:", payload);
 
     $.ajax({
         url: "/entregas/detalles",
@@ -154,30 +153,7 @@ function enviarDetalles(seleccionados, token) {
         data: JSON.stringify(payload),
         success: function (resp) {
             Swal.fire("Éxito", resp.mensaje || "Detalles asignados correctamente", "success");
-
-            // 🚀 Paso extra: marcar como entregados en detalle_contrasenias
-            const payloadEstado = {
-                detalles: seleccionados.map(s => ({
-                    cod_contrasenia: s.cod_contrasenia,
-                    cod_empresa: s.cod_empresa
-                }))
-            };
-
-            $.ajax({
-                url: "/contrasenias/entregar",
-                method: "PUT",
-                contentType: "application/json",
-                headers: { "Authorization": "Bearer " + token },
-                data: JSON.stringify(payloadEstado),
-                success: function (resp2) {
-                    console.log("Estados actualizados:", resp2);
-                    cargarDetallesPendientes(); // refresca tabla
-                },
-                error: function (xhr) {
-                    console.error("Error al actualizar estados:", xhr.responseJSON?.detail || xhr.statusText);
-                    Swal.fire("Error", "Los detalles se insertaron, pero no se pudo actualizar el estado.", "warning");
-                }
-            });
+            cargarDetallesPendientes(); // refresca tabla
         },
         error: function (xhr) {
             let errorMsg = "Error al asignar detalles";

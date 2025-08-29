@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from datetime import datetime
 from typing import List, Optional
-from ..models.entregas_model import EncaEntregaCreate, MostrarEntregas, DetalleEntrega
-from ..services.entregas_service import crear_entrega, obtener_entregas, crear_detalles_entrega
+from ..models.entregas_model import EncaEntregaCreate, MostrarEntregas, DetalleEntrega, AnulacionEntrega
+from ..services.entregas_service import crear_entrega, obtener_entregas, crear_detalles_entrega, obtener_entrega_completa, anular_entrega
 from ..utils.dependencies import obtener_usuario_desde_token
 
 router = APIRouter(prefix="/entregas",tags=["Entregas"])
@@ -34,7 +34,7 @@ def guardar_detalles_entrega(
     except HTTPException as e:
         raise e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error al guardar detalles: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error al procesar detalles: {str(e)}")
     
 # endpoint para obtener los encabezados de las entregas
 @router.get("/encabezados", response_model=List[MostrarEntregas])
@@ -64,3 +64,29 @@ def listar_entregas(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error en listar_entregas: {str(e)}")
 
+# endpoint para poder ver la entrega completa
+@router.get("/detalle/{cod_entrega}/{cod_empresa}")
+def ver_entrega_completa(cod_entrega: int, cod_empresa: int):
+
+    try:
+        resultado = obtener_entrega_completa(cod_entrega, cod_empresa)
+        return resultado
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error en el endpoint: {str(e)}")
+    
+# endpoint para anular la Entrega
+@router.post("/anular")
+def anular_entrega_endpoint(request: AnulacionEntrega):
+    try:
+        resultado = anular_entrega(
+            cod_entrega=request.cod_entrega,
+            cod_empresa=request.cod_empresa,
+            usuario_x=request.usuario_x
+        )
+        return {"menssage": "Entrega anulada exitosamente", "data": resultado}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al anular la entrega: {str(e)}")
+    

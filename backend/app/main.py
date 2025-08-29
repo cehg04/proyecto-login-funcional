@@ -73,6 +73,10 @@ def mostrar_contrasenias(request: Request):
 def ver_contrasenia(request: Request):
     return templates.TemplateResponse("contrasenia_completa.html", {"request": request})
 
+@app.get("/verentregacompleta.html", response_class=HTMLResponse)
+def ver_contrasenia(request: Request):
+    return templates.TemplateResponse("verentregacompleta.html", {"request": request})
+
 @app.get("/crearcontrasenia.html", response_class=HTMLResponse)
 def crear_contrasenias(request: Request):
     return templates.TemplateResponse("crearcontrasenia.html", {"request": request})

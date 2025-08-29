@@ -17,13 +17,13 @@ class EncaEntregaCreate(BaseModel):
     cod_empresa: int
     fecha_entrega: date
 
-# crear el detalle de las entregas
+# Modelo principal para manejar ambos procesos
 class DetalleEntrega(BaseModel):
     cod_entrega: int
     cod_empresa: int
     linea: Optional[int] = None
-    cod_contrasenia: Optional[int] = None
-    cod_empresa_contrasenia: Optional[int] = None
+    cod_contrasenia: int 
+    cod_empresa_contrasenia: int
     linea_contrasenia: Optional[int] = None
     num_factura: Optional[int] = None
     cod_moneda: str
@@ -36,6 +36,11 @@ class DetalleEntrega(BaseModel):
     cod_documento: Optional[int] = None
 
 
+# Anulacion de la entrega
+class AnulacionEntrega(BaseModel):
+    cod_entrega: int
+    cod_empresa: int
+    usuario_x: int
 
 
 

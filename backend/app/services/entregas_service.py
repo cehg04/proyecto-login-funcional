@@ -172,7 +172,7 @@ def obtener_empresas():
 # funcion para crear los detalles de la entrega
 def crear_detalles_entrega(detalles: List[DetalleEntrega]):
     if not detalles:
-        raise HTTPException(status_code=400, detail="No se proporcionaron detalles para guardar")
+        raise HTTPException(status_code=400, detail="No se proporcionaron detalles para procesar")
 
     conn = None
     cursor = None
@@ -181,7 +181,7 @@ def crear_detalles_entrega(detalles: List[DetalleEntrega]):
         conn = get_connection()
         cursor = conn.cursor()
 
-        # Obtener la última línea de esta entrega
+        # Obtener la última línea de la entrega
         cursor.execute("""
             SELECT COALESCE(MAX(linea), 0)
             FROM detalle_entregas
@@ -190,7 +190,18 @@ def crear_detalles_entrega(detalles: List[DetalleEntrega]):
         """, (detalles[0].cod_entrega, detalles[0].cod_empresa))
         linea = cursor.fetchone()[0] or 0
 
-        query = """
+        # Preparar query de UPDATE para detalle_contrasenias
+        sql_update = """
+            UPDATE detalle_contrasenias
+            SET estado = 'E'
+            WHERE cod_contrasenia = %s
+              AND cod_empresa = %s
+              AND linea = %s
+              AND estado = 'P'
+        """
+
+        # Preparar query de INSERT para detalle_entregas
+        sql_insert = """
             INSERT INTO detalle_entregas (
                 cod_entrega,
                 cod_empresa,
@@ -210,10 +221,18 @@ def crear_detalles_entrega(detalles: List[DetalleEntrega]):
             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
 
-        values_list = []
+        values_insert = []
+        total_actualizados = 0
+
+        # Procesar cada detalle
         for d in detalles:
-            linea += 1  # Backend calcula la línea automáticamente
-            values_list.append((
+            # update primero
+            cursor.execute(sql_update, (d.cod_contrasenia, d.cod_empresa_contrasenia, d.linea_contrasenia))
+            total_actualizados += cursor.rowcount
+
+            # si se actualizó correctamente, lo insertamos
+            linea += 1
+            values_insert.append((
                 d.cod_entrega,
                 d.cod_empresa,
                 linea,
@@ -231,21 +250,29 @@ def crear_detalles_entrega(detalles: List[DetalleEntrega]):
                 d.cod_documento
             ))
 
-        cursor.executemany(query, values_list)
+        if total_actualizados == 0:
+            raise HTTPException(status_code=404, detail="No se encontró detalle pendiente para actualizar")
+
+        # ejecutar los inserts en lote
+        cursor.executemany(sql_insert, values_insert)
+
         conn.commit()
 
-        return {"success": True, "mensaje": f"{len(detalles)} detalle(s) de entrega guardado(s) correctamente"}
+        return {
+            "success": True,
+            "mensaje": f"{total_actualizados} detalles actualizados y {len(values_insert)} insertados en la entrega"
+        }
 
     except Exception as e:
         if conn:
             conn.rollback()
-        raise HTTPException(status_code=500, detail=f"Error al crear detalles de entrega: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error al procesar entrega: {str(e)}")
 
     finally:
         if cursor:
             cursor.close()
         if conn:
-            conn.close()
+            conn.close() 
 
 
 # funcion para obtener la siguiente linea de entrega
@@ -271,4 +298,122 @@ def obtener_siguiente_linea_entrega(cod_entrega: int, cod_empresa: int):
         if cursor:
             cursor.close()
         if conn:
+            conn.close()
+
+# funcion para ver el encabezado y detalle junto
+def obtener_entrega_completa(cod_entrega: int, cod_empresa: int):
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        #Encabezado
+        query_encabezado = """
+            SELECT
+                e.cod_entrega,
+                e.cod_empresa,
+                e.num_entrega,
+                CASE
+                    WHEN e.tipo_entrega = 'DC' THEN 'Documento con Contraseña'
+                END AS tipo_entrega,
+                CASE
+                    WHEN e.estado = 'P' THEN 'Pendiente'
+                    WHEN e.estado = 'R' THEN 'Recibido'
+                    WHEN e.estado = 'X' THEN 'Anulado'
+                END AS estado
+            FROM enca_entregas e
+            WHERE e.cod_entrega = %s AND e.cod_empresa = %s
+        """
+        cursor.execute(query_encabezado, (cod_entrega, cod_empresa))
+        encabezado = cursor.fetchone()
+
+        if not encabezado:
+            raise HTTPException(status_code=404, detail= "Encabezado de entrega no encontrado")
+        
+        # Detalle de la entrega
+        query_detalle = """
+            select
+                d.num_factura,
+                d.cod_moneda,
+                d.monto,
+                CASE
+                    WHEN d.retension_iva = 'S' THEN 'Si Tiene'
+                    WHEN d.retension_iva = 'N' THEN 'No Tiene'
+                END AS retension_iva,
+                CASE
+                    WHEN d.retension_isr = 'S' THEN 'Si Tiene'
+                    WHEN d.retension_isr = 'N' THEN 'No Tiene'
+                END AS retension_isr,
+                d.numero_retension_iva,
+                d.numero_retension_isr,
+                CASE
+                    WHEN d.estado = 'P' THEN 'Pendiente'
+                    WHEN d.estado = 'C' THEN 'Confirmado'
+                END AS estado
+                FROM detalle_entregas d
+                WHERE d.cod_entrega = %s AND d.cod_empresa = %s
+                ORDER BY d.linea
+        """
+        cursor.execute(query_detalle, (cod_entrega, cod_empresa))
+        detalles = cursor.fetchall()
+        
+        return {
+            "encabezado": encabezado,
+            "detalles": detalles
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al obtener la entrega: {str(e)}")
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+# funcion para Anular la entrega del encabezado
+def anular_entrega(cod_entrega: int, cod_empresa: int, usuario_x: int):
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Verificar existencia
+        check_query = """
+            SELECT estado FROM enca_entregas
+            WHERE cod_entrega = %s AND cod_empresa = %s
+        """
+        cursor.execute(check_query, (cod_entrega, cod_empresa))
+        result = cursor.fetchone()
+
+        if not result:
+            raise HTTPException(status_code=404, detail="La entrega no existe")
+        if result[0] == 'X':
+            raise HTTPException(status_code=400, detail="La entrega ya esta anulada")
+        
+        # Actualizar estado
+        query = """
+            UPDATE enca_entregas
+            SET estado = 'X', usuario_x = %s, fecha_x = %s
+            WHERE cod_entrega = %s AND cod_empresa = %s
+        """
+        fecha_actual = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        cursor.execute(query, (usuario_x, fecha_actual, cod_entrega, cod_empresa))
+
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=500, detail="No se pudo anular la entrega")
+        
+        conn.commit()
+        return {"status": "ok", "mensaje": "Entrega anulada correctamente"}
+    
+    except Error as e:
+        print("Error al anular la entrega:", e)
+        raise HTTPException(status_code=500, detail=f"Error al anular la entrega: {str(e)}")
+    
+    finally:
+        if cursor:
+            cursor.close()
+        if conn and conn.is_connected():
             conn.close()

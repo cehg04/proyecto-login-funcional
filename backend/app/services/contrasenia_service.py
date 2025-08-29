@@ -1,6 +1,6 @@
 from ..db.connection import get_connection
 from mysql.connector import Error
-from ..models.contrasenia_model import EntradaContrasenia, DetalleContrasenia, CambiarEstado
+from ..models.contrasenia_model import EntradaContrasenia, DetalleContrasenia
 from datetime import datetime
 from fastapi import HTTPException
 from typing import Optional
@@ -422,14 +422,8 @@ def obtener_detalles_pendientes():
                 dc.num_factura,
                 dc.cod_moneda,
                 dc.monto,
-                CASE
-                    WHEN dc.retension_iva = 'S' THEN 'Si Tiene'
-                    WHEN dc.retension_iva = 'S' THEN 'No Tiene'
-                END AS retension_iva,
-                CASE
-                    WHEN dc.retension_isr = 'S' THEN 'Si Tiene'
-                    WHEN dc.retension_isr = 'S' THEN 'No Tiene'
-                END AS retension_isr,
+                dc.retension_iva,
+                dc.retension_isr,
                 dc.numero_retension_iva,
                 dc.numero_retension_isr,
                 CASE
@@ -458,41 +452,7 @@ def obtener_detalles_pendientes():
         if conn:
             conn.close()
 
-# funcion para poder cambiar el estado del detalle
-def marcar_entregado(detalles: list[dict]):
-    conn = None
-    cursor = None
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
 
-        sql = """
-            UPDATE detalle_contrasenias
-            SET estado = 'E'
-            WHERE cod_contrasenia = %s AND cod_empresa = %s AND estado = 'P'
-        """
-
-        # Ejecutar update por cada detalle
-        for d in detalles:
-            cursor.execute(sql, (d["cod_contrasenia"], d["cod_empresa"]))
-
-        conn.commit()
-
-        if cursor.rowcount == 0:
-            raise HTTPException(status_code=404, detail="No se encontró detalle pendiente para actualizar")
-
-        return {"success": True, "message": f"{cursor.rowcount} detalles cambiados a E"}
-
-    except Error as e:
-        if conn:
-            conn.rollback()
-        raise HTTPException(status_code=500, detail=f"Error al actualizar estado: {str(e)}")
-
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
 
 
 
