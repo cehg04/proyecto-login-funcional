@@ -1,28 +1,42 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from datetime import datetime
 from typing import List, Optional
-from ..models.entregas_model import EncaEntregaCreate, MostrarEntregas, DetalleEntrega, AnulacionEntrega
-from ..services.entregas_service import crear_entrega, obtener_entregas, crear_detalles_entrega, obtener_entrega_completa, anular_entrega
+from ..models.entregas_model import EncaEntregaCreate, MostrarEntregas, DetalleEntrega, AnulacionEntrega, DetalleEntregaDc
+from ..services.entregas_service import crear_entrega_contrasenia, crear_entrega_documentos, crear_detalles_entrega_contrasenia,crear_detalles_entrega_documentos ,obtener_entregas, obtener_entrega_completa, anular_entrega
 from ..utils.dependencies import obtener_usuario_desde_token
 
 router = APIRouter(prefix="/entregas",tags=["Entregas"])
 
-# endpoint para crear el encabezado de la entrega
-@router.post("/crear")
+# endpoint para crear el encabezado de la entrega de contraseñas
+@router.post("/crear-contrasenia")
 def crear_encabezado_entrega(
     data: EncaEntregaCreate,
     usuario_actual: int = Depends(obtener_usuario_desde_token)):
 
-    resultado = crear_entrega(data, usuario_actual)
+    resultado = crear_entrega_contrasenia(data, usuario_actual)
 
     if "error" in resultado:
         raise HTTPException(status_code=400, detail=resultado["error"])
     
     print("JSON recibido:", data)
     return resultado
-        
-# endpoint para crear el detalle de la entrega
-@router.post("/detalles")
+
+# endpoint para crear el encabezado de la entrega de documentos
+@router.post("/crear-documento")
+def crear_encabezado_entrega(
+    data: EncaEntregaCreate,
+    usuario_actual: int = Depends(obtener_usuario_desde_token)):
+
+    resultado = crear_entrega_documentos(data, usuario_actual)
+
+    if "error" in resultado:
+        raise HTTPException(status_code=400, detail=resultado["error"])
+    
+    print("JSON recibido:", data)
+    return resultado
+
+# endpoint para crear el detalle de la entrega de contraseñas
+@router.post("/detalles-contrasenia")
 def guardar_detalles_entrega(
     detalles: List[DetalleEntrega],
     usuario_actual: int = Depends(obtener_usuario_desde_token)
@@ -30,7 +44,22 @@ def guardar_detalles_entrega(
     if not detalles:
         raise HTTPException(status_code=400, detail="No se enviaron detalles para guardar")
     try:
-        return crear_detalles_entrega(detalles)
+        return crear_detalles_entrega_contrasenia(detalles)
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al procesar detalles: {str(e)}")
+    
+# endpoint para crear el detalle de la entrega de documentos
+@router.post("/detalles-documentos")
+def guardar_detalles_entrega(
+    detalles: List[DetalleEntregaDc],
+    usuario_actual: int = Depends(obtener_usuario_desde_token)
+):
+    if not detalles:
+        raise HTTPException(status_code=400, detail="No se enviaron detalles para guardar")
+    try:
+        return crear_detalles_entrega_documentos(detalles)
     except HTTPException as e:
         raise e
     except Exception as e:

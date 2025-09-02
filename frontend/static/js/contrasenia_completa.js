@@ -52,16 +52,16 @@ $(document).ready(function () {
 
         detalles.forEach(detalle => {
             tbody.append(`
-                <tr>
-                    <td>${detalle.num_factura || ''}</td>
-                    <td>${detalle.cod_moneda || ''}</td>
-                    <td>${detalle.monto ? detalle.monto.toFixed(2) : ''}</td>
-                    <td>${detalle.retension_iva || ''}</td>
-                    <td>${detalle.retension_isr || ''}</td>
-                    <td>${detalle.numero_retension_iva || ''}</td>
-                    <td>${detalle.numero_retension_isr || ''}</td>
-                    <td>${detalle.estado || ''}</td>
-                </tr>
+            <tr>
+                <td>${detalle.num_factura || ''}</td>
+                <td class="text-center">${detalle.monto_con_moneda || ''}</td>
+                <td class="text-center">${detalle.retension_iva || ''}</td>
+                <td class="text-center">${detalle.retension_isr || ''}</td>
+                <td>${detalle.numero_retension_iva || ''}</td>
+                <td>${detalle.numero_retension_isr || ''}</td>
+                <td class="text-center">${detalle.estado || ''}</td>
+            </tr>
+
             `);
         });
     }

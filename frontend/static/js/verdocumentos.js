@@ -32,21 +32,20 @@ $(document).ready(function () {
                 else if (doc.estado === 'Anulado') badgeClass = 'bg-danger text-white';
                 else if (doc.estado === 'Recibido') badgeClass = 'bg-success text-white';
                 else if (doc.estado === 'Entregado') badgeClass = 'bg-info text-white';
-                else badgeClass = 'bg-secondary text-white'; // gris por defecto
+                else badgeClass = 'bg-secondary text-white'; 
                     tbody.append(`
                         <tr>
-                            <td>${doc.empresa_nombre}</td>
-                            <td>${doc.tipo_documento}</td>
-                            <td>${doc.proveedor_nombre}</td>
-                            <td>${doc.nombre_solicitud}</td>
-                            <td>${doc.numero_documento}</td>
-                            <td>${doc.moneda}</td>
-                            <td>${doc.monto.toLocaleString('es-GT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                            <td>${doc.observaciones || ''}</td>
-                            <td><span class="badge ${badgeClass}">${doc.estado}</span></td>
-                            <td>
-                                <button class="btn btn-danger btn-sm btn-anular" data-cod="${doc.cod_documento}">Anular</button>
-                            </td>
+                        <td>${doc.empresa_nombre}</td>
+                        <td>${doc.tipo_documento}</td>
+                        <td>${doc.proveedor_nombre}</td>
+                        <td>${doc.nombre_solicitud}</td>
+                        <td>${doc.numero_documento}</td>
+                        <td class="text-center">${doc.monto_con_moneda || ''}</td>
+                        <td>${doc.observaciones || ''}</td>
+                        <td><span class="badge ${badgeClass}">${doc.estado}</span></td>
+                        <td>
+                            <button class="btn btn-danger btn-sm btn-anular" data-cod="${doc.cod_documento}">Anular</button>
+                        </td>
                         </tr>
                     `);
                 });

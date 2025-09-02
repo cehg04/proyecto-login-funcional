@@ -12,12 +12,12 @@ class MostrarEntregas(BaseModel):
     estado: str
     empresa_nombre: str
 
-# crear el encabezado de las entregas
+# crear el encabezado de las entregas de ambos 
 class EncaEntregaCreate(BaseModel):
     cod_empresa: int
     fecha_entrega: date
 
-# Modelo principal para manejar ambos procesos
+# crear el detalle de las entregas de contraseñas
 class DetalleEntrega(BaseModel):
     cod_entrega: int
     cod_empresa: int
@@ -34,6 +34,16 @@ class DetalleEntrega(BaseModel):
     numero_retension_isr: Optional[int] = None
     estado: Optional[str] = 'P'
     cod_documento: Optional[int] = None
+
+# crear el detalle de las entregas de docuementos
+class DetalleEntregaDc(BaseModel):
+    cod_entrega: int
+    cod_empresa: int
+    linea: Optional[int] = None
+    cod_moneda: str
+    monto: float
+    estado: Optional[str] = 'P'
+    cod_documento: int  
 
 
 # Anulacion de la entrega

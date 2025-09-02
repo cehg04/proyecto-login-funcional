@@ -4,7 +4,7 @@ let codEmpresaGlobal = null;
 
 $(document).ready(function () {
     cargarEmpresas();
-    cargarDetallesPendientes();
+    cargarDocumentosPendientes();
 
     // Un solo botón para crear encabezado + asignar detalles
     $("#btnAsignarDetalles").on("click", function () {
@@ -34,7 +34,7 @@ $(document).ready(function () {
             }
 
             $.ajax({
-                url: "/entregas/crear",
+                url: "/entregas/crear-documento",
                 method: "POST",
                 contentType: "application/json",
                 headers: { "Authorization": "Bearer " + token },
@@ -72,9 +72,9 @@ function cargarEmpresas() {
     });
 }
 
-function cargarDetallesPendientes() {
+function cargarDocumentosPendientes() {
     $.ajax({
-        url: "/contrasenias/detalles-pendientes",
+        url: "/documentos/pendientes",
         method: "GET",
         dataType: "json",
         success: function (response) {
@@ -83,34 +83,30 @@ function cargarDetallesPendientes() {
                 const $tbody = $("#tablaDetalles tbody");
                 $tbody.empty();
 
-                detallesPendientes.forEach((d, index) => {
+                detallesPendientes.forEach((dv, index) => {
                     $tbody.append(`
                         <tr>
                             <td>
                                 <input type="checkbox" 
                                     class="check-detalle" 
                                     data-index="${index}" 
-                                    data-cod-contrasenia="${d.cod_contrasenia}">
+                                    data-cod-documento="${dv.cod_documento}">
                             </td>
-                            <td>${d.num_factura || ''}</td>
-                            <td>${d.cod_moneda || ''}</td>
-                            <td>${d.monto || ''}</td>
-                            <td>${d.retension_iva === 'S' ? 'Si Tiene' : (d.retension_iva === 'N' ? 'No Tiene' : '')}</td>
-                            <td>${d.retension_isr === 'S' ? 'Si Tiene' : (d.retension_isr === 'N' ? 'No Tiene' : '')}</td>
-                            <td>${d.numero_retension_iva || ''}</td>
-                            <td>${d.numero_retension_isr || ''}</td>
-                            <td>${d.estado || ''}</td>
+                            <td>${dv.cod_empresa || ''}</td>
+                            <td>${dv.cod_moneda || ''}</td>
+                            <td>${dv.monto || ''}</td>
+                            <td>${dv.estado || ''}</td>
                         </tr>
                     `);
                 });
                 console.log("Total registros:", response.total);
             } else {
-                Swal.fire("Error", "No se pudieron cargar los detalles.", "error");
+                Swal.fire("Error", "No se pudieron cargar los documentos.", "error");
             }
         },
         error: function (xhr, status, error) {
             console.error("Error AJAX:", error);
-            Swal.fire("Error", "Error al obtener los detalles pendientes.", "error");
+            Swal.fire("Error", "Error al obtener los documentos pendientes.", "error");
         }
     });
 }
@@ -128,25 +124,19 @@ function enviarDetalles(seleccionados, token) {
     if (seleccionados.length === 0) return;
 
     const payload = seleccionados.map(s => ({
-        cod_contrasenia: s.cod_contrasenia,
-        cod_empresa_contrasenia: s.cod_empresa,
-        linea_contrasenia: s.linea ?? s.linea_contrasenia ?? 0,
-        num_factura: s.num_factura,
-        cod_moneda: s.cod_moneda,   
-        monto: s.monto,
-        retension_iva: s.retension_iva,
-        retension_isr: s.retension_isr,
-        numero_retension_iva: s.numero_retension_iva,
-        numero_retension_isr: s.numero_retension_isr,
-        estado: s.estado ? s.estado.charAt(0) : 'P',
         cod_entrega: codEntregaGlobal,
-        cod_empresa: codEmpresaGlobal
+        cod_empresa: codEmpresaGlobal,
+        cod_moneda: s.cod_moneda,
+        monto: s.monto,
+        estado: s.estado ? s.estado.charAt(0) : 'P',
+        cod_documento: s.cod_documento
     }));
 
-    console.log("Payload a enviar a /entregas/detalles:", payload);
+
+    console.log("Payload a enviar a /entregas/detalles-documentos:", payload);
 
     $.ajax({
-        url: "/entregas/detalles",
+        url: "/entregas/detalles-documentos",
         method: "POST",
         contentType: "application/json",
         headers: { "Authorization": "Bearer " + token },
@@ -164,6 +154,3 @@ function enviarDetalles(seleccionados, token) {
         }
     });
 }
-
-
-

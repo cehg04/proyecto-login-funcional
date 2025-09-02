@@ -85,9 +85,13 @@ def crear_contrasenias(request: Request):
 def mostrar_gestionentrega(request: Request):
     return templates.TemplateResponse("verentregas.html", {"request": request})
 
-@app.get("/envioentrega.html", response_class=HTMLResponse)
+@app.get("/crearentrega.html", response_class=HTMLResponse)
 def mostrar_gestionentrega(request: Request):
-    return templates.TemplateResponse("envioentrega.html", {"request": request})
+    return templates.TemplateResponse("crearentrega.html", {"request": request})
+
+@app.get("/crearentregadc.html", response_class=HTMLResponse)
+def mostrar_gestionentrega(request: Request):
+    return templates.TemplateResponse("crearentregadc.html", {"request": request})
 
 @app.get("/recepcionentrega.html", response_class=HTMLResponse)
 def mostrar_recepcion_entrega(request: Request):
@@ -96,7 +100,6 @@ def mostrar_recepcion_entrega(request: Request):
 @app.get("/verdocumentos.html", response_class=HTMLResponse)
 def mostrar_documentos_varios(request: Request):
     return templates.TemplateResponse("verdocumentos.html", {"request": request})
-
 
 @app.get("/creardocumentos.html", response_class=HTMLResponse)
 def mostrar_documentos_varios(request: Request):

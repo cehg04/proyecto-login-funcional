@@ -3,35 +3,81 @@ from mysql.connector import Error
 from ..db.connection import get_connection
 from ..models.documentos_model import DocumentoVarioCreate
 
+# funcion para obtener documentos varios pendientes
+def obtener_documentos_pendientes():
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        sql = """
+            SELECT
+                dv.cod_documento,
+                dv.cod_empresa,
+                dv.cod_tipo_documento,
+                dv.cod_proveedor,
+                dv.nombre_solicitud,
+                dv.numero_documento,
+                dv.cod_moneda,
+                dv.monto,
+                dv.observaciones,
+                CASE
+                    WHEN dv.estado = 'P' THEN 'Pendiente'
+                    WHEN dv.estado = 'R' THEN 'Recibido'
+                    WHEN dv.estado = 'E' THEN 'Entregado'
+                    WHEN dv.estado = 'X' THEN 'Anulado'
+                END AS estado,
+                emp.nombre AS empresa_nombre,
+                m.abreviatura AS moneda_descripcion,
+                td.nombre_documento AS tipo_documento
+            FROM documentos_varios dv
+            JOIN empresas emp ON dv.cod_empresa = emp.cod_empresa
+            JOIN monedas m ON dv.cod_moneda = m.cod_moneda
+            JOIN tipo_documentos td ON dv.cod_tipo_documento = td.cod_tipo_documento
+            WHERE dv.estado = 'P'
+            ORDER BY dv.cod_documento
+        """
+        cursor.execute(sql)
+        resultados = cursor.fetchall()
+        return resultados
+    except Error as e:
+        print(f"Error al obtener documentos varios pendientes: {e}")
+        raise
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
 # servicio para obtener documentos varios sin duplicados
 def obtener_documentos_varios():
     conn = get_connection()
     cursor = conn.cursor()
     try:
         cursor.execute("""
-            SELECT DISTINCT
-                d.cod_documento,
-                e.nombre AS empresa_nombre,
-                t.nombre_documento,
-                p.nombre AS proveedor_nombre,
-                d.nombre_solicitud,
-                d.numero_documento,
-                m.abreviatura AS moneda,
-                d.monto,
-                d.observaciones,
-                CASE
-                    WHEN d.estado = 'P' THEN 'Pendiente'
-                    WHEN d.estado = 'E' THEN 'Entregado'
-                    WHEN d.estado = 'R' THEN 'Recibido'
-                    WHEN d.estado = 'X' THEN 'Anulado'
-                END AS estado
-            FROM documentos_varios d
-            JOIN empresas e ON d.cod_empresa = e.cod_empresa
-            JOIN tipo_documentos t ON d.cod_tipo_documento = t.cod_tipo_documento
-            JOIN proveedores p ON d.cod_proveedor = p.cod_proveedor AND d.cod_empresa = p.cod_empresa
-            JOIN monedas m ON d.cod_moneda = m.cod_moneda
-            WHERE d.estado IN ('P', 'E', 'R', 'X')
-            ORDER BY d.cod_documento DESC
+        SELECT DISTINCT
+            d.cod_documento,
+            e.nombre AS empresa_nombre,
+            t.nombre_documento AS tipo_documento,
+            p.nombre AS proveedor_nombre,
+            d.nombre_solicitud,
+            d.numero_documento,
+            CONCAT(m.cod_moneda, ' ', FORMAT(d.monto, 2)) AS monto_con_moneda,  
+            d.observaciones,
+            CASE
+                WHEN d.estado = 'P' THEN 'Pendiente'
+                WHEN d.estado = 'E' THEN 'Entregado'
+                WHEN d.estado = 'R' THEN 'Recibido'
+                WHEN d.estado = 'X' THEN 'Anulado'
+            END AS estado
+        FROM documentos_varios d
+        JOIN empresas e ON d.cod_empresa = e.cod_empresa
+        JOIN tipo_documentos t ON d.cod_tipo_documento = t.cod_tipo_documento
+        JOIN proveedores p ON d.cod_proveedor = p.cod_proveedor AND d.cod_empresa = p.cod_empresa
+        JOIN monedas m ON d.cod_moneda = m.cod_moneda
+        WHERE d.estado IN ('P', 'E', 'R', 'X')
+        ORDER BY d.cod_documento DESC;
         """)
         rows = cursor.fetchall()
         return [
@@ -42,10 +88,9 @@ def obtener_documentos_varios():
                 "proveedor_nombre": r[3],
                 "nombre_solicitud": r[4],
                 "numero_documento": r[5],
-                "moneda": r[6],
-                "monto": r[7],
-                "observaciones": r[8],
-                "estado": r[9]
+                "monto_con_moneda": r[6],
+                "observaciones": r[7],
+                "estado": r[8]
             }
             for r in rows
         ]
@@ -90,7 +135,7 @@ def crear_documento_vario(doc: DocumentoVarioCreate):
         conn = get_connection()
         cursor = conn.cursor()
 
-        # Obtener el siguiente cod_documento (autoincrement manual)
+        # Obtener el siguiente cod_documento 
         cursor.execute("SELECT MAX(cod_documento) FROM documentos_varios")
         resultado = cursor.fetchone()
         nuevo_cod = (resultado[0] + 1) if resultado[0] is not None else 1

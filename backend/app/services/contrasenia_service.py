@@ -105,24 +105,25 @@ def obtener_contrasenia_completa_filtrada(cod_contrasenia: int, cod_empresa: int
 
         # Detalle filtrado 
         query_detalle = """
-            SELECT num_factura, cod_moneda, monto,
-                   retension_iva, retension_isr,
-                CASE
-                    WHEN retension_iva = 'S' THEN 'Si Tiene'
-                    WHEN retension_iva = 'N' THEN 'No Tiene'
-                END AS retension_iva, 
-                CASE
-                    WHEN retension_isr = 'S' THEN 'Si Tiene'
-                    WHEN retension_isr = 'N' THEN 'No Tiene'
-                END AS retension_isr,
-                numero_retension_iva, numero_retension_isr,
-                CASE
-                    WHEN estado = 'R' THEN 'Recibido'
-                    WHEN estado = 'P' THEN 'Pendiente'
-                    WHEN estado = 'E' THEN 'Entregado'
-                END AS estado
-            FROM detalle_contrasenias
-            WHERE cod_contrasenia = %s AND cod_empresa = %s
+        SELECT num_factura, 
+            CONCAT(cod_moneda, ' ', monto) AS monto_con_moneda,
+            retension_iva, retension_isr,
+            CASE
+                WHEN retension_iva = 'S' THEN 'Si Tiene'
+                WHEN retension_iva = 'N' THEN 'No Tiene'
+            END AS retension_iva, 
+            CASE
+                WHEN retension_isr = 'S' THEN 'Si Tiene'
+                WHEN retension_isr = 'N' THEN 'No Tiene'
+            END AS retension_isr,
+            numero_retension_iva, numero_retension_isr,
+            CASE
+                WHEN estado = 'R' THEN 'Recibido'
+                WHEN estado = 'P' THEN 'Pendiente'
+                WHEN estado = 'E' THEN 'Entregado'
+            END AS estado
+        FROM detalle_contrasenias
+        WHERE cod_contrasenia = %s AND cod_empresa = %s;
         """
         cursor.execute(query_detalle, (cod_contrasenia, cod_empresa))
         detalles = cursor.fetchall()

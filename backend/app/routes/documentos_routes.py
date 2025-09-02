@@ -1,8 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List
-from ..models.documentos_model import DocumentoVarioCreate, AnularDocumentoRequest
-from ..services.documentos_service import crear_documento_vario, obtener_documentos_varios, anular_documento, obtener_tipo_documentos
-
+from ..models.documentos_model import DocumentoVarioCreate, AnularDocumentoRequest, DocumentoVario
+from ..services.documentos_service import crear_documento_vario, obtener_documentos_varios, anular_documento, obtener_tipo_documentos, obtener_documentos_pendientes
 
 router = APIRouter(prefix="/documentos", tags=["Documentos"])
 
@@ -22,6 +21,24 @@ def ruta_crear_documento(doc: DocumentoVarioCreate):
 @router.get("/tipos")
 def listar_tipos_documentos():
     return obtener_tipo_documentos()
+
+# endpoint para obtener documentos pendientes
+@router.get("/pendientes")
+def get_documentos_pendientes():
+    try:
+        documentos = obtener_documentos_pendientes()
+        return {
+            "success": True,
+            "data": documentos,
+            "total": len(documentos)
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "data": [],
+            "error": f"Error al obtener documentos pendientes: {str(e)}"
+        }
+
 
 # Listar documentos varios
 @router.get("/varios")
