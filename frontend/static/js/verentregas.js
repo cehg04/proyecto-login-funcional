@@ -161,12 +161,23 @@ $(document).ready(function () {
         table.ajax.reload();
     });
 
-    // Botón Mostrar
-    $('#tablaEntregas').on('click', '.ver-detalle', function() {
-        const codEntrega = $(this).data('cod');
-        const codEmpresa = $(this).data('empresa');
-        window.location.href = `/verentregacompleta.html?cod_entrega=${codEntrega}&cod_empresa=${codEmpresa}`;
-    });
+    // Boton para mostrar
+$('#tablaEntregas').on('click', '.ver-detalle', function() {
+    //obtener datos de la fila desde el dataTable
+    const rowData = table.row($(this).parents('tr')).data();
+
+    if(!rowData) {
+        console.error("No se pudo obtener la fila seleccionada");
+        return;
+    }
+
+    const codEntrega = rowData.cod_entrega;
+    const codEmpresa = rowData.cod_empresa;
+
+    // Redirigimos a una sola vista
+    window.location.href = `/verentregacompleta.html?cod_entrega=${codEntrega}&cod_empresa=${codEmpresa}`;
+});
+
 
     // Acción al hacer click en "Anular"
 $('#tablaEntregas').on('click', '.anular-entrega', function () {

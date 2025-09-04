@@ -94,8 +94,9 @@ def crear_entrega_contrasenia(data: EncaEntregaCreate, usuario_actual: int):
         query = """
             INSERT INTO enca_entregas (
                 cod_entrega, cod_empresa, num_entrega, fecha_entrega,
-                usuario_creacion, fecha_creacion, estado, tipo_entrega
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                usuario_creacion, fecha_creacion, estado, tipo_entrega,
+                cod_usuario_entrega
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         cursor.execute(query, (
             nuevo_codigo,
@@ -104,8 +105,9 @@ def crear_entrega_contrasenia(data: EncaEntregaCreate, usuario_actual: int):
             data.fecha_entrega,
             usuario_actual,
             datetime.now(),
-            "P",  # estado por defecto = pendiente
-            "DC"
+            "P",  
+            "DC",
+            data.cod_usuario_entrega
         ))
         conn.commit()
         return {
@@ -149,8 +151,9 @@ def crear_entrega_documentos(data: EncaEntregaCreate, usuario_actual: int):
         query = """
             INSERT INTO enca_entregas (
                 cod_entrega, cod_empresa, num_entrega, fecha_entrega,
-                usuario_creacion, fecha_creacion, estado, tipo_entrega
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                usuario_creacion, fecha_creacion, estado, tipo_entrega,
+                cod_usuario_entrega
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         cursor.execute(query, (
             nuevo_codigo,
@@ -160,7 +163,8 @@ def crear_entrega_documentos(data: EncaEntregaCreate, usuario_actual: int):
             usuario_actual,
             datetime.now(),
             "P",  
-            "DS"
+            "DS",
+            data.cod_usuario_entrega
         ))
         conn.commit()
         return {
@@ -445,7 +449,7 @@ def obtener_siguiente_linea_entrega(cod_entrega: int, cod_empresa: int):
         if conn:
             conn.close()
 
-# funcion para ver el encabezado y detalle junto
+# funcion para ver el encabezado y detalle junto de la contraseña
 def obtener_entrega_completa(cod_entrega: int, cod_empresa: int):
     conn = None
     cursor = None
@@ -467,8 +471,11 @@ def obtener_entrega_completa(cod_entrega: int, cod_empresa: int):
                     WHEN e.estado = 'P' THEN 'Pendiente'
                     WHEN e.estado = 'R' THEN 'Recibido'
                     WHEN e.estado = 'X' THEN 'Anulado'
-                END AS estado
+                END AS estado,
+                e.cod_usuario_entrega,
+                u.nombre AS nombre_usuario_entrega
             FROM enca_entregas e
+            LEFT JOIN usuarios u ON e.cod_usuario_entrega = u.cod_usuario
             WHERE e.cod_entrega = %s AND e.cod_empresa = %s
         """
         cursor.execute(query_encabezado, (cod_entrega, cod_empresa))
@@ -478,33 +485,67 @@ def obtener_entrega_completa(cod_entrega: int, cod_empresa: int):
             raise HTTPException(status_code=404, detail= "Encabezado de entrega no encontrado")
         
         # Detalle de la entrega
-        query_detalle = """
-            select
-                COALESCE(d.num_factura, 'N/A') AS num_factura,
-                d.cod_moneda,
-                d.monto,
-                CASE
-                    WHEN d.retension_iva = 'S' THEN 'Si Tiene'
-                    WHEN d.retension_iva = 'N' THEN 'No Tiene'
-                    ELSE 'N/A'
-                END AS retension_iva,
-                CASE
-                    WHEN d.retension_isr = 'S' THEN 'Si Tiene'
-                    WHEN d.retension_isr = 'N' THEN 'No Tiene'
-                    ELSE 'N/A'
-                END AS retension_isr,
-                COALESCE(d.numero_retension_iva, 'N/A') AS numero_retension_iva,
-                COALESCE(d.numero_retension_isr, 'N/A') AS numero_retension_isr,
-                CASE
-                    WHEN d.estado = 'P' THEN 'Pendiente'
-                    WHEN d.estado = 'C' THEN 'Confirmado'
-                END AS estado
-                FROM detalle_entregas d
-                WHERE d.cod_entrega = %s AND d.cod_empresa = %s
-                ORDER BY d.linea
-        """
+        if encabezado["tipo_entrega"] == "Documento con Contraseña":
+
+            query_detalle = """
+                select
+                    COALESCE(d.num_factura, 'N/A') AS num_factura,
+                    CONCAT(d.cod_moneda, ' ', FORMAT(d.monto, 2)) AS monto_con_moneda,  
+                    CASE
+                        WHEN d.retension_iva = 'S' THEN 'Si Tiene'
+                        WHEN d.retension_iva = 'N' THEN 'No Tiene'
+                        ELSE 'N/A'
+                    END AS retension_iva,
+                    CASE
+                        WHEN d.retension_isr = 'S' THEN 'Si Tiene'
+                        WHEN d.retension_isr = 'N' THEN 'No Tiene'
+                        ELSE 'N/A'
+                    END AS retension_isr,
+                    COALESCE(d.numero_retension_iva, 'N/A') AS numero_retension_iva,
+                    COALESCE(d.numero_retension_isr, 'N/A') AS numero_retension_isr,
+                    CASE
+                        WHEN d.estado = 'P' THEN 'Pendiente'
+                        WHEN d.estado = 'C' THEN 'Confirmado'
+                    END AS estado
+                    FROM detalle_entregas d
+                    WHERE d.cod_entrega = %s AND d.cod_empresa = %s
+                    ORDER BY d.linea
+            """
+        else:
+             query_detalle = """
+                    SELECT
+                        d.cod_documento,
+                        t.nombre_documento AS tipo_documento,
+                        e.nombre AS empresa_nombre,
+                        p.nombre AS proveedor_nombre,
+                        dv.nombre_solicitud,
+                        dv.numero_documento,
+                        CONCAT(m.cod_moneda, ' ', FORMAT(dv.monto, 2)) AS monto_con_moneda,  
+                        COALESCE(dv.numero_retension_iva, 'N/A') AS numero_retension_iva,
+                        COALESCE(dv.numero_retension_isr, 'N/A') AS numero_retension_isr,
+                        dv.observaciones,
+                        CASE
+                            WHEN dv.estado = 'P' THEN 'Pendiente'
+                            WHEN dv.estado = 'E' THEN 'Entregado'
+                            WHEN dv.estado = 'R' THEN 'Recibido'
+                            WHEN dv.estado = 'X' THEN 'Anulado'
+                            ELSE 'Sin Documento'
+                        END AS estado
+                    FROM detalle_entregas d
+                    LEFT JOIN documentos_varios dv 
+                        ON d.cod_documento = dv.cod_documento
+                        AND d.cod_empresa = dv.cod_empresa
+                    LEFT JOIN empresas e ON dv.cod_empresa = e.cod_empresa
+                    LEFT JOIN tipo_documentos t ON dv.cod_tipo_documento = t.cod_tipo_documento
+                    LEFT JOIN proveedores p ON dv.cod_proveedor = p.cod_proveedor AND dv.cod_empresa = p.cod_empresa
+                    LEFT JOIN monedas m ON dv.cod_moneda = m.cod_moneda
+                    WHERE d.cod_entrega = %s 
+                    AND d.cod_empresa = %s
+                    ORDER BY d.linea;
+                 """
         cursor.execute(query_detalle, (cod_entrega, cod_empresa))
         detalles = cursor.fetchall()
+
         
         return {
             "encabezado": encabezado,
@@ -519,6 +560,8 @@ def obtener_entrega_completa(cod_entrega: int, cod_empresa: int):
             cursor.close()
         if conn:
             conn.close()
+
+
 
 # funcion para Anular la entrega del encabezado
 def anular_entrega(cod_entrega: int, cod_empresa: int, usuario_x: int):

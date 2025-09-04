@@ -1,10 +1,17 @@
-let detallesPendientes = []; // guardamos todos los detalles en memoria
+let detallesPendientes = [];
 let codEntregaGlobal = null;
 let codEmpresaGlobal = null;
 
 $(document).ready(function () {
-    cargarEmpresas();
-    cargarDetallesPendientes();
+        const token = localStorage.getItem("token");
+        if (!token) {
+            Swal.fire("Error", "No hay token, inicia sesión nuevamente", "error");
+            return;
+        }
+
+        cargarEmpresas();
+        cargarUsuariosEntrega();
+        cargarDetallesPendientes(token);
 
     // Un solo botón para crear encabezado + asignar detalles
     $("#btnAsignarDetalles").on("click", function () {
@@ -15,20 +22,15 @@ $(document).ready(function () {
             return;
         }
 
-        const token = localStorage.getItem("token");
-        if (!token) {
-            Swal.fire("Error", "No hay token, inicia sesión nuevamente", "error");
-            return;
-        }
-
         // Paso 1: crear encabezado si no existe
         if (!codEntregaGlobal) {
             const dataEncabezado = {
                 cod_empresa: $("#cod_empresa").val(),
-                fecha_entrega: $("#fecha_entrega").val()
+                fecha_entrega: $("#fecha_entrega").val(),
+                cod_usuario_entrega: $("#cod_usuario_entrega").val()
             };
 
-            if (!dataEncabezado.cod_empresa || !dataEncabezado.fecha_entrega) {
+            if (!dataEncabezado.cod_empresa || !dataEncabezado.fecha_entrega || !dataEncabezado.cod_usuario_entrega) {
                 Swal.fire("Error", "Debes completar todos los campos del encabezado", "warning");
                 return;
             }
@@ -69,6 +71,24 @@ function cargarEmpresas() {
         data.forEach(emp => {
             $empresa.append(`<option value="${emp.cod_empresa}">${emp.nombre}</option>`);
         });
+    });
+}
+
+function cargarUsuariosEntrega(token){
+    $.ajax({
+        url: "/entregas/usuarios",
+        method: "GET",
+        headers: { "Authorization": "Bearer " + token },
+        success: function (usuarios) {
+            const $select = $("#cod_usuario_entrega");
+            $select.empty().append('<option value="">Seleccione Usuario</option>');
+            usuarios.forEach(u => {
+                $select.append(`<option value="${u.cod_usuario}">${u.nombre}</option>`);
+            });
+        },
+        error: function (xhr) {
+            Swal.fire("Error", "Error al cargar usuarios", "error");
+        }
     });
 }
 

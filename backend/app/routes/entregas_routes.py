@@ -4,6 +4,8 @@ from typing import List, Optional
 from ..models.entregas_model import EncaEntregaCreate, MostrarEntregas, DetalleEntrega, AnulacionEntrega, DetalleEntregaDc
 from ..services.entregas_service import crear_entrega_contrasenia, crear_entrega_documentos, crear_detalles_entrega_contrasenia,crear_detalles_entrega_documentos ,obtener_entregas, obtener_entrega_completa, anular_entrega
 from ..utils.dependencies import obtener_usuario_desde_token
+from ..db.connection import get_connection
+
 
 router = APIRouter(prefix="/entregas",tags=["Entregas"])
 
@@ -93,18 +95,16 @@ def listar_entregas(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error en listar_entregas: {str(e)}")
 
-# endpoint para poder ver la entrega completa
+
 @router.get("/detalle/{cod_entrega}/{cod_empresa}")
 def ver_entrega_completa(cod_entrega: int, cod_empresa: int):
-
     try:
-        resultado = obtener_entrega_completa(cod_entrega, cod_empresa)
-        return resultado
-
+        return obtener_entrega_completa(cod_entrega, cod_empresa)
     except HTTPException as e:
         raise e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error en el endpoint: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error en el endpoint ver_entrega_completa: {str(e)}")
+    
     
 # endpoint para anular la Entrega
 @router.post("/anular")
@@ -118,4 +118,27 @@ def anular_entrega_endpoint(request: AnulacionEntrega):
         return {"menssage": "Entrega anulada exitosamente", "data": resultado}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al anular la entrega: {str(e)}")
-    
+
+# endpoint para la lista de usuarios
+@router.get("/usuarios")
+def listar_usuarios_entregas():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    query = """
+    SELECT u.cod_usuario, u.nombre
+    FROM usuarios u
+    INNER JOIN permisos p ON u.cod_usuario = p.cod_usuario
+    WHERE p.cod_opcion = 10
+        AND p.permiso = 'S'
+        AND u.estado = 'A';
+    """
+    cursor.execute(query)
+    usuarios = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return usuarios
+
+

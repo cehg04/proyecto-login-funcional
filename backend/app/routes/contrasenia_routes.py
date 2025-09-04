@@ -154,8 +154,7 @@ def imprimir_encabezado(cod_contrasenia: int, cod_empresa: int):
                 prov.nombre AS proveedor_nombre,
                 d.num_factura,
                 DATE_FORMAT(d.fecha_factura, '%Y-%m-%d') AS fecha_factura,
-                d.cod_moneda,
-                d.monto,
+                CONCAT(d.cod_moneda, ' ', FORMAT(d.monto, 2)) AS monto_con_moneda,
                 d.retension_iva,
                 d.retension_isr,
                 d.numero_retension_iva,
@@ -271,7 +270,7 @@ def imprimir_encabezado(cod_contrasenia: int, cod_empresa: int):
 
         # Filas
         for d in detalles:
-            monto_moneda = f"{d.get('cod_moneda', '')} {d.get('monto', '')}"
+            monto_moneda = d.get("monto_con_moneda", "")
             fecha_factura = d.get("fecha_factura", "")
             if fecha_factura:
                 try:

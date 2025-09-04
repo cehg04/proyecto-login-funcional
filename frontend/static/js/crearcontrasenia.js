@@ -242,6 +242,29 @@ function agregarDetalleATabla(detalle) {
     const hoy = new Date().toISOString().split('T')[0];
   $("#fecha_contrasenia").val(hoy);
 
+
+  // Inicialmente deshabilitar los inputs
+  $("#numero_retension_iva").prop("disabled", true);
+  $("#numero_retension_isr").prop("disabled", true);
+
+  // Toggle para IVA
+  $("#retension_iva").change(function () {
+    if ($(this).is(":checked")) {
+      $("#numero_retension_iva").prop("disabled", false);
+    } else {
+      $("#numero_retension_iva").prop("disabled", true).val("");
+    }
+  });
+
+  // Toggle para ISR
+  $("#retension_isr").change(function () {
+    if ($(this).is(":checked")) {
+      $("#numero_retension_isr").prop("disabled", false);
+    } else {
+      $("#numero_retension_isr").prop("disabled", true).val("");
+    }
+  });
+
 });
 
 

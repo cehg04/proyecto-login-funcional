@@ -24,11 +24,6 @@
                     <select id="cod_empresa" class="form-control" required></select>
                 </div>
                 <div class="mb-3">
-                    <label for="proveedor_nombre">Proveedor</label>
-                    <input type="text" id="proveedor_nombre" class="form-control" placeholder="Buscar proveedor...">
-                    <input type="hidden" id="cod_proveedor">
-                </div>
-                <div class="mb-3">
                     <label for="cod_tipo_documento">Tipo Documento</label>
                     <select id="cod_tipo_documento" class="form-control" required></select>
                 </div>
@@ -36,12 +31,42 @@
                     <label for="numero_documento">Número Documento</label>
                     <input type="number" id="numero_documento" class="form-control">
                 </div>
-        <div class="mt-2">
-            <button type="button" id="btnGuardarDocumento" class="btn btn-success">Guardar Documento</button>
-        </div>
-    </div>
+                
+                <!-- Campos de Retenciones -->
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="retension_iva">
+                    <label class="form-check-label" for="retension_iva">
+                        Retención IVA
+                    </label>
+                </div>
+                <div class="mb-3">
+                    <label for="numero_retension_iva">Número Retención IVA</label>
+                    <input type="number" id="numero_retension_iva" class="form-control" disabled>
+                </div>
+
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="retension_isr">
+                    <label class="form-check-label" for="retension_isr">
+                        Retención ISR
+                    </label>
+                </div>
+                <div class="mb-3">
+                    <label for="numero_retension_isr">Número Retención ISR</label>
+                    <input type="number" id="numero_retension_isr" class="form-control" disabled>
+                </div>
+
+                <div class="mt-2">
+                    <button type="button" id="btnGuardarDocumento" class="btn btn-success">Guardar Documento</button>
+                </div>
+            </div>
+
             <!-- Columna Derecha -->
             <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="proveedor_nombre">Proveedor</label>
+                    <input type="text" id="proveedor_nombre" class="form-control" placeholder="Buscar proveedor...">
+                    <input type="hidden" id="cod_proveedor">
+                </div>
                 <div class="mb-3">
                     <label for="nombre_solicitud">Nombre Solicitud</label>
                     <input type="text" id="nombre_solicitud" class="form-control" required>
@@ -71,6 +96,7 @@
 <script src="/static/js/validar_permisos.js"></script>
 <script src="/static/js/creardocumentos.js"></script>
 {% endblock %}
+
 
 
 

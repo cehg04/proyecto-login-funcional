@@ -13,7 +13,7 @@ def obtener_documentos_pendientes():
         sql = """
             SELECT
                 dv.cod_documento,
-                dv.cod_empresa,
+                emp.nombre AS empresa_nombre, 
                 dv.cod_tipo_documento,
                 dv.cod_proveedor,
                 dv.nombre_solicitud,
@@ -56,41 +56,45 @@ def obtener_documentos_varios():
     cursor = conn.cursor()
     try:
         cursor.execute("""
-        SELECT DISTINCT
-            d.cod_documento,
-            e.nombre AS empresa_nombre,
-            t.nombre_documento AS tipo_documento,
-            p.nombre AS proveedor_nombre,
-            d.nombre_solicitud,
-            d.numero_documento,
-            CONCAT(m.cod_moneda, ' ', FORMAT(d.monto, 2)) AS monto_con_moneda,  
-            d.observaciones,
-            CASE
-                WHEN d.estado = 'P' THEN 'Pendiente'
-                WHEN d.estado = 'E' THEN 'Entregado'
-                WHEN d.estado = 'R' THEN 'Recibido'
-                WHEN d.estado = 'X' THEN 'Anulado'
-            END AS estado
-        FROM documentos_varios d
-        JOIN empresas e ON d.cod_empresa = e.cod_empresa
-        JOIN tipo_documentos t ON d.cod_tipo_documento = t.cod_tipo_documento
-        JOIN proveedores p ON d.cod_proveedor = p.cod_proveedor AND d.cod_empresa = p.cod_empresa
-        JOIN monedas m ON d.cod_moneda = m.cod_moneda
-        WHERE d.estado IN ('P', 'E', 'R', 'X')
-        ORDER BY d.cod_documento DESC;
-        """)
+                SELECT 
+                    d.cod_documento,
+                    t.nombre_documento AS tipo_documento,
+                    e.nombre AS empresa_nombre,
+                    p.nombre AS proveedor_nombre,
+                    d.nombre_solicitud,
+                    d.numero_documento,
+                    CONCAT(m.cod_moneda, ' ', FORMAT(d.monto, 2)) AS monto_con_moneda,  
+                    COALESCE(d.numero_retension_iva, 'N/A') AS numero_retension_iva,
+                    COALESCE(d.numero_retension_isr, 'N/A') AS numero_retension_isr,
+                    d.observaciones,
+                    CASE
+                        WHEN d.estado = 'P' THEN 'Pendiente'
+                        WHEN d.estado = 'E' THEN 'Entregado'
+                        WHEN d.estado = 'R' THEN 'Recibido'
+                        WHEN d.estado = 'X' THEN 'Anulado'
+                    END AS estado
+                FROM documentos_varios d
+                JOIN empresas e ON d.cod_empresa = e.cod_empresa
+                JOIN tipo_documentos t ON d.cod_tipo_documento = t.cod_tipo_documento
+                LEFT JOIN proveedores p ON d.cod_proveedor = p.cod_proveedor AND d.cod_empresa = p.cod_empresa
+                JOIN monedas m ON d.cod_moneda = m.cod_moneda
+                WHERE d.estado IN ('P', 'E', 'R', 'X')
+                ORDER BY d.cod_documento DESC;
+            """)
         rows = cursor.fetchall()
         return [
-            {
-                "cod_documento": r[0],
-                "empresa_nombre": r[1],
-                "tipo_documento": r[2],
-                "proveedor_nombre": r[3],
-                "nombre_solicitud": r[4],
-                "numero_documento": r[5],
-                "monto_con_moneda": r[6],
-                "observaciones": r[7],
-                "estado": r[8]
+                {
+                    "cod_documento": r[0],
+                    "tipo_documento": r[1],
+                    "empresa_nombre": r[2],
+                    "proveedor_nombre": r[3],
+                    "nombre_solicitud": r[4],
+                    "numero_documento": r[5],
+                    "monto_con_moneda": r[6],
+                    "numero_retension_iva": r[7],
+                    "numero_retension_isr": r[8],
+                    "observaciones": r[9],
+                    "estado": r[10]
             }
             for r in rows
         ]
@@ -100,6 +104,8 @@ def obtener_documentos_varios():
     finally:
         cursor.close()
         conn.close()
+
+
 
 # servicio para anular documento
 def anular_documento(cod_documento: int):
@@ -145,8 +151,9 @@ def crear_documento_vario(doc: DocumentoVarioCreate):
             INSERT INTO documentos_varios (
                 cod_documento, cod_empresa, cod_tipo_documento,
                 cod_proveedor, nombre_solicitud, numero_documento,
-                cod_moneda, monto, observaciones, estado
-            ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                cod_moneda, monto, observaciones, estado, retension_iva, retension_isr,
+                numero_retension_iva, numero_retension_isr
+            ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """, (
             nuevo_cod,
             doc.cod_empresa,
@@ -157,7 +164,11 @@ def crear_documento_vario(doc: DocumentoVarioCreate):
             doc.cod_moneda,
             doc.monto,
             doc.observaciones,
-            'P'
+            'P',
+            doc.retencion_iva,
+            doc.retencion_isr,
+            doc.numero_retension_iva,
+            doc.numero_retension_isr
         ))
 
         conn.commit()

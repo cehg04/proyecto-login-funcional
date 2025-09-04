@@ -1,5 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
-from typing import List
+from fastapi import APIRouter, HTTPException
 from ..models.documentos_model import DocumentoVarioCreate, AnularDocumentoRequest, DocumentoVario
 from ..services.documentos_service import crear_documento_vario, obtener_documentos_varios, anular_documento, obtener_tipo_documentos, obtener_documentos_pendientes
 

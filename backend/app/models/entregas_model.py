@@ -16,6 +16,7 @@ class MostrarEntregas(BaseModel):
 class EncaEntregaCreate(BaseModel):
     cod_empresa: int
     fecha_entrega: date
+    cod_usuario_entrega: int
 
 # crear el detalle de las entregas de contraseñas
 class DetalleEntrega(BaseModel):

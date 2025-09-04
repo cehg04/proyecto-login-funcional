@@ -53,12 +53,12 @@ $(document).ready(function () {
         detalles.forEach(detalle => {
             tbody.append(`
             <tr>
-                <td>${detalle.num_factura || ''}</td>
+                <td class="text-center">${detalle.num_factura || ''}</td>
                 <td class="text-center">${detalle.monto_con_moneda || ''}</td>
                 <td class="text-center">${detalle.retension_iva || ''}</td>
                 <td class="text-center">${detalle.retension_isr || ''}</td>
-                <td>${detalle.numero_retension_iva || ''}</td>
-                <td>${detalle.numero_retension_isr || ''}</td>
+                <td class="text-center">${detalle.numero_retension_iva || ''}</td>
+                <td class="text-center">${detalle.numero_retension_isr || ''}</td>
                 <td class="text-center">${detalle.estado || ''}</td>
             </tr>
 

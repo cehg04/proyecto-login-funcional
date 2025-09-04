@@ -30,7 +30,12 @@ $(document).ready(function () {
             cod_moneda: $("#cod_moneda").val(),
             monto: parseFloat($("#monto").val()),
             observaciones: $("#observaciones").val(),
-            estado: "P" 
+            estado: "P",
+            retension_iva: $("#retension_iva").is(":checked") ? "S" : "N",
+            retension_isr: $("#retension_isr").is(":checked") ? "S" : "N",
+            numero_retension_iva: $("#numero_retension_iva").val() ? parseInt($("#numero_retension_iva").val()) : null,
+            numero_retension_isr: $("#numero_retension_isr").val() ? parseInt($("#numero_retension_isr").val()) : null,
+
         };
 
         // Validaciones simples
@@ -54,7 +59,31 @@ $(document).ready(function () {
             }
         });
     });
+      // Inicialmente deshabilitar los inputs
+      $("#numero_retension_iva").prop("disabled", true);
+      $("#numero_retension_isr").prop("disabled", true);
+
+      // Toggle para IVA
+      $("#retension_iva").change(function () {
+        if ($(this).is(":checked")) {
+          $("#numero_retension_iva").prop("disabled", false);
+        } else {
+          $("#numero_retension_iva").prop("disabled", true).val("");
+        }
+      });
+
+      // Toggle para ISR
+      $("#retension_isr").change(function () {
+        if ($(this).is(":checked")) {
+          $("#numero_retension_isr").prop("disabled", false);
+        } else {
+          $("#numero_retension_isr").prop("disabled", true).val("");
+        }
+      });
+
 });
+
+
 
 // funcion para cargar las empresas
   function cargarEmpresas() {

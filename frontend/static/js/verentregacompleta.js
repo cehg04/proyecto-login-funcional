@@ -20,11 +20,15 @@ $(document).ready(function () {
         url: `/entregas/detalle/${codEntrega}/${codEmpresa}`,
         method: 'GET',
         success: function (data) {
+            if (!data || !data.encabezado) {
+                Swal.fire("Error", "No se pudo cargar la entrega", "error");
+                return;
+            }
             mostrarEncabezado(data.encabezado);
-            mostrarDetalles(data.detalles);
+            mostrarDetalles(data.encabezado, data.detalles);
         },
         error: function (xhr) {
-            alert('Error al cargar datos: ' + (xhr.responseJSON?.detail || xhr.statusText));
+            Swal.fire("Error", "No se pudo cargar la entrega: " + (xhr.responseJSON?.detail || xhr.statusText), "error");
         }
     });
 
@@ -33,31 +37,60 @@ $(document).ready(function () {
         $('#numEntrega').text(encabezado.num_entrega || '');
         $('#tipoEntrega').text(encabezado.tipo_entrega || '');
         $('#estadoEntrega').text(encabezado.estado || '');
+        $('#nombreUsuarioEntrega').text(encabezado.nombre_usuario_entrega || '');
     }
 
-    // Mostrar detalles en tabla
-    function mostrarDetalles(detalles) {
-        const tbody = $('#tablaDetalles tbody');
-        tbody.empty();
+    // Mostrar detalles en tabla según tipo de entrega
+    function mostrarDetalles(encabezado, detalles) {
+        if (encabezado.tipo_entrega === "Documento con Contraseña") {
+            $("#tablaDCContainer").show();
+            $("#tablaDSContainer").hide();
 
-        if (!detalles || detalles.length === 0) {
-            tbody.append('<tr><td colspan="9" class="text-center">No hay detalles disponibles</td></tr>');
-            return;
+            const tbody = $("#tablaDC tbody");
+            tbody.empty();
+            detalles.forEach(d => {
+                tbody.append(`
+                    <tr>
+                        <td>${d.num_factura || "N/A"}</td>
+                        <td>${d.monto_con_moneda || 'N/A'}</td>
+                        <td>${d.retension_iva || "N/A"}</td>
+                        <td>${d.retension_isr || "N/A"}</td>
+                        <td>${d.numero_retension_iva || "N/A"}</td>
+                        <td>${d.numero_retension_isr || "N/A"}</td>
+                        <td>${d.estado || "Desconocido"}</td>
+                    </tr>
+                `);
+            });
+
+        } else if (encabezado.tipo_entrega === "Documento sin Contraseña") {
+            $("#tablaDCContainer").hide();
+            $("#tablaDSContainer").show();
+
+            const tbody = $("#tablaDS tbody");
+            tbody.empty();
+            detalles.forEach(d => {
+                tbody.append(`
+                    <tr>
+                        <td>${d.tipo_documento || 'N/A'}</td>
+                        <td>${d.proveedor_nombre || 'N/A'}</td>
+                        <td>${d.nombre_solicitud || 'N/A'}</td>
+                        <td>${d.numero_documento || 'N/A'}</td>
+                        <td>${d.monto_con_moneda || 'N/A'}</td>
+                        <td>${d.numero_retension_iva || 'N/A'}</td>
+                        <td>${d.numero_retension_isr || 'N/A'}</td>
+                        <td title="${d.observaciones ? d.observaciones : 'Sin observaciones'}">
+                            ${d.observaciones && d.observaciones.length > 20 
+                                ? d.observaciones.substring(0, 20) + '...' 
+                                : (d.observaciones || 'Sin observaciones')}
+                        </td>
+                        <td class="estado-${d.estado ? d.estado.toLowerCase().replace(/\s+/g, '-') : 'desconocido'}">
+                            ${d.estado || 'Sin estado'}
+                        </td>
+                    </tr>
+                `);
+            });
         }
-
-        detalles.forEach(detalle => {
-            tbody.append(`
-                <tr>
-                    <td>${detalle.num_factura || ''}</td>
-                    <td>${detalle.cod_moneda || ''}</td>
-                    <td>${detalle.monto ? parseFloat(detalle.monto).toFixed(2) : ''}</td>
-                    <td>${detalle.retension_iva || ''}</td>
-                    <td>${detalle.retension_isr || ''}</td>
-                    <td>${detalle.numero_retension_iva || ''}</td>
-                    <td>${detalle.numero_retension_isr || ''}</td>
-                    <td>${detalle.estado || ''}</td>
-                </tr>
-            `);
-        });
     }
 });
+
+

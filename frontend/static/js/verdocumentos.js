@@ -35,13 +35,14 @@ $(document).ready(function () {
                 else badgeClass = 'bg-secondary text-white'; 
                     tbody.append(`
                         <tr>
-                        <td>${doc.empresa_nombre}</td>
                         <td>${doc.tipo_documento}</td>
-                        <td>${doc.proveedor_nombre}</td>
-                        <td>${doc.nombre_solicitud}</td>
+                        <td>${doc.proveedor_nombre || "N/A"}</td>
+                        <td>${doc.nombre_solicitud || "N/A"}</td>
                         <td>${doc.numero_documento}</td>
-                        <td class="text-center">${doc.monto_con_moneda || ''}</td>
-                        <td>${doc.observaciones || ''}</td>
+                        <td>${doc.monto_con_moneda || ''}</td>
+                        <td>${doc.numero_retension_iva || "N/A"}</td>
+                        <td>${doc.numero_retension_isr || "N/A"}</td>
+                        <td title="${doc.observaciones || ''}">${doc.observaciones || "N/A"}</td>
                         <td><span class="badge ${badgeClass}">${doc.estado}</span></td>
                         <td>
                             <button class="btn btn-danger btn-sm btn-anular" data-cod="${doc.cod_documento}">Anular</button>
@@ -63,7 +64,9 @@ $(document).ready(function () {
                     pageLength: 10,
                     lengthMenu: [5, 10, 25, 50],
                     columnDefs: [
-                        { orderable: false, targets: [] }
+                        { orderable: false, targets: [9] },
+                        { className: "text-center", targets: [0, 3, 4, 5, 6, 8, 9] },
+                        { className: "truncate", targets: 7 }
                     ]
                 });
                     table.on('draw', function () {
@@ -122,4 +125,3 @@ $('#tablaDocumentos').on('click', '.btn-anular', function () {
 });
 
 });
-

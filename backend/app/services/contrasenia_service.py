@@ -106,7 +106,7 @@ def obtener_contrasenia_completa_filtrada(cod_contrasenia: int, cod_empresa: int
         # Detalle filtrado 
         query_detalle = """
         SELECT num_factura, 
-            CONCAT(cod_moneda, ' ', monto) AS monto_con_moneda,
+            CONCAT(cod_moneda, ' ', FORMAT(monto, 2)) AS monto_con_moneda,
             retension_iva, retension_isr,
             CASE
                 WHEN retension_iva = 'S' THEN 'Si Tiene'
@@ -116,7 +116,8 @@ def obtener_contrasenia_completa_filtrada(cod_contrasenia: int, cod_empresa: int
                 WHEN retension_isr = 'S' THEN 'Si Tiene'
                 WHEN retension_isr = 'N' THEN 'No Tiene'
             END AS retension_isr,
-            numero_retension_iva, numero_retension_isr,
+            COALESCE(numero_retension_iva, 'N/A') AS numero_retension_iva,
+            COALESCE(numero_retension_isr, 'N/A') AS numero_retension_isr,
             CASE
                 WHEN estado = 'R' THEN 'Recibido'
                 WHEN estado = 'P' THEN 'Pendiente'

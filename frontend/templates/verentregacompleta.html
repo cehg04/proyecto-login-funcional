@@ -28,6 +28,9 @@
             <div class="row mb-3">
                 <div class="col-md-3 fw-semibold">Estado:</div>
                 <div class="col-md-3" id="estadoEntrega"></div>
+                
+                <div class="col-md-3 fw-semibold">Entregado A:</div>
+                <div class="col-md-3" id="nombreUsuarioEntrega"></div>
             </div>
         </div>
     </div>
@@ -38,27 +41,52 @@
             Detalles
         </div>
         <div class="card-body table-responsive">
-            <table id="tablaDetalles" class="table table-hover table-striped table-bordered align-middle mb-0">
-                <thead class="table-secondary">
-                    <tr>
-                        <th scope="col" class="text-center">Número Factura</th>
-                        <th scope="col" class="text-center">Moneda</th>
-                        <th scope="col" class="text-end">Monto</th>
-                        <th scope="col" class="text-center">Retención IVA</th>
-                        <th scope="col" class="text-center">Retención ISR</th>
-                        <th scope="col" class="text-center">Número Ret. IVA</th>
-                        <th scope="col" class="text-center">Número Ret. ISR</th>
-                        <th scope="col" class="text-center">Estado</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Los detalles se inyectan con JS -->
-                </tbody>
-            </table>
+
+            <!-- Tabla para Documento con Contraseña (DC) -->
+            <div id="tablaDCContainer" style="display: none;">
+                <table id="tablaDC" class="table table-hover table-striped table-bordered align-middle mb-0">
+                    <thead class="table-secondary">
+                        <tr>
+                            <th class="text-center">Número Factura</th>
+                            <th class="text-center">Monto</th>
+                            <th class="text-center">Retención IVA</th>
+                            <th class="text-center">Retención ISR</th>
+                            <th class="text-center">Número Ret. IVA</th>
+                            <th class="text-center">Número Ret. ISR</th>
+                            <th class="text-center">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- DC detalles se inyectan con JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Tabla para Documento sin Contraseña (DS) -->
+            <div id="tablaDSContainer" style="display: none;">
+                <table id="tablaDS" class="table table-hover table-striped table-bordered align-middle mb-0">
+                    <thead class="table-secondary">
+                        <tr>
+                        <th>Tipo Documento</th>
+                        <th>Proveedor</th>
+                        <th>Nombre Solicitud</th>
+                        <th>Número Documento</th>
+                        <th>Monto</th>
+                        <th>No Retension IVA</th>
+                        <th>No Retension ISR</th>
+                        <th>Observaciones</th>
+                        <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- DS detalles se inyectan con JS -->
+                    </tbody>
+                </table>
+            </div>
+
         </div>
     </div>
 </div>
-
 {% endblock %}
 
 {% block extra_js %}
@@ -66,3 +94,4 @@
 <script src="/static/js/validar_permisos.js"></script>
 <script src="/static/js/verentregacompleta.js"></script>
 {% endblock %}
+
