@@ -248,7 +248,8 @@ def crear_detalles_entrega_contrasenia(detalles: List[DetalleEntrega]):
             WHERE cod_entrega = %s AND cod_empresa = %s
             FOR UPDATE
         """, (detalles[0].cod_entrega, detalles[0].cod_empresa))
-        linea = cursor.fetchone()[0] or 0
+        resultado = cursor.fetchone()
+        linea = resultado[0]
 
         # Preparar query de UPDATE para detalle_contrasenias
         sql_update = """
@@ -286,6 +287,7 @@ def crear_detalles_entrega_contrasenia(detalles: List[DetalleEntrega]):
 
         # Procesar cada detalle
         for d in detalles:
+
             # update primero
             cursor.execute(sql_update, (d.cod_contrasenia, d.cod_empresa_contrasenia, d.linea_contrasenia))
             total_actualizados += cursor.rowcount

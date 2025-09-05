@@ -15,6 +15,26 @@ $(document).ready(function () {
         }
     }
 
+    
+        if (validar_permisos(7) !== 'S') {
+        Swal.fire({
+        title: "Acceso denegado",
+        text: "No tienes permiso para ver entregas",
+        icon: "warning",
+        confirmButtonText: "OK"
+        }).then(() => {
+        window.location.href = "inicio.html";
+        });
+        return;
+    }
+        if (validar_permisos(8) !== 'S') {
+        $("#btnCrearEntrega").hide();
+    }
+
+    if (validar_permisos(8) !== 'S') {
+        $("#btnCrearEntregadoc").hide();
+    }
+    
     // Agregar filtros
     $('#filtrosContainer').html(`
         <div class="row mb-3">
@@ -107,6 +127,12 @@ $(document).ready(function () {
         ],
         responsive: true,
         pageLength: 10
+    });
+
+        table.on('draw', function () {
+        if (validar_permisos(9) !== 'S') {
+            $(".anular-entrega").remove();
+        }
     });
 
     //Funcion para anular la entrega

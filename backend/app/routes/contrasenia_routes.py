@@ -199,11 +199,6 @@ def imprimir_encabezado(cod_contrasenia: int, cod_empresa: int):
 
         # PDF en memoria (ticket 80x250 mm)
         buffer = BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=(80*mm, 150*mm),
-                                rightMargin=5, leftMargin=5,
-                                topMargin=5, bottomMargin=5)
-
-        story = []
         styles = getSampleStyleSheet()
 
         # Estilos personalizados
@@ -249,6 +244,8 @@ def imprimir_encabezado(cod_contrasenia: int, cod_empresa: int):
                 fecha_contrasenia = datetime.strptime(fecha_contrasenia, '%Y-%m-%d').strftime('%d/%m/%Y')
             except Exception:
                 pass 
+                
+        story = []
 
         # ENCABEZADO
         titulo = f"<b>{encabezado['empresa_nombre']}</b>"
@@ -307,9 +304,27 @@ def imprimir_encabezado(cod_contrasenia: int, cod_empresa: int):
         story.append(Paragraph(f"<b>EMISOR:</b> {nombre_emisor if nombre_emisor else ''}", centrado_style))
         story.append(Spacer(1, 1))
         story.append(Spacer(1, 10))
-
         story.append(Paragraph("5a. CALLE 5-19 ZONA 9 PBX: (502) 2427-5800 ", centrado_style))
 
+        # calcular altura del contenido
+        tmp_doc = SimpleDocTemplate(buffer, pagesize=(80*mm, 1000*mm))
+        tmp_story = list(story)
+        tmp_doc.build(tmp_story)
+
+        # medimos los altos reales en los puntos
+        from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate, Frame
+        story_height = sum([flow.wrap(80*mm, 1000*mm)[1] + flow.getSpaceAfter() for flow in story])
+
+        # convertir a mm y darle un margen extra
+        page_height = (story_height / 2.83465) + 20  
+        if page_height < 150:
+            page_height = 150
+
+        buffer.seek(0)
+        buffer.truncate(0)
+        doc = SimpleDocTemplate(buffer, pagesize=(80*mm, 150*mm),
+                                rightMargin=5, leftMargin=5,
+                                topMargin=5, bottomMargin=5)
         # Construir PDF
         doc.build(story)
 

@@ -9,6 +9,18 @@ $(document).ready(function () {
             return;
         }
 
+        if (validar_permisos(8) !== 'S') {
+        Swal.fire({
+        title: "Acceso denegado",
+        text: "No tienes permiso para Crear Entregas",
+        icon: "warning",
+        confirmButtonText: "OK"
+        }).then(() => {
+        window.location.href = "inicio.html";
+        });
+        return;
+  }
+
     cargarEmpresas();
     cargarDocumentosPendientes();
     cargarUsuariosEntrega();
