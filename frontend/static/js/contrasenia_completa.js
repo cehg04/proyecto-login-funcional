@@ -15,6 +15,32 @@ $(document).ready(function () {
         return;
     }
 
+    // 🔹 Colores para ENCABEZADO
+    function obtenerClaseBadgeEncabezado(estado) {
+        switch ((estado || '').toLowerCase()) {
+            case 'realizado':
+                return 'bg-success text-white'; // Verde
+            case 'anulado':
+                return 'bg-danger text-white'; // Rojo
+            default:
+                return 'bg-secondary text-white'; // Gris por defecto
+        }
+    }
+
+    // 🔹 Colores para DETALLE
+    function obtenerClaseBadgeDetalle(estado) {
+        switch ((estado || '').toLowerCase()) {
+            case 'entregado':
+                return 'bg-info text-white'; // Celeste
+            case 'recibido':
+                return 'bg-success text-white'; // Verde
+            case 'pendiente':
+                return 'bg-primary text-white'; // Azul
+            default:
+                return 'bg-secondary text-white'; // Gris por defecto
+        }
+    }
+
     // Petición AJAX al endpoint
     $.ajax({
         url: '/contrasenias/ver-completa-filtrada',
@@ -35,9 +61,11 @@ $(document).ready(function () {
     // Mostrar encabezado en HTML
     function mostrarEncabezado(encabezado) {
         $('#numContrasenia').text(encabezado.num_contrasenia || '');
-        $('#estadoContrasenia').text(encabezado.estado || '');
         $('#empresaNombre').text(encabezado.empresa_nombre || '');
         $('#proveedorNombre').text(encabezado.proveedor_nombre || '');
+
+        const claseBadge = obtenerClaseBadgeEncabezado(encabezado.estado);
+        $('#estadoContrasenia').html(`<span class="badge ${claseBadge}">${encabezado.estado || ''}</span>`);
     }
 
     // Mostrar detalles en tabla
@@ -51,21 +79,24 @@ $(document).ready(function () {
         }
 
         detalles.forEach(detalle => {
+            const claseBadgeDetalle = obtenerClaseBadgeDetalle(detalle.estado);
             tbody.append(`
-            <tr>
-                <td class="text-center">${detalle.num_factura || ''}</td>
-                <td class="text-center">${detalle.monto_con_moneda || ''}</td>
-                <td class="text-center">${detalle.retension_iva || ''}</td>
-                <td class="text-center">${detalle.retension_isr || ''}</td>
-                <td class="text-center">${detalle.numero_retension_iva || ''}</td>
-                <td class="text-center">${detalle.numero_retension_isr || ''}</td>
-                <td class="text-center">${detalle.estado || ''}</td>
-            </tr>
-
+                <tr>
+                    <td class="text-center">${detalle.num_factura || ''}</td>
+                    <td class="text-center">${detalle.monto_con_moneda || ''}</td>
+                    <td class="text-center">${detalle.retension_iva || ''}</td>
+                    <td class="text-center">${detalle.retension_isr || ''}</td>
+                    <td class="text-center">${detalle.numero_retension_iva || ''}</td>
+                    <td class="text-center">${detalle.numero_retension_isr || ''}</td>
+                    <td class="text-center">
+                        <span class="badge ${claseBadgeDetalle}">${detalle.estado || ''}</span>
+                    </td>
+                </tr>
             `);
         });
     }
 });
+
 
 
 

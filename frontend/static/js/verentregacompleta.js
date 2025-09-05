@@ -15,6 +15,32 @@ $(document).ready(function () {
         return;
     }
 
+    // 🔹 Colores para ENCABEZADO
+    function obtenerClaseBadgeEncabezado(estado) {
+        switch ((estado || '').toLowerCase()) {
+            case 'pendiente':
+                return 'bg-warning text-dark'; // Amarillo
+            case 'recibido':
+                return 'bg-success text-white'; // Verde
+            case 'anulado':
+                return 'bg-danger text-white'; // Rojo
+            default:
+                return 'bg-secondary text-white'; // Gris por defecto
+        }
+    }
+
+    // 🔹 Colores para DETALLE
+    function obtenerClaseBadgeDetalle(estado) {
+        switch ((estado || '').toLowerCase()) {
+            case 'pendiente':
+                return 'bg-warning text-dark'; // Amarillo
+            case 'confirmado':
+                return 'bg-success text-white'; // Verde
+            default:
+                return 'bg-secondary text-white'; // Gris
+        }
+    }
+
     // Petición AJAX al endpoint
     $.ajax({
         url: `/entregas/detalle/${codEntrega}/${codEmpresa}`,
@@ -36,8 +62,10 @@ $(document).ready(function () {
     function mostrarEncabezado(encabezado) {
         $('#numEntrega').text(encabezado.num_entrega || '');
         $('#tipoEntrega').text(encabezado.tipo_entrega || '');
-        $('#estadoEntrega').text(encabezado.estado || '');
         $('#nombreUsuarioEntrega').text(encabezado.nombre_usuario_entrega || '');
+
+        const claseBadge = obtenerClaseBadgeEncabezado(encabezado.estado);
+        $('#estadoEntrega').html(`<span class="badge ${claseBadge}">${encabezado.estado || ''}</span>`);
     }
 
     // Mostrar detalles en tabla según tipo de entrega
@@ -49,6 +77,7 @@ $(document).ready(function () {
             const tbody = $("#tablaDC tbody");
             tbody.empty();
             detalles.forEach(d => {
+                const claseBadgeDetalle = obtenerClaseBadgeDetalle(d.estado);
                 tbody.append(`
                     <tr>
                         <td>${d.num_factura || "N/A"}</td>
@@ -57,7 +86,7 @@ $(document).ready(function () {
                         <td>${d.retension_isr || "N/A"}</td>
                         <td>${d.numero_retension_iva || "N/A"}</td>
                         <td>${d.numero_retension_isr || "N/A"}</td>
-                        <td>${d.estado || "Desconocido"}</td>
+                        <td><span class="badge ${claseBadgeDetalle}">${d.estado || "Desconocido"}</span></td>
                     </tr>
                 `);
             });
@@ -69,6 +98,7 @@ $(document).ready(function () {
             const tbody = $("#tablaDS tbody");
             tbody.empty();
             detalles.forEach(d => {
+                const claseBadgeDetalle = obtenerClaseBadgeDetalle(d.estado);
                 tbody.append(`
                     <tr>
                         <td>${d.tipo_documento || 'N/A'}</td>
@@ -83,14 +113,13 @@ $(document).ready(function () {
                                 ? d.observaciones.substring(0, 20) + '...' 
                                 : (d.observaciones || 'Sin observaciones')}
                         </td>
-                        <td class="estado-${d.estado ? d.estado.toLowerCase().replace(/\s+/g, '-') : 'desconocido'}">
-                            ${d.estado || 'Sin estado'}
-                        </td>
+                        <td><span class="badge ${claseBadgeDetalle}">${d.estado || 'Sin estado'}</span></td>
                     </tr>
                 `);
             });
         }
     }
 });
+
 
 

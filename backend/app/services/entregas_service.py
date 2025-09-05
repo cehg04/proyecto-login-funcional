@@ -461,8 +461,9 @@ def obtener_entrega_completa(cod_entrega: int, cod_empresa: int):
         query_encabezado = """
             SELECT
                 e.cod_entrega,
-                e.cod_empresa,
+                emp.nombre AS empresa_nombre,
                 e.num_entrega,
+                DATE_FORMAT(e.fecha_entrega, '%Y-%m-%d') AS fecha_entrega,
                 CASE
                     WHEN e.tipo_entrega = 'DC' THEN 'Documento con Contraseña'
                     WHEN e.tipo_entrega = 'DS' THEN 'Documento sin Contraseña'
@@ -476,6 +477,7 @@ def obtener_entrega_completa(cod_entrega: int, cod_empresa: int):
                 u.nombre AS nombre_usuario_entrega
             FROM enca_entregas e
             LEFT JOIN usuarios u ON e.cod_usuario_entrega = u.cod_usuario
+            JOIN empresas emp ON e.cod_empresa = emp.cod_empresa
             WHERE e.cod_entrega = %s AND e.cod_empresa = %s
         """
         cursor.execute(query_encabezado, (cod_entrega, cod_empresa))
@@ -488,8 +490,9 @@ def obtener_entrega_completa(cod_entrega: int, cod_empresa: int):
         if encabezado["tipo_entrega"] == "Documento con Contraseña":
 
             query_detalle = """
-                select
+                SELECT
                     COALESCE(d.num_factura, 'N/A') AS num_factura,
+                    prov.nombre AS proveedor_nombre,
                     CONCAT(d.cod_moneda, ' ', FORMAT(d.monto, 2)) AS monto_con_moneda,  
                     CASE
                         WHEN d.retension_iva = 'S' THEN 'Si Tiene'
@@ -507,10 +510,23 @@ def obtener_entrega_completa(cod_entrega: int, cod_empresa: int):
                         WHEN d.estado = 'P' THEN 'Pendiente'
                         WHEN d.estado = 'C' THEN 'Confirmado'
                     END AS estado
-                    FROM detalle_entregas d
-                    WHERE d.cod_entrega = %s AND d.cod_empresa = %s
-                    ORDER BY d.linea
-            """
+                FROM detalle_entregas d
+                LEFT JOIN detalle_contrasenias dc 
+                    ON d.cod_contrasenia = dc.cod_contrasenia
+                    AND d.cod_empresa_contrasenia = dc.cod_empresa
+                    AND d.linea_contrasenia = dc.linea
+                LEFT JOIN enca_contrasenias ec 
+                    ON dc.cod_contrasenia = ec.cod_contrasenia
+                    AND dc.cod_empresa = ec.cod_empresa
+                LEFT JOIN documentos_varios dv 
+                    ON d.cod_documento = dv.cod_documento
+                LEFT JOIN proveedores prov 
+                    ON (ec.cod_proveedor = prov.cod_proveedor AND ec.cod_empresa_proveedor = prov.cod_empresa)
+                    OR (dv.cod_proveedor = prov.cod_proveedor AND dv.cod_empresa = prov.cod_empresa)
+                WHERE d.cod_entrega = %s 
+                AND d.cod_empresa = %s
+                ORDER BY d.linea;
+                            """
         else:
              query_detalle = """
                     SELECT
@@ -525,11 +541,9 @@ def obtener_entrega_completa(cod_entrega: int, cod_empresa: int):
                         COALESCE(dv.numero_retension_isr, 'N/A') AS numero_retension_isr,
                         dv.observaciones,
                         CASE
-                            WHEN dv.estado = 'P' THEN 'Pendiente'
-                            WHEN dv.estado = 'E' THEN 'Entregado'
-                            WHEN dv.estado = 'R' THEN 'Recibido'
-                            WHEN dv.estado = 'X' THEN 'Anulado'
-                            ELSE 'Sin Documento'
+                            WHEN d.estado = 'P' THEN 'Pendiente'
+                            WHEN d.estado = 'C' THEN 'Confirmado'
+                            ELSE 'Sin Estado'
                         END AS estado
                     FROM detalle_entregas d
                     LEFT JOIN documentos_varios dv 

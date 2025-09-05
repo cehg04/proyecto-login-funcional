@@ -99,6 +99,7 @@ $(document).ready(function () {
                         <div class= "btn-group" role="group">
                         <button class="btn btn-primary btn-sm ver-detalle" data-cod="${row.cod_entrega}" data-empresa="${row.cod_empresa}"> Mostrar </button>
                         <button class="btn btn-danger btn-sm anular-entrega" data-cod="${row.cod_entrega}" data-empresa="${row.cod_empresa}">Anular</button>
+                        <button class="btn btn-warning btn-sm btn-imprimir" data-cod="${row.cod_entrega}" data-empresa="${row.cod_empresa}">Imprimir</button>
                         </div>
                     `;
                 }
@@ -198,6 +199,13 @@ $('#tablaEntregas').on('click', '.anular-entrega', function () {
             anularEntrega(codEntrega, codEmpresa); // tu función ya lista
         }
     });
+});
+
+    // Boton Imprimir contraseña
+$('#tablaEntregas').on('click', '.btn-imprimir', function() {
+    let cod = $(this).data('cod');
+    let empresa = $(this).data('empresa');
+    window.open(`/entregas/imprimir-entrega/${cod}/${empresa}`, '_blank');
 });
 
 

@@ -1,10 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import StreamingResponse
 from datetime import datetime
 from typing import List, Optional
 from ..models.entregas_model import EncaEntregaCreate, MostrarEntregas, DetalleEntrega, AnulacionEntrega, DetalleEntregaDc
 from ..services.entregas_service import crear_entrega_contrasenia, crear_entrega_documentos, crear_detalles_entrega_contrasenia,crear_detalles_entrega_documentos ,obtener_entregas, obtener_entrega_completa, anular_entrega
 from ..utils.dependencies import obtener_usuario_desde_token
 from ..db.connection import get_connection
+from reportlab.lib.pagesizes import mm
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from io import BytesIO
 
 
 router = APIRouter(prefix="/entregas",tags=["Entregas"])
@@ -141,4 +147,116 @@ def listar_usuarios_entregas():
 
     return usuarios
 
+# end-point para generar el PDF en formato ticket
+@router.get("/imprimir-entrega/{cod_entrega}/{cod_empresa}")
+def imprimir_entrega(cod_entrega: int, cod_empresa: int):
+    try:
+        # Obtener datos desde el service
+        resultado = obtener_entrega_completa(cod_entrega, cod_empresa)
+        encabezado = resultado["encabezado"]
+        detalles = resultado["detalles"]
 
+        if not encabezado:
+            raise HTTPException(status_code=404, detail="Entrega no encontrada")
+
+        #  Obtener nombre del usuario que entrega
+        nombre_emisor = ""
+        cod_usuario = encabezado.get("cod_usuario_entrega")
+        if cod_usuario:
+            conn2 = get_connection()
+            cursor2 = conn2.cursor(dictionary=True)
+            cursor2.execute("SELECT nombre FROM usuarios WHERE cod_usuario = %s", (cod_usuario,))
+            usuario_row = cursor2.fetchone()
+            if usuario_row:
+                nombre_emisor = usuario_row.get("nombre", "")
+            cursor2.close()
+            conn2.close()
+
+        #  Preparar PDF en memoria
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=(80*mm, 150*mm),
+                                rightMargin=5, leftMargin=5,
+                                topMargin=5, bottomMargin=5)
+        story = []
+        styles = getSampleStyleSheet()
+
+        # Estilos
+        titulo_style = ParagraphStyle(name='Titulo', parent=styles['Normal'], fontSize=16, alignment=1, spaceAfter=6, fontName='Times-Bold')
+        subtitulo_style = ParagraphStyle(name='Subtitulo', parent=styles['Normal'], fontSize=9, alignment=1, spaceAfter=4, fontName='Times-Roman')
+        centrado_style = ParagraphStyle(name='Centrado', parent=styles['Normal'], alignment=1, fontSize=7, fontName='Times-Roman')
+
+        # Formatear fecha
+        fecha_entrega = encabezado.get("fecha_entrega", "")
+        if fecha_entrega:
+            try:
+                fecha_entrega = datetime.strptime(fecha_entrega, '%Y-%m-%d').strftime('%d/%m/%Y')
+            except Exception:
+                pass
+
+        # Encabezado del ticket
+        story.append(Paragraph(f"<b>{encabezado.get('empresa_nombre', '')}</b>", titulo_style))
+        story.append(Paragraph(f"Entrega No. <b>{encabezado.get('num_entrega', '')}</b>", subtitulo_style))
+        story.append(Paragraph(f"Fecha: {fecha_entrega}", subtitulo_style))
+        story.append(Spacer(1, 6))
+        story.append(Paragraph("SE ENTREGAN LOS SIGUIENTES DOCUMENTOS", centrado_style))
+        story.append(Spacer(1, 6))
+
+        # definir un estilo para las celdas 
+        celda_style = ParagraphStyle(
+            name='Celda',
+            fontSize=7,
+            leading=8,
+            alignment=1,
+            fontName='Times-Roman'
+        )
+
+        # Detalle según tipo de entrega
+        if encabezado["tipo_entrega"] == "Documento con Contraseña":
+            data = [["Factura", "Proveedor", "Monto"]]
+            for d in detalles:
+                data.append([
+                    Paragraph(str(d.get("num_factura", "")), centrado_style),
+                    Paragraph(str(d.get("proveedor_nombre", "")), celda_style),
+                    Paragraph(str(d.get("monto_con_moneda", "")), centrado_style )
+                ])
+            col_widths = [20*mm, 25*mm, 20*mm]
+        else:
+            data = [["Documento", "Proveedor", "Nombre Solicitud", "Monto"]]
+            for d in detalles:
+                data.append([
+                    d.get("numero_documento", ""),
+                    Paragraph(str(d.get("proveedor_nombre", "")), celda_style),
+                    d.get("nombre_solicitud", ""),
+                    d.get("monto_con_moneda", "")
+                ])
+            col_widths = [15*mm, 20*mm, 23*mm, 18*mm]
+
+        table = Table(data, colWidths=col_widths)
+        table.setStyle(TableStyle([
+            ('GRID', (0,0), (-1,-1), 0.5, colors.black),
+            ('BACKGROUND', (0,0), (-1,0), colors.black),
+            ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+            ('ALIGN', (0,0), (-1,-1), 'CENTER'),     # Centrar horizontal
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),    # Centrar vertical
+            ('FONTSIZE', (0,0), (-1,-1), 7),
+            ('BOTTOMPADDING', (0,0), (-1,0), 3),
+            ('TOPPADDING', (0,0), (-1,-1), 3),       # Opcional: ajustar padding
+            ('BOTTOMPADDING', (0,0), (-1,-1), 3),
+        ]))
+        story.append(table)
+        story.append(Spacer(1, 8))
+
+        story.append(Spacer(1, 12))
+
+        story.append(Paragraph(f"<b>EMISOR:</b> {nombre_emisor}", centrado_style))
+
+
+        #  Construir PDF
+        doc.build(story)
+        buffer.seek(0)
+
+        return StreamingResponse(buffer, media_type="application/pdf",
+                                 headers={"Content-Disposition": f"inline; filename=entrega_{cod_entrega}.pdf"})
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
