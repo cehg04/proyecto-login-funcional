@@ -184,9 +184,9 @@ def imprimir_encabezado(cod_contrasenia: int, cod_empresa: int):
         encabezado = rows[0]
         detalles = rows
 
-        # obtenemos el nombre del usuario creador
-        usuario_creacion = encabezado.get("usuario_creacion")
+        # Nombre del usuario creador
         nombre_emisor = ""
+        usuario_creacion = encabezado.get("usuario_creacion")
         if usuario_creacion:
             conn2 = get_connection()
             cursor2 = conn2.cursor(dictionary=True)
@@ -197,92 +197,61 @@ def imprimir_encabezado(cod_contrasenia: int, cod_empresa: int):
             cursor2.close()
             conn2.close()
 
-        # PDF en memoria (ticket 80x250 mm)
+        # PDF en memoria
         buffer = BytesIO()
         styles = getSampleStyleSheet()
 
         # Estilos personalizados
         titulo_style = ParagraphStyle(
-            name='TituloGrande',
-            parent=styles['Normal'],
-            fontSize=16,
-            alignment=1,  
-            spaceAfter=6,
-            leading=16,
-            fontName='Times-Bold'
+            name='TituloGrande', parent=styles['Normal'],
+            fontSize=16, alignment=1, spaceAfter=2, leading=16, fontName='Times-Bold'
         )
         subtitulo_style = ParagraphStyle(
-            name='Subtitulo',
-            parent=styles['Normal'],
-            fontSize=9,
-            alignment=1,  
-            spaceAfter=6,
-            leading=12,
-            fontName='Times-Roman'
+            name='Subtitulo', parent=styles['Normal'],
+            fontSize=9, alignment=1, spaceAfter=2, leading=12, fontName='Times-Roman'
         )
         centrado_style = ParagraphStyle(
-            name='Centrado',
-            parent=styles['Normal'],
-            alignment=1,  
-            fontSize=7,
-            fontName='Times-Roman',
+            name='Centrado', parent=styles['Normal'],
+            alignment=1, fontSize=7, fontName='Times-Roman', spaceAfter=1
         )
         encabezado_style = ParagraphStyle(
-            name='Encabezado',
-            parent=styles['Normal'],
-            fontSize=8,
-            alignment=0,  
-            spaceAfter=4,
-            leading=10,
-            fontName='Times-Roman'
+            name='Encabezado', parent=styles['Normal'],
+            fontSize=8, alignment=0, spaceAfter=2, leading=10, fontName='Times-Roman'
         )
 
-        # formato de fecha
+        # Formato de fecha
         fecha_contrasenia = encabezado.get("fecha_contrasenia", "")
         if fecha_contrasenia:
             try:
                 fecha_contrasenia = datetime.strptime(fecha_contrasenia, '%Y-%m-%d').strftime('%d/%m/%Y')
-            except Exception:
-                pass 
-                
+            except:
+                pass
+
+        # Story
         story = []
 
-        # ENCABEZADO
-        titulo = f"<b>{encabezado['empresa_nombre']}</b>"
-        story.append(Paragraph(titulo, titulo_style))
-        subtitulo = f"Contraseña No. <b>{encabezado['num_contrasenia']}</b>"
-        story.append(Paragraph(subtitulo, subtitulo_style))
-        story.append(Spacer(1, 6))
-
+        # Encabezado
+        story.append(Paragraph(f"<b>{encabezado['empresa_nombre']}</b>", titulo_style))
+        story.append(Paragraph(f"Contraseña No. <b>{encabezado['num_contrasenia']}</b>", subtitulo_style))
+        story.append(Spacer(1, 2))
         story.append(Paragraph(f"GUATEMALA, {fecha_contrasenia}", encabezado_style))
         story.append(Paragraph(f"<b>RECIBIMOS DE:</b> {encabezado['proveedor_nombre']}", encabezado_style))
-        story.append(Spacer(1, 8))
-
-        # texto agregado del formato
+        story.append(Spacer(1, 2))
         story.append(Paragraph("LOS SIGUIENTES DOCUMENTOS PARA REVISION Y PAGO", centrado_style))
-        story.append(Spacer(1, 8))
+        story.append(Spacer(1, 2))
 
-        # Cabecera de tabla
+        # Tabla de documentos
         data = [["FACTURA No.", "FECHA", "MONTO"]]
-
-        # Filas
         for d in detalles:
-            monto_moneda = d.get("monto_con_moneda", "")
-            fecha_factura = d.get("fecha_factura", "")
+            fecha_factura = d.get("fecha_factura","")
             if fecha_factura:
                 try:
                     fecha_factura = datetime.strptime(fecha_factura, '%Y-%m-%d').strftime('%d/%m/%Y')
-                except Exception:
+                except:
                     pass
-            data.append([
-                d.get("num_factura", ""),
-                fecha_factura,
-                monto_moneda
-                
-            ])
+            data.append([d.get("num_factura",""), fecha_factura, d.get("monto_con_moneda","")])
 
-        # Tabla
-        table = Table(data, colWidths=[25*mm, 22*mm, 22*mm, 20*mm])
+        table = Table(data, colWidths=[25*mm, 22*mm, 22*mm])
         table.setStyle(TableStyle([
             ('BACKGROUND', (0,0), (-1,0), colors.black),
             ('TEXTCOLOR', (0,0), (-1,0), colors.white),
@@ -292,49 +261,35 @@ def imprimir_encabezado(cod_contrasenia: int, cod_empresa: int):
             ('BOTTOMPADDING', (0,0), (-1,0), 3),
             ('GRID', (0,0), (-1,-1), 0.5, colors.black),
         ]))
-
         story.append(table)
-        story.append(Spacer(1, 8))
-        story.append(Paragraph("LOS DIAS DE PAGOS MIERCOLES DE 14:00 A 16:00 HORAS", centrado_style))
-        story.append(Paragraph("LOS DIAS DE PAGOS VIERNES DE 14:00 A 15:00 HORAS", centrado_style))
+        story.append(Spacer(1, 2))
+
+        # Pie de información y firma
+        story.append(Paragraph("DIAS DE PAGOS MIERCOLES DE 14:00 A 16:00 HORAS", centrado_style))
+        story.append(Paragraph("VIERNES DE 14:00 A 15:00 HORAS", centrado_style))
         story.append(Paragraph("RECEPCION DE FACTURAS: LUNES, MIERCOLES Y VIERNES DE 8:00 AM A 12:00PM", centrado_style))
-        story.append(Spacer(1, 18))
+        story.append(Spacer(1, 2))
+        story.append(Paragraph(f"<b>EMISOR:</b> {nombre_emisor}", centrado_style))
+        story.append(Paragraph("5a. CALLE 5-19 ZONA 9 PBX: (502) 2427-5800", centrado_style))
 
-        # linea para nuestra firma
-        story.append(Paragraph(f"<b>EMISOR:</b> {nombre_emisor if nombre_emisor else ''}", centrado_style))
-        story.append(Spacer(1, 1))
-        story.append(Spacer(1, 10))
-        story.append(Paragraph("5a. CALLE 5-19 ZONA 9 PBX: (502) 2427-5800 ", centrado_style))
-
-        # calcular altura del contenido
-        tmp_doc = SimpleDocTemplate(buffer, pagesize=(80*mm, 1000*mm))
-        tmp_story = list(story)
-        tmp_doc.build(tmp_story)
-
-        # medimos los altos reales en los puntos
-        from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate, Frame
-        story_height = sum([flow.wrap(80*mm, 1000*mm)[1] + flow.getSpaceAfter() for flow in story])
-
-        # convertir a mm y darle un margen extra
-        page_height = (story_height / 2.83465) + 20  
-        if page_height < 150:
-            page_height = 150
-
-        buffer.seek(0)
-        buffer.truncate(0)
-        doc = SimpleDocTemplate(buffer, pagesize=(80*mm, 150*mm),
-                                rightMargin=5, leftMargin=5,
-                                topMargin=5, bottomMargin=5)
-        # Construir PDF
+        # Tamaño exacto de ticket: 68.75 x 105.1 mm
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=(73*mm, 110*mm),
+            rightMargin=2, leftMargin=2, topMargin=2, bottomMargin=2
+        )
         doc.build(story)
-
         buffer.seek(0)
+
         return StreamingResponse(buffer, media_type="application/pdf", headers={
             "Content-Disposition": f"inline; filename=ticket_{cod_contrasenia}.pdf"
         })
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+
 
 # ---------------- funcion para obtener los detalles de las contraseñas ------------------------------------------------------------
 @router.get("/detalles-pendientes")

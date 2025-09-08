@@ -245,27 +245,16 @@ def imprimir_entrega(cod_entrega: int, cod_empresa: int):
         ]))
         story.append(table)
         story.append(Spacer(1, 8))
-
         story.append(Spacer(1, 12))
+        story.append(Paragraph(f"<b>Entrega A:</b> {nombre_emisor}", centrado_style))
 
-        story.append(Paragraph(f"<b>EMISOR:</b> {nombre_emisor}", centrado_style))
-
-                # calcular altura del contenido
-        tmp_doc = SimpleDocTemplate(buffer, pagesize=(80*mm, 1000*mm))
-        tmp_story = list(story)
-        tmp_doc.build(tmp_story)
-
-        # medimos los altos reales en los puntos
-        from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate, Frame
-        story_height = sum([flow.wrap(80*mm, 1000*mm)[1] + flow.getSpaceAfter() for flow in story])
-
-        # convertir a mm y darle un margen extra
-        page_height = (story_height / 2.83465) + 20  
-        if page_height < 150:
-            page_height = 150
-
-        buffer.seek(0)
-        buffer.truncate(0)
+        
+        # Tamaño exacto de ticket: 68.75 x 105.1 mm
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=(73*mm, 110*mm),
+            rightMargin=2, leftMargin=2, topMargin=2, bottomMargin=2
+        )
 
         #  Construir PDF
         doc.build(story)
