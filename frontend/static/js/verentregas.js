@@ -1,6 +1,5 @@
 $(document).ready(function () {
 
-    //funcion para extraer el cod_usuario
     function getUsuarioIdFromToken() {
         const token = localStorage.getItem('token');
         if (!token) return null;
@@ -34,8 +33,7 @@ $(document).ready(function () {
     if (validar_permisos(8) !== 'S') {
         $("#btnCrearEntregadoc").hide();
     }
-    
-    // Agregar filtros
+
     $('#filtrosContainer').html(`
         <div class="row mb-3">
             <div class="col-md-3">
@@ -58,12 +56,10 @@ $(document).ready(function () {
         </div>
     `);
 
-    // Fecha por defecto hoy
     const today = new Date().toISOString().split('T')[0];
     $('#fechaInicio').val(today);
     $('#fechaFin').val(today);
 
-    // Cargar empresas
     $.get('/contrasenias/empresas', function(data) {
         const select = $('#empresaSelect');
         data.forEach(empresa => {
@@ -71,17 +67,15 @@ $(document).ready(function () {
         });
     });
 
-    // Inicializar DataTable
     const table = $("#tablaEntregas").DataTable({
         ajax: {
             url: "/entregas/encabezados",
             dataSrc: "",
             data: function(d) {
-                // Enviar filtros al backend
                 d.fecha_inicio = $('#fechaInicio').val();
                 d.fecha_fin = $('#fechaFin').val() || "";
                 d.cod_empresa = $('#empresaSelect').val() || "";
-                console.log("Filtros enviados:", $.param(d)); // <--- depuración
+                console.log("Filtros enviados:", $.param(d)); 
             }
         },
         columns: [
@@ -91,10 +85,9 @@ $(document).ready(function () {
                 data: "fecha_entrega", 
                 title: "Fecha Entrega",
                 render: function(data) {
-                    // data = "YYYY-MM-DD"
                     if(!data) return "";
-                    const partes = data.split('-'); // ["2025","08","26"]
-                    return `${partes[2]}/${partes[1]}/${partes[0]}`; // "26/08/2025"
+                    const partes = data.split('-'); 
+                    return `${partes[2]}/${partes[1]}/${partes[0]}`; 
                 }
             },
             { data: "tipo_entrega", title: "Tipo de Entrega" },
@@ -135,7 +128,6 @@ $(document).ready(function () {
         }
     });
 
-    //Funcion para anular la entrega
     function anularEntrega(cod_entrega, cod_empresa) {
         const usuario_x = getUsuarioIdFromToken();
         if (!usuario_x) {
@@ -168,7 +160,7 @@ $(document).ready(function () {
                     icon: "success",
                     confirmButtonText: "OK"
                 }).then(() => {
-                    table.ajax.reload(null, false); // recarga manteniendo la paginación
+                    table.ajax.reload(null, false);
                 });
             },
             error: function(error) {
@@ -183,14 +175,11 @@ $(document).ready(function () {
 });
     }
 
-    // Botón filtrar
     $('#btnFiltrar').click(function() {
         table.ajax.reload();
     });
 
-    // Boton para mostrar
 $('#tablaEntregas').on('click', '.ver-detalle', function() {
-    //obtener datos de la fila desde el dataTable
     const rowData = table.row($(this).parents('tr')).data();
 
     if(!rowData) {
@@ -201,12 +190,10 @@ $('#tablaEntregas').on('click', '.ver-detalle', function() {
     const codEntrega = rowData.cod_entrega;
     const codEmpresa = rowData.cod_empresa;
 
-    // Redirigimos a una sola vista
     window.location.href = `/verentregacompleta.html?cod_entrega=${codEntrega}&cod_empresa=${codEmpresa}`;
 });
 
 
-    // Acción al hacer click en "Anular"
 $('#tablaEntregas').on('click', '.anular-entrega', function () {
     const codEntrega = $(this).data('cod');
     const codEmpresa = $(this).data('empresa');
@@ -222,19 +209,16 @@ $('#tablaEntregas').on('click', '.anular-entrega', function () {
         cancelButtonText: 'Cancelar'
     }).then((result) => {
         if (result.isConfirmed) {
-            anularEntrega(codEntrega, codEmpresa); // tu función ya lista
+            anularEntrega(codEntrega, codEmpresa); 
         }
     });
 });
 
-    // Boton Imprimir contraseña
 $('#tablaEntregas').on('click', '.btn-imprimir', function() {
     let cod = $(this).data('cod');
     let empresa = $(this).data('empresa');
     window.open(`/entregas/imprimir-entrega/${cod}/${empresa}`, '_blank');
 });
-
-
 
 });
 

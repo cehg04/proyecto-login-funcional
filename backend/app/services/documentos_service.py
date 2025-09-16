@@ -50,7 +50,7 @@ def obtener_documentos_pendientes():
             conn.close()
 
 
-# servicio para obtener documentos varios sin duplicados
+# funcion para obtener documentos varios sin duplicados
 def obtener_documentos_varios():
     conn = get_connection()
     cursor = conn.cursor()
@@ -107,7 +107,7 @@ def obtener_documentos_varios():
 
 
 
-# servicio para anular documento
+# funcion para anular documento
 def anular_documento(cod_documento: int):
     conn = get_connection()
     cursor = conn.cursor()
@@ -133,7 +133,7 @@ def anular_documento(cod_documento: int):
         cursor.close()
         conn.close()
 
-# servicio para crear un documento
+# funcion para crear un documento
 def crear_documento_vario(doc: DocumentoVarioCreate):
     conn = None
     cursor = None

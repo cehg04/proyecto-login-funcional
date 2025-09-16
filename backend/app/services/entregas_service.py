@@ -1,9 +1,11 @@
 from datetime import datetime
+import logging
 from fastapi import HTTPException
 from typing import Optional, List
 from mysql.connector import Error
 from ..db.connection import get_connection
-from ..models.entregas_model import EncaEntregaCreate, DetalleEntrega, DetalleEntregaDc
+from ..models.entregas_model import EncaEntregaCreate, DetalleEntrega, DetalleEntregaDc, EntregaPendiente
+
 
 # obtener la lista de encabezados de las entregas
 def obtener_entregas(cod_entrega: Optional[int] = None, cod_empresa: Optional[int] = None, fecha_inicio: Optional[str] = None, fecha_fin: Optional[str] = None): 
@@ -67,7 +69,6 @@ def obtener_entregas(cod_entrega: Optional[int] = None, cod_empresa: Optional[in
         if conn:
             conn.close()
 
-# -------------------------------------------------------------------------------------------
 # crear el encabezado de la entrega de contraseñas
 def crear_entrega_contrasenia(data: EncaEntregaCreate, usuario_actual: int):
     conn = None
@@ -228,7 +229,7 @@ def obtener_empresas():
     finally:
         cursor.close()
         conn.close()
-# -------------------------------------------------------------------------------------------
+
 # funcion para crear los detalles de la entrega de contraseñas
 def crear_detalles_entrega_contrasenia(detalles: List[DetalleEntrega]):
     if not detalles:
@@ -511,6 +512,7 @@ def obtener_entrega_completa(cod_entrega: int, cod_empresa: int):
                     CASE
                         WHEN d.estado = 'P' THEN 'Pendiente'
                         WHEN d.estado = 'C' THEN 'Confirmado'
+                        WHEN d.estado = 'N' THEN 'No confirmado'
                     END AS estado
                 FROM detalle_entregas d
                 LEFT JOIN detalle_contrasenias dc 
@@ -545,6 +547,7 @@ def obtener_entrega_completa(cod_entrega: int, cod_empresa: int):
                         CASE
                             WHEN d.estado = 'P' THEN 'Pendiente'
                             WHEN d.estado = 'C' THEN 'Confirmado'
+                            WHEN d.estado = 'N' THEN 'No confirmado'
                             ELSE 'Sin Estado'
                         END AS estado
                     FROM detalle_entregas d
@@ -624,3 +627,248 @@ def anular_entrega(cod_entrega: int, cod_empresa: int, usuario_x: int):
             cursor.close()
         if conn and conn.is_connected():
             conn.close()
+
+
+# funcion para obtener las entregas pendientes con filtro de fechas opcional
+def obtener_entregas_pendientes(cod_usuario: int, fecha_inicio: Optional[str] = None, fecha_fin: Optional[str] = None) -> List[EntregaPendiente]:
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        sql = """
+            SELECT 
+                e.cod_entrega,
+                e.cod_empresa,
+                e.fecha_entrega,
+                u.nombre AS usuario_creacion,        
+                CASE 
+                    WHEN e.estado = 'P' THEN 'Pendiente'
+                END AS estado
+            FROM enca_entregas e
+            LEFT JOIN usuarios u ON e.usuario_creacion = u.cod_usuario
+            WHERE e.estado = 'P'
+            AND e.cod_usuario_entrega = %s
+        """
+        params = [cod_usuario]
+
+        # 🔹 Filtros de fecha
+        if fecha_inicio and fecha_fin:
+            sql += " AND DATE(e.fecha_entrega) BETWEEN %s AND %s"
+            params.extend([fecha_inicio, fecha_fin])
+        elif fecha_inicio:
+            sql += " AND DATE(e.fecha_entrega) = %s"
+            params.append(fecha_inicio)
+
+        sql += " ORDER BY e.fecha_entrega DESC"
+
+        cursor.execute(sql, tuple(params))
+        rows = cursor.fetchall()
+        return [EntregaPendiente(**row) for row in rows]
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al obtener entregas: {str(e)}")
+    finally:
+        cursor.close()
+        conn.close()
+
+# función para mostrar el encabezado y detalle a recibir
+def obtener_recepcion_completa(cod_entrega: int, cod_empresa: int):
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # Encabezado
+        query_encabezado = """
+             SELECT
+                e.cod_entrega,
+                emp.nombre AS empresa_nombre,
+                e.num_entrega,
+                DATE_FORMAT(e.fecha_entrega, '%%Y-%%m-%%d') AS fecha_entrega,
+                CASE
+                    WHEN e.tipo_entrega = 'DC' THEN 'Documento con Contraseña'
+                    WHEN e.tipo_entrega = 'DS' THEN 'Documento sin Contraseña'
+                END AS tipo_entrega,
+                CASE
+                    WHEN e.estado = 'P' THEN 'Pendiente'
+                    WHEN e.estado = 'R' THEN 'Recibido'
+                    WHEN e.estado = 'X' THEN 'Anulado'
+                END AS estado,
+                e.cod_usuario_entrega,
+                u.nombre AS nombre_usuario_entrega
+            FROM enca_entregas e
+            LEFT JOIN usuarios u ON e.cod_usuario_entrega = u.cod_usuario
+            JOIN empresas emp ON e.cod_empresa = emp.cod_empresa
+            WHERE e.cod_entrega = %s AND e.cod_empresa = %s
+        """
+        cursor.execute(query_encabezado, (cod_entrega, cod_empresa))
+        encabezado = cursor.fetchone()
+        if not encabezado:
+            raise HTTPException(status_code=404, detail="Encabezado de entrega no encontrado")
+
+        # Detalle
+        if encabezado["tipo_entrega"] == "Documento con Contraseña":
+            query_detalle = """
+                SELECT
+                    d.linea,
+                    COALESCE(d.num_factura, 'N/A') AS num_factura,
+                    prov.nombre AS proveedor_nombre,
+                    CONCAT(d.cod_moneda, ' ', FORMAT(d.monto, 2)) AS monto_con_moneda,  
+                    CASE
+                        WHEN d.retension_iva = 'S' THEN 'Si Tiene'
+                        WHEN d.retension_iva = 'N' THEN 'No Tiene'
+                        ELSE 'N/A'
+                    END AS retension_iva,
+                    CASE
+                        WHEN d.retension_isr = 'S' THEN 'Si Tiene'
+                        WHEN d.retension_isr = 'N' THEN 'No Tiene'
+                        ELSE 'N/A'
+                    END AS retension_isr,
+                    COALESCE(d.numero_retension_iva, 'N/A') AS numero_retension_iva,
+                    COALESCE(d.numero_retension_isr, 'N/A') AS numero_retension_isr,
+                    CASE
+                        WHEN d.estado = 'P' THEN 'Pendiente'
+                        WHEN d.estado = 'C' THEN 'Confirmado'
+                        WHEN d.estado = 'N' THEN 'No confirmado'
+                    END AS estado
+                FROM detalle_entregas d
+                LEFT JOIN detalle_contrasenias dc 
+                    ON d.cod_contrasenia = dc.cod_contrasenia
+                    AND d.cod_empresa_contrasenia = dc.cod_empresa
+                    AND d.linea_contrasenia = dc.linea
+                LEFT JOIN enca_contrasenias ec 
+                    ON dc.cod_contrasenia = ec.cod_contrasenia
+                    AND dc.cod_empresa = ec.cod_empresa
+                LEFT JOIN documentos_varios dv 
+                    ON d.cod_documento = dv.cod_documento
+                LEFT JOIN proveedores prov 
+                    ON (ec.cod_proveedor = prov.cod_proveedor AND ec.cod_empresa_proveedor = prov.cod_empresa)
+                    OR (dv.cod_proveedor = prov.cod_proveedor AND dv.cod_empresa = prov.cod_empresa)
+                WHERE d.cod_entrega = %s 
+                AND d.cod_empresa = %s
+                ORDER BY d.linea;
+            """
+        else:
+            query_detalle = """
+                SELECT
+                    d.linea,
+                    d.cod_documento,
+                    t.nombre_documento AS tipo_documento,
+                    e.nombre AS empresa_nombre,
+                    p.nombre AS proveedor_nombre,
+                    dv.nombre_solicitud,
+                    dv.numero_documento,
+                    CONCAT(m.cod_moneda, ' ', FORMAT(dv.monto, 2)) AS monto_con_moneda,  
+                    COALESCE(dv.numero_retension_iva, 'N/A') AS numero_retension_iva,
+                    COALESCE(dv.numero_retension_isr, 'N/A') AS numero_retension_isr,
+                    dv.observaciones,
+                    CASE
+                        WHEN d.estado = 'P' THEN 'Pendiente'
+                        WHEN d.estado = 'C' THEN 'Confirmado'
+                        WHEN d.estado = 'N' THEN 'No confirmado'
+                        ELSE 'Sin Estado'
+                    END AS estado
+                FROM detalle_entregas d
+                LEFT JOIN documentos_varios dv 
+                    ON d.cod_documento = dv.cod_documento
+                    AND d.cod_empresa = dv.cod_empresa
+                LEFT JOIN empresas e ON dv.cod_empresa = e.cod_empresa
+                LEFT JOIN tipo_documentos t ON dv.cod_tipo_documento = t.cod_tipo_documento
+                LEFT JOIN proveedores p ON dv.cod_proveedor = p.cod_proveedor AND dv.cod_empresa = p.cod_empresa
+                LEFT JOIN monedas m ON dv.cod_moneda = m.cod_moneda
+                WHERE d.cod_entrega = %s 
+                AND d.cod_empresa = %s
+                ORDER BY d.linea;
+            """
+        cursor.execute(query_detalle, (cod_entrega, cod_empresa))
+        detalles = cursor.fetchall()
+
+        return {"encabezado": encabezado, "detalles": detalles}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al obtener la entrega: {str(e)}")
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+
+
+# función para actualizar estado de líneas específicas
+def actualizar_estado_detalle(cod_entrega: int, cod_empresa: int, lineas: List[int]):
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        if not lineas:
+            return {"success": False, "message": "No se enviaron líneas"}
+
+        placeholders = ",".join(["%s"] * len(lineas))
+        params = [cod_entrega, cod_empresa] + lineas
+
+        query = f"""
+            UPDATE detalle_entregas 
+            SET estado='C' 
+            WHERE cod_entrega=%s AND cod_empresa=%s AND linea IN ({placeholders})
+        """
+        cursor.execute(query, params)
+        conn.commit()
+
+        # Verificar si quedan pendientes
+        cursor.execute("""
+            SELECT COUNT(*) AS pendientes 
+            FROM detalle_entregas 
+            WHERE cod_entrega=%s AND cod_empresa=%s AND estado='P'
+        """, (cod_entrega, cod_empresa))
+        pendientes = cursor.fetchone()["pendientes"]
+
+        if pendientes == 0:
+            cursor.execute("""
+                UPDATE enca_entregas SET estado='R' 
+                WHERE cod_entrega=%s AND cod_empresa=%s
+            """, (cod_entrega, cod_empresa))
+            conn.commit()
+
+        return {"success": True, "pendientes_restantes": pendientes}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al actualizar estado: {str(e)}")
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+
+
+# Función para confirmar entrega parcial (botón Confirmar Recepción Parcial)
+def confirmar_entrega_parcial(cod_entrega: int, cod_empresa: int, comentario: str):
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Cambiar solo los detalles pendientes ('P') a 'N'
+        cursor.execute("""
+            UPDATE detalle_entregas 
+            SET estado = 'N', comentario_recepcion = %s
+            WHERE cod_entrega = %s AND cod_empresa = %s AND estado = 'P'
+        """, (comentario, cod_entrega, cod_empresa))
+
+        # Actualizar encabezado a 'R'
+        cursor.execute("""
+            UPDATE enca_entregas 
+            SET estado = 'R'
+            WHERE cod_entrega = %s AND cod_empresa = %s
+        """, (cod_entrega, cod_empresa))
+
+        conn.commit()
+        return {"success": True}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al confirmar entrega parcial: {str(e)}")
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+

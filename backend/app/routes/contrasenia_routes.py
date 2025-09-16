@@ -16,8 +16,6 @@ from io import BytesIO
     
 router = APIRouter(prefix="/contrasenias", tags=["contrasenias"])
 
-# ---------------- Obtener todos los encabezados -------------------------------------------------------------------------
-
 # end-point para obtener los encabezados
 from datetime import datetime, timedelta
 
@@ -55,7 +53,6 @@ def ver_contrasenia_completa_filtrada(
     return obtener_contrasenia_completa_filtrada(cod_contrasenia, cod_empresa)
 
 
-# ---------------- Anulacion de encabezados para la contrasela ------------------------------------------------------------
 # end-point para anular contraseñas
 @router.post("/anular")
 def anular_contrasenia_endpoint(request: AnulacionContrasenia):
@@ -69,8 +66,6 @@ def anular_contrasenia_endpoint(request: AnulacionContrasenia):
         return {"message": "Contraseña anulada exitosamente", "data": resultado}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al anular contraseña: {str(e)}")
-
-# ---------------- creacion de encabezados para la contrasela ------------------------------------------------------------
 
 # end-point para crear contraseñas
 @router.post("/crear-contrasenia")
@@ -104,10 +99,6 @@ def autocomplete_proveedores(q: str, cod_empresa: int):
     cursor.execute(consulta, (cod_empresa, like, like, like))
     return cursor.fetchall()
 
-
-
-# ---------------- creacion de lo detalles para la contrasela ------------------------------------------------------------
-
 # end-point para los detalles de la contraseña
 @router.post("/detalle")
 def guardar_detalle_contrasenia(detalle: DetalleContrasenia):
@@ -131,9 +122,8 @@ def get_siguiente_linea(cod_contrasenia: int, cod_empresa: int):
 def listar_monedas():
     return obtener_monedas()
 
-# ---------------- Creacion de documento PDF ------------------------------------------------------------
-# end-point para generar PDF en formato ticket
 
+# end-point para generar PDF en formato ticket
 @router.get("/imprimir-encabezado/{cod_contrasenia}/{cod_empresa}")
 def imprimir_encabezado(cod_contrasenia: int, cod_empresa: int):
     try:
@@ -288,10 +278,7 @@ def imprimir_encabezado(cod_contrasenia: int, cod_empresa: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
-
-
-# ---------------- funcion para obtener los detalles de las contraseñas ------------------------------------------------------------
+# end point para obtener los detalles de las contraseñas 
 @router.get("/detalles-pendientes")
 def obtener_detalles_pendientes_api():
     try:

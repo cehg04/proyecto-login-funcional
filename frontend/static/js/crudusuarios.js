@@ -11,7 +11,6 @@ $(function () {
         return;
     }
 
-    // Ocultar botón "Crear Usuario" si no tiene permiso 2
     if (validar_permisos(2) !== 'S') {
         $("#btnCrearUsuario").hide();
     }
@@ -42,9 +41,8 @@ $(function () {
                     `);
                 });
 
-                // Inicializar DataTable después de llenar la tabla
                 if ($.fn.DataTable.isDataTable('#tablaUsuarios')) {
-                    $('#tablaUsuarios').DataTable().destroy(); // Destruye si ya existe
+                    $('#tablaUsuarios').DataTable().destroy(); 
                 }
 
                 $('#tablaUsuarios').DataTable({
@@ -55,7 +53,7 @@ $(function () {
                     pageLength: 10,
                     lengthMenu: [5, 10, 25, 50],
                     columnDefs: [
-                        { orderable: false, targets: 5 } // Columna de acciones sin orden
+                        { orderable: false, targets: 5 } 
                     ]
                 });
             }).fail(() => alert("Error al cargar usuarios"));

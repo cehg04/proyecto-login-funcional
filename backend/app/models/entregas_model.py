@@ -1,8 +1,9 @@
 from pydantic import BaseModel
 from datetime import date
-from typing import Optional, List, Dict, Any
+from typing import Optional
+from typing import List 
 
-# obtener las entregas creadas
+# modelo para obtener las entregas creadas
 class MostrarEntregas(BaseModel):
     cod_entrega: int
     cod_empresa: int
@@ -12,13 +13,13 @@ class MostrarEntregas(BaseModel):
     estado: str
     empresa_nombre: str
 
-# crear el encabezado de las entregas de ambos 
+# modelo para crear el encabezado de las entregas
 class EncaEntregaCreate(BaseModel):
     cod_empresa: int
     fecha_entrega: date
     cod_usuario_entrega: int
 
-# crear el detalle de las entregas de contraseñas
+# modelo para crear el detalle de las entregas de contraseñas
 class DetalleEntrega(BaseModel):
     cod_entrega: int
     cod_empresa: int
@@ -36,7 +37,7 @@ class DetalleEntrega(BaseModel):
     estado: Optional[str] = 'P'
     cod_documento: Optional[int] = None
 
-# crear el detalle de las entregas de docuementos
+# modelo para crear el detalle de las entregas de docuementos
 class DetalleEntregaDc(BaseModel):
     cod_entrega: int
     cod_empresa: int
@@ -47,11 +48,31 @@ class DetalleEntregaDc(BaseModel):
     cod_documento: int  
 
 
-# Anulacion de la entrega
+# modelo de Anulacion de la entrega
 class AnulacionEntrega(BaseModel):
     cod_entrega: int
     cod_empresa: int
     usuario_x: int
 
+# modelo para Mostrar entregas pendientes
+class EntregaPendiente(BaseModel):
+    cod_entrega: int
+    cod_empresa: int
+    fecha_entrega: date
+    usuario_creacion: str
+    estado: str
+
+# modelo para el boton guardar seleccion
+class GuardarRequest(BaseModel):
+    cod_entrega: int
+    cod_empresa: int
+    lineas: List[int]
+
+# modelo para el boton de confirmacion parcial
+class ConfirmarRequest(BaseModel):
+    cod_entrega: int
+    cod_empresa: int
+    comentario: str
+    
 
 

@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from datetime import date
 from typing import Optional, List
 
-# ------------ Obtener el encabezado ---------------------------------------------
+# modelo para Obtener el encabezado de la contraseña
 class EncabezadoContrasenia(BaseModel):
     cod_contrasenia: int
     fecha_contrasenia: str
@@ -10,13 +10,13 @@ class EncabezadoContrasenia(BaseModel):
     proveedor_nombre: str
     estado: str
 
-# ------------ modelo del encabezado de la contraseña ----------------------------
+# modelo para crear encabezado de la contraseña 
 class EntradaContrasenia(BaseModel):
     cod_empresa: int
     cod_proveedor: str
     fecha_contrasenia: date
 
-# ------------ modelo del detalle de la contraseña -------------------------------
+# modelo para crear el detalle de la contraseña
 class DetalleContrasenia(BaseModel):
     cod_contrasenia: Optional[int] = None
     cod_empresa: Optional[int] = None
@@ -30,17 +30,18 @@ class DetalleContrasenia(BaseModel):
     numero_retension_isr: Optional[int] = None
     fecha_factura: date
 
-# ------------ modelo de la anulacion de contraseña --------------------------------
+# modelo de la anulacion de contraseña 
 class AnulacionContrasenia(BaseModel):
     cod_contrasenia: int
     cod_empresa: int
     usuario_x: int
     comentario: str = None
 
-# ------------ Actualizacion de estado --------------------------------------------
+# modelo para la Actualizacion de estado 
 class CambiarEstado(BaseModel):
     cod_contrasenia: int
     cod_empresa: int
 
+# modelo para listar los estados
 class ListaCambiarEstado(BaseModel):
     detalles: List[CambiarEstado]

@@ -25,7 +25,6 @@ $(document).ready(function () {
     cargarDocumentosPendientes();
     cargarUsuariosEntrega();
 
-    // Un solo botón para crear encabezado + asignar detalles
     $("#btnAsignarDetalles").on("click", function () {
         const seleccionados = obtenerSeleccionados();
 
@@ -34,7 +33,6 @@ $(document).ready(function () {
             return;
         }
 
-        // Paso 1: crear encabezado si no existe
         if (!codEntregaGlobal) {
             const dataEncabezado = {
                 cod_empresa: $("#cod_empresa").val(),
@@ -58,7 +56,6 @@ $(document).ready(function () {
                     codEmpresaGlobal = resp.cod_empresa;
                     console.log("Encabezado creado:", resp);
 
-                    // Paso 2: enviar detalles ya seleccionados
                     enviarDetalles(seleccionados, token);
                 },
                 error: function (xhr) {
@@ -70,7 +67,7 @@ $(document).ready(function () {
                 }
             });
         } else {
-            // Si ya existe el encabezado, solo mandamos los detalles
+
             enviarDetalles(seleccionados, token);
         }
     });

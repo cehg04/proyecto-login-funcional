@@ -5,8 +5,8 @@ from datetime import datetime
 from fastapi import HTTPException
 from typing import Optional
 
-# ---------------------- creacion de la vista de contrasenias  ----------------------------------------------------
-# obtener el encabezado filtrado
+
+# funcion para obtener el encabezado filtrado
 def obtener_encabezados_filtrados(cod_contrasenia: Optional[int] = None, cod_empresa: Optional[int] = None,     fecha_inicio: Optional[str] = None, fecha_fin: Optional[str] = None ):
     conn = None
     cursor = None
@@ -69,7 +69,7 @@ def obtener_encabezados_filtrados(cod_contrasenia: Optional[int] = None, cod_emp
         if conn:
             conn.close()
 
-# obtener el detalle y el encabezado juntos
+# funcion para obtener el detalle y el encabezado juntos
 def obtener_contrasenia_completa_filtrada(cod_contrasenia: int, cod_empresa: int):
     conn = None
     cursor = None
@@ -144,7 +144,7 @@ def obtener_contrasenia_completa_filtrada(cod_contrasenia: int, cod_empresa: int
         if conn:
             conn.close()
 
-# anular y actualizar el estado de la contraseña
+# funcion para anular y actualizar el estado de la contraseña
 def anular_contrasenia(cod_contrasenia: int, cod_empresa: int, usuario_x: int, comentario: str = None):
     conn = None
     cursor = None
@@ -192,10 +192,7 @@ def anular_contrasenia(cod_contrasenia: int, cod_empresa: int, usuario_x: int, c
         if conn and conn.is_connected():
             conn.close()
 
-
-
-# ---------------------- creacion del servicio de encabezado de la contrasenia ------------------------------------
-# creacion de contraseñas
+# funcion para creacion de contraseñas
 def crear_contrasenias(data: EntradaContrasenia, usuario_actual: int):
     conn = None
     cursor = None
@@ -315,8 +312,6 @@ def obtener_proveedores(cod_empresa):
         cursor.close()
         conn.close()
 
-
-# ---------------------- creacion del servicio de detalle de la contrasenia ------------------------------------
 # funcion para crear los detalles de la contraseña
 def crear_detalle_contrasenia(detalle: DetalleContrasenia):
     conn = None
@@ -406,8 +401,6 @@ def obtener_monedas():
     finally:
         cursor.close()
         conn.close()
-
-#--------------------------------------------------------------------------------------------------------------
 
 # funcion para obtener los detalles de las contraseñas
 def obtener_detalles_pendientes():

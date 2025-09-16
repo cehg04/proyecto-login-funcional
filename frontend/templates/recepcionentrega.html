@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Recepción de Entregas{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Recepción de Entregas</h1>
+        <div id="filtrosContainer" class="mb-4"></div>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered table-sm" id="tablaEntregas">
+            <thead class="table-dark">
+                <tr>
+                    <th style="text-align: center;">Fecha Entrega</th>
+                    <th style="text-align: center;">Entregado por</th>
+                    <th style="text-align: center;">Estado</th>
+                    <th style="text-align: center;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/static/js/validar_permisos.js"></script>
+<script src="/static/js/recepcionentrega.js"></script>
+{% endblock %}
+

@@ -77,7 +77,6 @@ $(document).ready(function () {
     $("#cod_proveedor").val("");
   });
 
-  // Agregar detalle a lista y tabla
 $("#btnGuardarDetalle").click(function () {
     const detalle = {
       cod_contrasenia: codContrasenia,

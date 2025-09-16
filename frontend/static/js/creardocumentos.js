@@ -11,14 +11,10 @@ $(document).ready(function () {
     });
     return;
   }
-
-    // === Cargar combos al iniciar ===
     cargarEmpresas();
     cargarTipos();
     cargarMonedas();
-
-
-    // Guardar documento
+  
     $("#btnGuardarDocumento").click(function () {
 
         const documento = {
@@ -35,10 +31,8 @@ $(document).ready(function () {
             retension_isr: $("#retension_isr").is(":checked") ? "S" : "N",
             numero_retension_iva: $("#numero_retension_iva").val() ? parseInt($("#numero_retension_iva").val()) : null,
             numero_retension_isr: $("#numero_retension_isr").val() ? parseInt($("#numero_retension_isr").val()) : null,
-
         };
 
-        // Validaciones simples
         if (!documento.cod_empresa || !documento.cod_tipo_documento || !documento.cod_moneda || isNaN(documento.monto)) {
             Swal.fire("Campos incompletos", "Llena todos los campos obligatorios.", "warning");
             return;
@@ -59,11 +53,11 @@ $(document).ready(function () {
             }
         });
     });
-      // Inicialmente deshabilitar los inputs
+     
       $("#numero_retension_iva").prop("disabled", true);
       $("#numero_retension_isr").prop("disabled", true);
 
-      // Toggle para IVA
+      
       $("#retension_iva").change(function () {
         if ($(this).is(":checked")) {
           $("#numero_retension_iva").prop("disabled", false);
@@ -72,7 +66,7 @@ $(document).ready(function () {
         }
       });
 
-      // Toggle para ISR
+     
       $("#retension_isr").change(function () {
         if ($(this).is(":checked")) {
           $("#numero_retension_isr").prop("disabled", false);
@@ -83,9 +77,6 @@ $(document).ready(function () {
 
 });
 
-
-
-// funcion para cargar las empresas
   function cargarEmpresas() {
     $.get("/contrasenias/empresas", function (data) {
       const $empresa = $("#cod_empresa");
@@ -96,7 +87,6 @@ $(document).ready(function () {
     });
   }
 
-  // funcion para cargar las monedas
     function cargarMonedas() {
     $.get("/contrasenias/monedas", function (data) {
       const select = $("#cod_moneda");
@@ -107,7 +97,6 @@ $(document).ready(function () {
     });
   }
 
-// funcion para cargar los tipos de documentos
 function cargarTipos() {
     $.get("/documentos/tipos", function (data) {
         let opciones = '<option value="">Seleccione un tipo de documento</option>';
@@ -118,7 +107,6 @@ function cargarTipos() {
     });
 }
 
-// Cuando cambie la empresa, cargar proveedores de esa empresa
     $("#cod_empresa").change(function () {
         const codEmpresa = $(this).val();
         if (codEmpresa) {
@@ -128,7 +116,6 @@ function cargarTipos() {
         }
     });
 
-// funcion para cargar los proveedores de la empresa seleccionada
   $("#proveedor_nombre").autocomplete({
     source: function (request, response) {
       const cod_empresa = $("#cod_empresa").val();

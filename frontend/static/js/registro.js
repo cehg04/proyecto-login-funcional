@@ -1,12 +1,11 @@
 $(document).ready(function () {
-    // Validación de permisos
+
     if (validar_permisos(2) !== 'S') {
         alert("No tienes permiso para registrar usuarios.");
         window.location.href = "inicio.html";
         return;
     }
 
-    // El resto de tu código existente
     cargarOpciones();
 
     $("#formRegistro").on("submit", function (e) {
@@ -36,7 +35,6 @@ $(document).ready(function () {
                     icon: "success",
                     confirmButtonText: "OK"
                 }).then(() => {
-                    // Limpiar formulario después de cerrar la alerta
                     limpiaformulario();
                 });
             },

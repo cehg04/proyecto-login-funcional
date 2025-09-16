@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    // Validar permisos
+
     if (validar_permisos(3) !== 'S') {
         $("#contenido-dinamico").html('<div class="alert alert-danger">No tienes permiso para editar usuarios.</div>');
         return;
@@ -20,7 +20,6 @@ $(document).ready(function () {
         return;
     }
 
-    // Cargar datos del usuario
     $.get(`/api/usuarios/${cod_usuario}`, function (usuario) {  
         $("#edit_cod_usuario").val(cod_usuario);
         $("#edit_usuario").val(usuario.usuario).prop("readonly", true);
@@ -33,7 +32,6 @@ $(document).ready(function () {
             console.warn("Estado inesperado:", usuario.estado);
         }
 
-        // Cargar permisos
         const contenedor = $("#edit_permisos").empty();
         $.get("/api/usuarios/opciones", function (opciones) {
             $.get(`/api/usuarios/permisos/${cod_usuario}`, function (permisos_actuales) {
@@ -55,7 +53,6 @@ $(document).ready(function () {
         });
     });
 
-    // Guardar cambios
     $("#formEditarUsuario").submit(function (e) {
         e.preventDefault();
 

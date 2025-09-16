@@ -3,7 +3,7 @@ from ..utils.security import verify_password
 from ..utils.jwt_handler import crear_token
 from mysql.connector import Error
 
-# Autenticación de usuario
+# funcion para Autenticación de usuario
 def autenticar_usuario(data):
     conn = None
     cursor = None
@@ -37,7 +37,7 @@ def autenticar_usuario(data):
             conn.close()
             
 
-# Obtener permisos por usuario  
+# funcion para Obtener permisos por usuario  
 def obtener_permisos_por_usuario(cod_usuario: int):
     conn = None
     cursor = None

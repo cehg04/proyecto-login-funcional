@@ -9,18 +9,18 @@ from ..db.connection import get_connection
 
 router = APIRouter(prefix="/api/usuarios", tags=["Usuarios"])
 
-# Registrar los usuarios
+# end point Registrar los usuarios
 @router.post("/") 
 def registrar_usuario(data: UsuarioCreate):
     print("Datos recibidos:", data)
     return crear_usuario(data)
 
-# Obtener todos los usuarios
+# end point Obtener todos los usuarios
 @router.get("/")
 def listar_usuarios():
     return obtener_usuarios()
 
-# agregar opciones de usuario
+# end point agregar opciones de usuario
 @router.get("/opciones")
 def obtener_opciones():
     conn = get_connection()
@@ -31,7 +31,7 @@ def obtener_opciones():
     conn.close()
     return opciones
 
-# Obtener usuario por ID
+# end point Obtener usuario por ID
 @router.get("/{cod_usuario}")
 def obtener_usuario(cod_usuario: int):
     conn = get_connection()
@@ -45,12 +45,12 @@ def obtener_usuario(cod_usuario: int):
     else:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-# Actualizar un usuario existente
+# end point Actualizar un usuario existente
 @router.put("/{cod_usuario}")
 def modificar_usuario(cod_usuario: int, data: UsuarioUpdate):
     return actualizar_usuario(cod_usuario, data)
 
-# Cambiar el estado de un usuario
+# end point Cambiar el estado de un usuario
 @router.put("/estado/{cod_usuario}")
 def cambiar_estado_usuario(cod_usuario: int):
     conn = get_connection()
@@ -71,7 +71,7 @@ def cambiar_estado_usuario(cod_usuario: int):
         conn.close()
     
 
-# Obtener permisos de un usuario
+# end point Obtener permisos de un usuario
 @router.get("/permisos/{cod_usuario}")
 def obtener_permisos_usuario(cod_usuario: int):
     conn = get_connection()
@@ -91,7 +91,7 @@ def obtener_permisos_usuario(cod_usuario: int):
         cursor.close()
         conn.close()
 
-# Modificar permisos de un usuario
+# end point Modificar permisos de un usuario
 @router.put("/permisos/{cod_usuario}")
 def modificar_permisos(cod_usuario: int, data: dict):
     nuevas_opciones = data.get("permisos", [])

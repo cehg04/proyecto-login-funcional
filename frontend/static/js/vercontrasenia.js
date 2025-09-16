@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    // Función para extraer cod_usuario del token JWT en localStorage
+
     function getUsuarioIdFromToken() {
         const token = localStorage.getItem('token');
         if (!token) return null;
@@ -13,8 +13,7 @@ $(document).ready(function () {
             return null;
         }
     }
-
-    // Validar permisos 
+ 
     if (validar_permisos(4) !== 'S') {
                 Swal.fire({
             title: "Acceso denegado",
@@ -30,7 +29,6 @@ $(document).ready(function () {
         $("#btnCrearContrasenia").hide();
     }
 
-    // Filtros
     $('#filtrosContainer').append(`
         <div class="row mb-3">
             <div class="col-md-3">
@@ -53,14 +51,12 @@ $(document).ready(function () {
         </div>
     `);
 
-    // Setear fecha actual por defecto
     const today = new Date().toISOString().split('T')[0];
     $('#fechaInicio').val(today);
 
     const today1 = new Date().toISOString().split('T')[0];
     $('#fechaFin').val(today);
 
-    // Cargar empresas
     function cargarEmpresas() {
         $.get('/contrasenias/empresas', function(data) {
             const select = $('#empresaSelect');
@@ -71,7 +67,6 @@ $(document).ready(function () {
     }
     cargarEmpresas();
 
-    // Inicializar DataTable
     let table = $('#tablaContrasenias').DataTable({
         ajax: {
             url: '/contrasenias/ver-encabezados',
@@ -92,9 +87,7 @@ $(document).ready(function () {
             title: 'Fecha Contraseña',
             render: function(d) {
                 if (!d) return '';
-                // Si viene con hora, solo toma la fecha
                 let fecha = d.split(' ')[0];
-                // Convierte yyyy-mm-dd a dd/mm/yyyy
                 const partes = fecha.split('-');
                 if (partes.length === 3) {
                     return `${partes[2]}/${partes[1]}/${partes[0]}`;
@@ -109,9 +102,9 @@ $(document).ready(function () {
                 title: 'Estado',
                 render: function(data, type, row) {
                     let badgeClass = '';
-                    if (data === 'Realizado') badgeClass = 'bg-success text-white'; // verde
-                    else if (data === 'Anulado') badgeClass = 'bg-danger text-white'; // rojo
-                    else badgeClass = 'bg-secondary text-white'; // gris por defecto
+                    if (data === 'Realizado') badgeClass = 'bg-success text-white'; 
+                    else if (data === 'Anulado') badgeClass = 'bg-danger text-white';
+                    else badgeClass = 'bg-secondary text-white';
 
                     return `<span class="badge ${badgeClass}">${data}</span>`;
                 }                
@@ -140,7 +133,6 @@ $(document).ready(function () {
         }
     });
 
-    // Función para anular contraseña usando cod_usuario del JWT
     function anularContrasenia(cod_contrasenia, cod_empresa, comentario) {
         const usuario_x = getUsuarioIdFromToken();
         if (!usuario_x) {
@@ -184,19 +176,16 @@ $(document).ready(function () {
 });
     }
 
-    // Botón filtrar
     $('#btnFiltrar').click(function() {
         table.ajax.reload();
     });
 
-    // Botón Mostrar
     $('#tablaContrasenias').on('click', '.btn-completa', function() {
         const codContrasenia = $(this).data('cod');
         const codEmpresa = $(this).data('empresa');
         window.location.href = `/contrasenia_completa.html?cod_contrasenia=${codContrasenia}&cod_empresa=${codEmpresa}`;
     });
 
-    // Abrir modal al hacer clic en Anular
     $('#tablaContrasenias').on('click', '.btn-anular', function() {
         const codContrasenia = $(this).data('cod');
         const codEmpresa = $(this).data('empresa');
@@ -209,7 +198,6 @@ $(document).ready(function () {
         modal.show();
     });
 
-    // Confirmar anulación desde el modal
     $('#btnConfirmarAnular').click(function() {
         const codContrasenia = $('#modalCodContrasenia').val();
         const codEmpresa = $('#modalCodEmpresa').val();
@@ -222,7 +210,6 @@ $(document).ready(function () {
         modal.hide();
     });
 
-    // Boton Imprimir contraseña
 $('#tablaContrasenias').on('click', '.btn-imprimir', function() {
     let cod = $(this).data('cod');
     let empresa = $(this).data('empresa');

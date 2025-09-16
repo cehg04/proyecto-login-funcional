@@ -24,9 +24,8 @@ def login(data: LoginData):
         "usuario": usuario_autenticado["usuario"],
         "nombre": usuario_autenticado["nombre"],  
         "permisos": permisos
-
     })
-    
+
     return {
         "token": token,
         "user_data": {  # Datos adicionales para el frontend

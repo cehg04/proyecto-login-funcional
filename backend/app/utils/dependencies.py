@@ -25,18 +25,17 @@ def verificar_sesion(request: Request):
 
 
 # obtiene el toquen para utilizarlo en el encabezado de la contraseña
-def obtener_usuario_desde_token(authorization: str = Header(...)):
-    try:
-        if not authorization.startswith("Bearer "):
-            raise HTTPException(status_code=401, detail="Formato de token inválido")
-        
-        token = authorization.split(" ")[1]
-        payload = verificar_token(token)
-        
-        if not payload or "cod_usuario" not in payload:
-            raise HTTPException(status_code=401, detail="Token inválido o expirado")
-        
-        return payload["cod_usuario"]
+def obtener_usuario_desde_token(authorization: str | None = Header(None)):
+    if not authorization:
+        raise HTTPException(status_code=401, detail="No se envió token")
     
-    except Exception as e:
-        raise HTTPException(status_code=401, detail="Token inválido")
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Formato de token inválido")
+    
+    token = authorization.split(" ")[1]
+    payload = verificar_token(token)
+    
+    if not payload or "cod_usuario" not in payload:
+        raise HTTPException(status_code=401, detail="Token inválido o expirado")
+    
+    return payload["cod_usuario"]

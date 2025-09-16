@@ -101,6 +101,10 @@ def mostrar_gestionentrega(request: Request):
 def mostrar_recepcion_entrega(request: Request):
     return templates.TemplateResponse("recepcionentrega.html", {"request": request})
 
+@app.get("/recepcioncompleta.html", response_class=HTMLResponse)
+def mostrar_recepcion_entrega(request: Request):
+    return templates.TemplateResponse("recepcioncompleta.html", {"request": request})
+
 @app.get("/verdocumentos.html", response_class=HTMLResponse)
 def mostrar_documentos_varios(request: Request):
     return templates.TemplateResponse("verdocumentos.html", {"request": request})

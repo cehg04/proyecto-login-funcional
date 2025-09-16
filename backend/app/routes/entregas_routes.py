@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
+from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime
 from typing import List, Optional
-from ..models.entregas_model import EncaEntregaCreate, MostrarEntregas, DetalleEntrega, AnulacionEntrega, DetalleEntregaDc
-from ..services.entregas_service import crear_entrega_contrasenia, crear_entrega_documentos, crear_detalles_entrega_contrasenia,crear_detalles_entrega_documentos ,obtener_entregas, obtener_entrega_completa, anular_entrega
+from ..models.entregas_model import EncaEntregaCreate, MostrarEntregas, DetalleEntrega, AnulacionEntrega, DetalleEntregaDc, EntregaPendiente, GuardarRequest, ConfirmarRequest
+from ..services.entregas_service import crear_entrega_contrasenia, crear_entrega_documentos, crear_detalles_entrega_contrasenia,crear_detalles_entrega_documentos ,obtener_entregas, obtener_entrega_completa, anular_entrega, obtener_entregas_pendientes, obtener_recepcion_completa, actualizar_estado_detalle, confirmar_entrega_parcial
+from ..models.entregas_model import EntregaPendiente
 from ..utils.dependencies import obtener_usuario_desde_token
 from ..db.connection import get_connection
 from reportlab.lib.pagesizes import mm
@@ -12,6 +14,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from io import BytesIO
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 router = APIRouter(prefix="/entregas",tags=["Entregas"])
 
@@ -265,3 +268,28 @@ def imprimir_entrega(cod_entrega: int, cod_empresa: int):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+
+# end point para las entregas pendientes 
+@router.get("/pendientes/{cod_usuario}", response_model=List[EntregaPendiente])
+def listar_entregas_pendientes(
+    cod_usuario: int,
+    fecha_inicio: Optional[str] = Query(None),
+    fecha_fin: Optional[str] = Query(None)
+):
+    return obtener_entregas_pendientes(cod_usuario, fecha_inicio, fecha_fin)
+
+# end point para mostrar las entregas completas en recepcion
+@router.get("/recepcion/{cod_entrega}/{cod_empresa}")
+def ver_recepcion_completa(cod_entrega: int, cod_empresa: int):
+    return obtener_recepcion_completa(cod_entrega, cod_empresa)
+
+# endpoint para el botón de guardar
+@router.post("/guardar")
+def guardar_detalles(req: GuardarRequest):
+    return actualizar_estado_detalle(req.cod_entrega, req.cod_empresa, req.lineas)
+
+# end point para el boton confirmar parcial
+@router.post("/confirmar-parcial")
+def confirmar_parcial(req: ConfirmarRequest):
+    return confirmar_entrega_parcial(req.cod_entrega, req.cod_empresa, req.comentario)

@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    // Función para obtener parámetros desde URL
+
     function getUrlParameter(name) {
         name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
         var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
@@ -15,33 +15,29 @@ $(document).ready(function () {
         return;
     }
 
-    // 🔹 Colores para ENCABEZADO
     function obtenerClaseBadgeEncabezado(estado) {
         switch ((estado || '').toLowerCase()) {
             case 'pendiente':
-                return 'bg-warning text-dark'; // Amarillo
+                return 'bg-warning text-dark'; 
             case 'recibido':
-                return 'bg-success text-white'; // Verde
+                return 'bg-success text-white';
             case 'anulado':
-                return 'bg-danger text-white'; // Rojo
+                return 'bg-danger text-white'; 
             default:
-                return 'bg-secondary text-white'; // Gris por defecto
+                return 'bg-secondary text-white'; 
         }
     }
 
-    // 🔹 Colores para DETALLE
     function obtenerClaseBadgeDetalle(estado) {
         switch ((estado || '').toLowerCase()) {
-            case 'pendiente':
-                return 'bg-warning text-dark'; // Amarillo
-            case 'confirmado':
-                return 'bg-success text-white'; // Verde
+            case 'pendiente':return 'bg-warning text-dark'; 
+            case 'confirmado': return 'bg-success text-white'; 
+            case "no confirmado": return "bg-danger text-white";
             default:
-                return 'bg-secondary text-white'; // Gris
+                return 'bg-secondary text-white';
         }
     }
 
-    // Petición AJAX al endpoint
     $.ajax({
         url: `/entregas/detalle/${codEntrega}/${codEmpresa}`,
         method: 'GET',
@@ -58,7 +54,7 @@ $(document).ready(function () {
         }
     });
 
-    // Mostrar encabezado en HTML
+ 
     function mostrarEncabezado(encabezado) {
         $('#numEntrega').text(encabezado.num_entrega || '');
         $('#tipoEntrega').text(encabezado.tipo_entrega || '');
@@ -67,8 +63,7 @@ $(document).ready(function () {
         const claseBadge = obtenerClaseBadgeEncabezado(encabezado.estado);
         $('#estadoEntrega').html(`<span class="badge ${claseBadge}">${encabezado.estado || ''}</span>`);
     }
-
-    // Mostrar detalles en tabla según tipo de entrega
+    
     function mostrarDetalles(encabezado, detalles) {
         if (encabezado.tipo_entrega === "Documento con Contraseña") {
             $("#tablaDCContainer").show();

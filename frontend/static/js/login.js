@@ -17,10 +17,8 @@ $(document).ready(function(){
             data: JSON.stringify({ usuario, contrasenia }),
             success: function (res) {
                 if (res.token) {
-                    // Corrección aquí
                     localStorage.setItem("token", res.token);
                     
-                    // Opcional: también guardar en cookie
                     document.cookie = `token=${res.token}; path=/; max-age=3600; samesite=strict`;
 
                     $("#msg").html(`<div class="alert alert-success text-center">Bienvenido</div>`);

@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    // Función para obtener parámetros desde URL
+
     function getUrlParameter(name) {
         name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
         var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
@@ -15,33 +15,30 @@ $(document).ready(function () {
         return;
     }
 
-    // 🔹 Colores para ENCABEZADO
     function obtenerClaseBadgeEncabezado(estado) {
         switch ((estado || '').toLowerCase()) {
             case 'realizado':
-                return 'bg-success text-white'; // Verde
+                return 'bg-success text-white'; 
             case 'anulado':
-                return 'bg-danger text-white'; // Rojo
+                return 'bg-danger text-white'; 
             default:
-                return 'bg-secondary text-white'; // Gris por defecto
+                return 'bg-secondary text-white';
         }
     }
 
-    // 🔹 Colores para DETALLE
     function obtenerClaseBadgeDetalle(estado) {
         switch ((estado || '').toLowerCase()) {
             case 'entregado':
-                return 'bg-info text-white'; // Celeste
+                return 'bg-info text-white'; 
             case 'recibido':
-                return 'bg-success text-white'; // Verde
+                return 'bg-success text-white'; 
             case 'pendiente':
-                return 'bg-primary text-white'; // Azul
+                return 'bg-primary text-white'; 
             default:
-                return 'bg-secondary text-white'; // Gris por defecto
+                return 'bg-secondary text-white'; 
         }
     }
 
-    // Petición AJAX al endpoint
     $.ajax({
         url: '/contrasenias/ver-completa-filtrada',
         method: 'GET',
@@ -58,7 +55,6 @@ $(document).ready(function () {
         }
     });
 
-    // Mostrar encabezado en HTML
     function mostrarEncabezado(encabezado) {
         $('#numContrasenia').text(encabezado.num_contrasenia || '');
         $('#empresaNombre').text(encabezado.empresa_nombre || '');
@@ -68,7 +64,6 @@ $(document).ready(function () {
         $('#estadoContrasenia').html(`<span class="badge ${claseBadge}">${encabezado.estado || ''}</span>`);
     }
 
-    // Mostrar detalles en tabla
     function mostrarDetalles(detalles) {
         const tbody = $('#tablaDetalles tbody');
         tbody.empty();

@@ -17,7 +17,7 @@ class UsuarioCreate(UsuarioBase):
 class UsuarioUpdate(UsuarioBase):
     estado: Optional[str]  # Opcional para update parcial
 
-
+# Base para un Usuario inactivo
 class UsuarioOut(UsuarioBase):
     cod_usuario: int
     estado: str

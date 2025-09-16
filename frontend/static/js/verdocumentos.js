@@ -1,7 +1,6 @@
 $(document).ready(function () {
     cargarDocumentosVarios();
 
-    // Validar permisos 
     if (validar_permisos(13) !== 'S') {
         Swal.fire({
             title: "Acceso denegado",
@@ -51,7 +50,6 @@ $(document).ready(function () {
                     `);
                 });
 
-                // Inicializar DataTable después de llenar la tabla
                 if ($.fn.DataTable.isDataTable('#tablaDocumentos')) {
                     $('#tablaDocumentos').DataTable().destroy(); 
                 }
@@ -81,6 +79,12 @@ $(document).ready(function () {
         });
     }
 
+    // Validar si el usuario tiene permiso 15 al dibujar la tabla
+$('#tablaDocumentos').on('draw.dt', function () {
+    if (validar_permisos(15) !== 'S') {
+        $(".btn-anular").remove();
+    }
+});
 
 $('#tablaDocumentos').on('click', '.btn-anular', function () {
     const codDocumento = $(this).data('cod');
