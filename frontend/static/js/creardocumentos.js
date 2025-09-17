@@ -38,6 +38,23 @@ $(document).ready(function () {
             return;
         }
 
+        if ($("#retension_iva").is(":checked") && documento.numero_retension_iva && documento.numero_retension_iva.length > 13) {
+            Swal.fire("Campo inválido", "El número de retención IVA debe tener exactamente 13 caracteres.", "warning");
+            return;
+        }
+
+
+        if ($("#retension_isr").is(":checked") && documento.numero_retension_isr && documento.numero_retension_isr.length > 13) {
+            Swal.fire("Campo inválido", "El número de retención ISR debe tener exactamente 13 caracteres.", "warning");
+            return;
+        }
+
+        
+        if (documento.observaciones && documento.observaciones.length > 255) {
+            Swal.fire("Campo inválido", "Las observaciones no pueden tener más de 255 caracteres.", "warning");
+            return;
+        }
+
         $.ajax({
             url: "/documentos/crear",
             type: "POST",
@@ -106,15 +123,6 @@ function cargarTipos() {
         $("#cod_tipo_documento").html(opciones);
     });
 }
-
-    $("#cod_empresa").change(function () {
-        const codEmpresa = $(this).val();
-        if (codEmpresa) {
-            cargarProveedores(codEmpresa);
-        } else {
-            $("#cod_proveedor").empty().append('<option value="">Seleccione un proveedor</option>');
-        }
-    });
 
   $("#proveedor_nombre").autocomplete({
     source: function (request, response) {

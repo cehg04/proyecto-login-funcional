@@ -77,7 +77,52 @@ $(document).ready(function () {
     $("#cod_proveedor").val("");
   });
 
+    // --- Validaciones para campos numéricos ---
+  function esNumeroValido(valor) {
+    return /^\d+(\.\d+)?$/.test(valor);  // acepta enteros y decimales
+  }
+
 $("#btnGuardarDetalle").click(function () {
+    const numFactura = $("#num_factura").val().trim();
+    const monto = $("#monto").val().trim();
+    const retIva = $("#numero_retension_iva").val().trim();
+    const retIsr = $("#numero_retension_isr").val().trim();
+
+        if (numFactura.length !== 10) {
+      Swal.fire("Campo inválido", "El número de factura debe tener exactamente 10 caracteres.", "warning");
+      return;
+    }
+
+    if ($("#retension_iva").is(":checked") && retIva && retIva.length !== 13) {
+      Swal.fire("Campo inválido", "El número de retención IVA debe tener exactamente 13 caracteres.", "warning");
+      return;
+    }
+
+    if ($("#retension_isr").is(":checked") && retIsr && retIsr.length !== 13) {
+      Swal.fire("Campo inválido", "El número de retención ISR debe tener exactamente 13 caracteres.", "warning");
+      return;
+    }
+
+    if (!esNumeroValido(numFactura)) {
+      Swal.fire("Campo inválido", "El número de factura debe contener solo números.", "warning");
+      return;
+    }
+
+    if (!esNumeroValido(monto)) {
+      Swal.fire("Campo inválido", "El monto debe ser un valor numérico.", "warning");
+      return;
+    }
+
+    if ($("#retension_iva").is(":checked") && retIva && !esNumeroValido(retIva)) {
+      Swal.fire("Campo inválido", "El número de retención IVA debe contener solo números.", "warning");
+      return;
+    }
+
+    if ($("#retension_isr").is(":checked") && retIsr && !esNumeroValido(retIsr)) {
+      Swal.fire("Campo inválido", "El número de retención ISR debe contener solo números.", "warning");
+      return;
+    }
+
     const detalle = {
       cod_contrasenia: codContrasenia,
       num_factura: $("#num_factura").val(),
@@ -105,6 +150,13 @@ $("#btnGuardarDetalle").click(function () {
     agregarDetalleATabla(detalle);
     $('#formulario-detalle')[0].reset();
 });
+
+  $("#num_factura, #monto, #numero_retension_iva, #numero_retension_isr").on("keypress", function (e) {
+    if (!/[0-9.]/.test(e.key)) {
+      e.preventDefault();
+    }
+  });
+  
 function agregarDetalleATabla(detalle) {
     const fila = `
       <tr>

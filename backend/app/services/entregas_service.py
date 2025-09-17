@@ -533,34 +533,38 @@ def obtener_entrega_completa(cod_entrega: int, cod_empresa: int):
                             """
         else:
              query_detalle = """
-                    SELECT
-                        d.cod_documento,
-                        t.nombre_documento AS tipo_documento,
-                        e.nombre AS empresa_nombre,
-                        p.nombre AS proveedor_nombre,
-                        dv.nombre_solicitud,
-                        dv.numero_documento,
-                        CONCAT(m.cod_moneda, ' ', FORMAT(dv.monto, 2)) AS monto_con_moneda,  
-                        COALESCE(dv.numero_retension_iva, 'N/A') AS numero_retension_iva,
-                        COALESCE(dv.numero_retension_isr, 'N/A') AS numero_retension_isr,
-                        dv.observaciones,
-                        CASE
-                            WHEN d.estado = 'P' THEN 'Pendiente'
-                            WHEN d.estado = 'C' THEN 'Confirmado'
-                            WHEN d.estado = 'N' THEN 'No confirmado'
-                            ELSE 'Sin Estado'
-                        END AS estado
-                    FROM detalle_entregas d
-                    LEFT JOIN documentos_varios dv 
-                        ON d.cod_documento = dv.cod_documento
-                        AND d.cod_empresa = dv.cod_empresa
-                    LEFT JOIN empresas e ON dv.cod_empresa = e.cod_empresa
-                    LEFT JOIN tipo_documentos t ON dv.cod_tipo_documento = t.cod_tipo_documento
-                    LEFT JOIN proveedores p ON dv.cod_proveedor = p.cod_proveedor AND dv.cod_empresa = p.cod_empresa
-                    LEFT JOIN monedas m ON dv.cod_moneda = m.cod_moneda
-                    WHERE d.cod_entrega = %s 
-                    AND d.cod_empresa = %s
-                    ORDER BY d.linea;
+                        SELECT
+                            d.cod_documento,
+                            COALESCE(t.nombre_documento, 'Sin Tipo') AS tipo_documento,
+                            COALESCE(e.nombre, 'Sin Empresa') AS empresa_nombre,
+                            COALESCE(p.nombre, 'Sin Proveedor') AS proveedor_nombre,
+                            COALESCE(dv.nombre_solicitud, 'N/A') AS nombre_solicitud,
+                            COALESCE(dv.numero_documento, 'N/A') AS numero_documento,
+                            COALESCE(CONCAT(m.cod_moneda, ' ', FORMAT(dv.monto, 2)), 'N/A') AS monto_con_moneda,  
+                            COALESCE(dv.numero_retension_iva, 'N/A') AS numero_retension_iva,
+                            COALESCE(dv.numero_retension_isr, 'N/A') AS numero_retension_isr,
+                            COALESCE(dv.observaciones, '') AS observaciones,
+                            CASE
+                                WHEN d.estado = 'P' THEN 'Pendiente'
+                                WHEN d.estado = 'C' THEN 'Confirmado'
+                                WHEN d.estado = 'N' THEN 'No confirmado'
+                                ELSE 'Sin Estado'
+                            END AS estado
+                        FROM detalle_entregas d
+                        LEFT JOIN documentos_varios dv 
+                            ON d.cod_documento = dv.cod_documento
+                        LEFT JOIN empresas e 
+                            ON dv.cod_empresa = e.cod_empresa
+                        LEFT JOIN tipo_documentos t 
+                            ON dv.cod_tipo_documento = t.cod_tipo_documento
+                        LEFT JOIN proveedores p 
+                            ON dv.cod_proveedor = p.cod_proveedor 
+                        AND dv.cod_empresa = p.cod_empresa
+                        LEFT JOIN monedas m 
+                            ON dv.cod_moneda = m.cod_moneda
+                        WHERE d.cod_entrega = %s 
+                        AND d.cod_empresa = %s
+                        ORDER BY d.linea;
                  """
         cursor.execute(query_detalle, (cod_entrega, cod_empresa))
         detalles = cursor.fetchall()
@@ -579,6 +583,7 @@ def obtener_entrega_completa(cod_entrega: int, cod_empresa: int):
             cursor.close()
         if conn:
             conn.close()
+
 
 
 
@@ -651,7 +656,6 @@ def obtener_entregas_pendientes(cod_usuario: int, fecha_inicio: Optional[str] = 
         """
         params = [cod_usuario]
 
-        # 🔹 Filtros de fecha
         if fecha_inicio and fecha_fin:
             sql += " AND DATE(e.fecha_entrega) BETWEEN %s AND %s"
             params.extend([fecha_inicio, fecha_fin])
@@ -754,15 +758,15 @@ def obtener_recepcion_completa(cod_entrega: int, cod_empresa: int):
                 SELECT
                     d.linea,
                     d.cod_documento,
-                    t.nombre_documento AS tipo_documento,
-                    e.nombre AS empresa_nombre,
-                    p.nombre AS proveedor_nombre,
-                    dv.nombre_solicitud,
-                    dv.numero_documento,
-                    CONCAT(m.cod_moneda, ' ', FORMAT(dv.monto, 2)) AS monto_con_moneda,  
+                    COALESCE(t.nombre_documento, 'Sin Tipo') AS tipo_documento,
+                    COALESCE(e.nombre, 'Sin Empresa') AS empresa_nombre,
+                    COALESCE(p.nombre, 'Sin Proveedor') AS proveedor_nombre,
+                    COALESCE(dv.nombre_solicitud, 'N/A') AS nombre_solicitud,
+                    COALESCE(dv.numero_documento, 'N/A') AS numero_documento,
+                    COALESCE(CONCAT(m.cod_moneda, ' ', FORMAT(dv.monto, 2)), 'N/A') AS monto_con_moneda,  
                     COALESCE(dv.numero_retension_iva, 'N/A') AS numero_retension_iva,
                     COALESCE(dv.numero_retension_isr, 'N/A') AS numero_retension_isr,
-                    dv.observaciones,
+                    COALESCE(dv.observaciones, '') AS observaciones,
                     CASE
                         WHEN d.estado = 'P' THEN 'Pendiente'
                         WHEN d.estado = 'C' THEN 'Confirmado'
@@ -772,11 +776,15 @@ def obtener_recepcion_completa(cod_entrega: int, cod_empresa: int):
                 FROM detalle_entregas d
                 LEFT JOIN documentos_varios dv 
                     ON d.cod_documento = dv.cod_documento
-                    AND d.cod_empresa = dv.cod_empresa
-                LEFT JOIN empresas e ON dv.cod_empresa = e.cod_empresa
-                LEFT JOIN tipo_documentos t ON dv.cod_tipo_documento = t.cod_tipo_documento
-                LEFT JOIN proveedores p ON dv.cod_proveedor = p.cod_proveedor AND dv.cod_empresa = p.cod_empresa
-                LEFT JOIN monedas m ON dv.cod_moneda = m.cod_moneda
+                LEFT JOIN empresas e 
+                    ON dv.cod_empresa = e.cod_empresa
+                LEFT JOIN tipo_documentos t 
+                    ON dv.cod_tipo_documento = t.cod_tipo_documento
+                LEFT JOIN proveedores p 
+                    ON dv.cod_proveedor = p.cod_proveedor 
+                AND dv.cod_empresa = p.cod_empresa
+                LEFT JOIN monedas m 
+                    ON dv.cod_moneda = m.cod_moneda
                 WHERE d.cod_entrega = %s 
                 AND d.cod_empresa = %s
                 ORDER BY d.linea;

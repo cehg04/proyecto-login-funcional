@@ -124,7 +124,10 @@ $(document).ready(function () {
                     
                 }
             }
-        ]
+        ],
+        language: {
+            emptyTable: "No hay datos disponibles"
+        } 
     });
 
     table.on('draw', function () {

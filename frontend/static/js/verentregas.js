@@ -118,6 +118,9 @@ $(document).ready(function () {
                 }
             }
         ],
+        language: {
+            emptyTable: "No hay datos disponibles"
+        },
         responsive: true,
         pageLength: 10
     });

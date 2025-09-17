@@ -100,7 +100,7 @@ function mostrarEntregas(entregas) {
     if (entregas.length === 0) {
         // Mostrar mensaje de tabla vacía
         let fila = `<tr>
-            <td colspan="4" class="text-center fw-bold">Tabla sin entregas</td>
+            <td colspan="4" class="text-center">No hay datos disponibles</td>
         </tr>`;
         tabla.append(fila);
         return;

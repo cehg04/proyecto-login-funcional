@@ -24,6 +24,15 @@ $(document).ready(function () {
             success: function (data) {
                 const tbody = $("#tablaDocumentos tbody");
                 tbody.empty();
+                    
+                if (!data || data.length === 0) {
+                    tbody.html('<tr><td colspan="10" class="text-center">No hay datos disponibles</td></tr>');
+                    if ($.fn.DataTable.isDataTable('#tablaDocumentos')) {
+                        $('#tablaDocumentos').DataTable().destroy();
+                    }
+                    return;
+                }
+
                 data.forEach(function (doc) {
 
                  let badgeClass = '';

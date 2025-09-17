@@ -63,9 +63,33 @@ $(document).ready(function () {
             estado: $('#edit_estado').val()
         };
 
+        const soloLetras = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
+
+        if (!soloLetras.test(datosUsuario.nombre)) {
+            Swal.fire({
+                title: "Advertencia",
+                text: "El nombre solo puede contener letras.",
+                icon: "warning",
+                confirmButtonText: "OK"
+            });
+            return;
+        }
+
+        if (!soloLetras.test(datosUsuario.usuario)) {
+            Swal.fire({
+                title: "Advertencia",
+                text: "El usuario solo puede contener letras.",
+                icon: "warning",
+                confirmButtonText: "OK"
+            });
+            return;
+        }
+
+
+
         if (!datosUsuario.nombre || !datosUsuario.usuario) {
             Swal.fire({
-                title: "Atención",
+                title: "Advertencia",
                 text: "Nombre y Usuario son obligatorios.",
                 icon: "warning",
                 confirmButtonText: "OK"

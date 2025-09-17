@@ -4,13 +4,12 @@
 <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 {% endblock %}
 {% block content %}
-<div class="container mt-4">
-    <h1>Gestión de Usuarios</h1>
-    <div class="container mt-4">
+<div class="container-fluid mt-4"> 
+    <h1 class="mb-4">Gestión de Usuarios</h1>
     <a href="/register.html" id="btnCrearUsuario" class="btn btn-success mb-3">Crear usuario nuevo</a>
-     <div class="table-responsive">
-    <table id="tablaUsuarios" class="table table-bordered table-hover table-striped align-middle">
-        <thead class="table-dark">
+    <div class="table-responsive">
+        <table id="tablaUsuarios" class="table table-bordered table-hover table-striped align-middle text-nowrap">
+            <thead class="table-dark">
                 <tr>
                     <th>Código</th>
                     <th>Nombre</th>
@@ -22,7 +21,6 @@
             </thead>
             <tbody></tbody>
         </table>
-        </div>
     </div>
 </div>
 {% endblock %}
@@ -31,6 +29,7 @@
 <script src="/static/js/validar_permisos.js"></script>
 <script src="/static/js/crudusuarios.js"></script>
 {% endblock %}
+
 
 
 

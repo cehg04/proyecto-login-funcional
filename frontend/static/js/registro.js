@@ -10,16 +10,44 @@ $(document).ready(function () {
 
     $("#formRegistro").on("submit", function (e) {
         e.preventDefault();
+
+        const nombre = $("#regNombre").val().trim();
+        const usuario = $("#regUsuario").val().trim();
+        const contrasenia = $("#regContrasenia").val().trim();
+        const correo = $("#regCorreo").val().trim();
+
+        const soloLetras = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
+
+        if (!soloLetras.test(nombre)) {
+            Swal.fire({
+                title: "Advertencia",
+                text: "El nombre solo puede contener letras.",
+                icon: "warning",
+                confirmButtonText: "OK"
+            });
+            return;
+        }
+
+        if (!soloLetras.test(usuario)) {
+            Swal.fire({
+                title: "Advertencia",
+                text: "El usuario solo puede contener letras.",
+                icon: "warning",
+                confirmButtonText: "OK"
+            });
+            return;
+        }
+
         const permisosSeleccionados = [];
         $("input.permiso-opcion:checked").each(function () {
             permisosSeleccionados.push(parseInt($(this).val()));
         });
 
         const datos = {
-            nombre: $("#regNombre").val(),
-            usuario: $("#regUsuario").val(),
-            contrasenia: $("#regContrasenia").val(),
-            correo: $("#regCorreo").val(),
+            nombre: nombre,
+            usuario: usuario,
+            contrasenia: contrasenia,
+            correo: correo,
             permisos: permisosSeleccionados
         };
 
@@ -62,9 +90,7 @@ function cargarOpciones(){
                 contenedor.append(`
                     <div class="form-check">
                         <input class="form-check-input permiso-opcion" type="checkbox" value="${opcion.cod_opcion}" id="permiso_${opcion.cod_opcion}">
-                        <label class="form-check-label" for="permiso_${opcion.cod_opcion}">
-                            ${opcion.nombre_opcion}
-                        </label>
+                        <label class="form-check-label" for="permiso_${opcion.cod_opcion}">${opcion.nombre_opcion}</label>
                     </div>
                 `);
             });
@@ -81,6 +107,7 @@ function limpiaformulario() {
     $("#regContrasenia").val("");
     $("#regCorreo").val("");
 }
+
 
 
 

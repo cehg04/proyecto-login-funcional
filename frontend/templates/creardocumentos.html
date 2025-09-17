@@ -38,7 +38,8 @@
                 </div>
                 <div class="mb-3">
                     <label for="numero_retension_iva">Número Retención IVA</label>
-                    <input type="number" id="numero_retension_iva" class="form-control" disabled>
+                    <input type="text" id="numero_retension_iva" class="form-control" disabled maxlength="13">
+                    <small class="form-text text-muted">Máximo 13 caracteres</small>
                 </div>
 
                 <div class="form-check mb-2">
@@ -49,7 +50,8 @@
                 </div>
                 <div class="mb-3">
                     <label for="numero_retension_isr">Número Retención ISR</label>
-                    <input type="number" id="numero_retension_isr" class="form-control" disabled>
+                    <input type="text" id="numero_retension_isr" class="form-control" disabled maxlength="13">
+                    <small class="form-text text-muted">Máximo 13 caracteres</small>
                 </div>
 
                 <div class="mt-2">
@@ -76,7 +78,8 @@
                 </div>
                 <div class="mb-3">
                     <label for="observaciones">Observaciones</label>
-                    <textarea id="observaciones" class="form-control" rows="3"></textarea>
+                    <textarea id="observaciones" class="form-control" rows="3" maxlength="255"></textarea>
+                    <small class="form-text text-muted">Máximo 255 caracteres</small>
                 </div>
             </div>
         </div>
