@@ -280,9 +280,9 @@ def imprimir_encabezado(cod_contrasenia: int, cod_empresa: int):
 
 # end point para obtener los detalles de las contraseñas 
 @router.get("/detalles-pendientes")
-def obtener_detalles_pendientes_api():
+def obtener_detalles_pendientes_api(cod_empresa: int = Query(...)):
     try:
-        detalles = obtener_detalles_pendientes()
+        detalles = obtener_detalles_pendientes(cod_empresa)
         return {
             "success": True,
             "data": detalles,

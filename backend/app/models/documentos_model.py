@@ -30,6 +30,7 @@ class DocumentoVario(BaseModel):
     numero_retension_isr: Optional[int] = None
     observaciones: Optional[str] = None
     estado: str
+    fecha_creacion: Optional[str] = None
 
 # modelo para anular un documento
 class AnularDocumentoRequest(BaseModel):

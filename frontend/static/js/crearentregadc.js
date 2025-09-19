@@ -3,27 +3,38 @@ let codEntregaGlobal = null;
 let codEmpresaGlobal = null;
 
 $(document).ready(function () {
-            const token = localStorage.getItem("token");
-        if (!token) {
-            Swal.fire("Error", "No hay token, inicia sesión nuevamente", "error");
-            return;
-        }
+    const token = localStorage.getItem("token");
+    if (!token) {
+        Swal.fire("Error", "No hay token, inicia sesión nuevamente", "error");
+        return;
+    }
 
-        if (validar_permisos(8) !== 'S') {
+    if (validar_permisos(8) !== 'S') {
         Swal.fire({
-        title: "Acceso denegado",
-        text: "No tienes permiso para Crear Entregas",
-        icon: "warning",
-        confirmButtonText: "OK"
+            title: "Acceso denegado",
+            text: "No tienes permiso para Crear Entregas",
+            icon: "warning",
+            confirmButtonText: "OK"
         }).then(() => {
-        window.location.href = "inicio.html";
+            window.location.href = "inicio.html";
         });
         return;
-  }
+    }
 
     cargarEmpresas();
-    cargarDocumentosPendientes();
-    cargarUsuariosEntrega();
+    cargarUsuariosEntrega(token);
+    limpiarTablaDetalles();
+
+    // cuando se cambie la empresa, cargar solo documentos pendientes de esa empresa
+    $("#cod_empresa").on("change", function() {
+        const codEmpresa = $(this).val();
+        codEmpresaGlobal = codEmpresa;
+        if (codEmpresa) {
+            cargarDocumentosPendientes(codEmpresa);
+        } else {
+            limpiarTablaDetalles();
+        }
+    });
 
     $("#btnAsignarDetalles").on("click", function () {
         const seleccionados = obtenerSeleccionados();
@@ -67,7 +78,6 @@ $(document).ready(function () {
                 }
             });
         } else {
-
             enviarDetalles(seleccionados, token);
         }
     });
@@ -101,43 +111,49 @@ function cargarUsuariosEntrega(token){
     });
 }
 
-function cargarDocumentosPendientes() {
+function cargarDocumentosPendientes(codEmpresa) {
     $.ajax({
         url: "/documentos/pendientes",
         method: "GET",
+        data: { cod_empresa: codEmpresa },
         dataType: "json",
         success: function (response) {
-            if (response.success) {
-                detallesPendientes = response.data;
-                const $tbody = $("#tablaDetalles tbody");
-                $tbody.empty();
+            detallesPendientes = response.success ? response.data : [];
+            const $tbody = $("#tablaDetalles tbody");
+            $tbody.empty();
 
-                detallesPendientes.forEach((dv, index) => {
-                    $tbody.append(`
-                        <tr>
-                            <td>
-                                <input type="checkbox" 
-                                    class="check-detalle" 
-                                    data-index="${index}" 
-                                    data-cod-documento="${dv.cod_documento}">
-                            </td>
-                            <td>${dv.empresa_nombre || ''}</td>
-                            <td>${dv.cod_moneda || ''}</td>
-                            <td>${dv.monto || ''}</td>
-                            <td>${dv.estado || ''}</td>
-                        </tr>
-                    `);
-                });
-                console.log("Total registros:", response.total);
-            } else {
-                Swal.fire("Error", "No se pudieron cargar los documentos.", "error");
+            if (detallesPendientes.length === 0) {
+                $tbody.html('<tr><td colspan="5" class="text-center">No hay documentos pendientes para esta empresa</td></tr>');
+                return;
             }
+
+            detallesPendientes.forEach((dv, index) => {
+                $tbody.append(`
+                    <tr>
+                        <td>
+                            <input type="checkbox" 
+                                class="check-detalle" 
+                                data-index="${index}" 
+                                data-cod-documento="${dv.cod_documento}">
+                        </td>
+                        <td>${dv.empresa_nombre || ''}</td>
+                        <td>${dv.cod_moneda || ''}</td>
+                        <td>${dv.monto || ''}</td>
+                        <td>${dv.estado || ''}</td>
+                    </tr>
+                `);
+            });
         },
         error: function (xhr, status, error) {
             console.error("Error AJAX:", error);
             Swal.fire("Error", "Error al obtener los documentos pendientes.", "error");
         }
     });
+}
+
+function limpiarTablaDetalles() {
+    $("#tablaDetalles tbody").empty();
+    detallesPendientes = [];
 }
 
 function obtenerSeleccionados() {
@@ -161,9 +177,6 @@ function enviarDetalles(seleccionados, token) {
         cod_documento: s.cod_documento
     }));
 
-
-    console.log("Payload a enviar a /entregas/detalles-documentos:", payload);
-
     $.ajax({
         url: "/entregas/detalles-documentos",
         method: "POST",
@@ -171,8 +184,24 @@ function enviarDetalles(seleccionados, token) {
         headers: { "Authorization": "Bearer " + token },
         data: JSON.stringify(payload),
         success: function (resp) {
-            Swal.fire("Éxito", resp.mensaje || "Detalles asignados correctamente", "success");
-            cargarDocumentosPendientes(); // refresca tabla
+            Swal.fire({
+                title: "Éxito",
+                text: resp.mensaje || "Detalles asignados correctamente",
+                icon: "success"
+            }).then(() => {
+                // Abrir PDF en otra pestaña
+                if (codEntregaGlobal && codEmpresaGlobal) {
+                    window.open(`/entregas/imprimir-entrega/${codEntregaGlobal}/${codEmpresaGlobal}`, '_blank');
+                }
+
+                // Limpiar tabla y reiniciar variables
+                codEntregaGlobal = null;
+                codEmpresaGlobal = null;
+                limpiarTablaDetalles();
+                $("#cod_empresa").val(""); 
+                $("#fecha_entrega").val(""); 
+                $("#cod_usuario_entrega").val("");
+            });
         },
         error: function (xhr) {
             let errorMsg = "Error al asignar detalles";

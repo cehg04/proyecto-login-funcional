@@ -3,27 +3,43 @@ let codEntregaGlobal = null;
 let codEmpresaGlobal = null;
 
 $(document).ready(function () {
-        const token = localStorage.getItem("token");
-        if (!token) {
-            Swal.fire("Error", "No hay token, inicia sesión nuevamente", "error");
-            return;
-        }
+    const token = localStorage.getItem("token");
+    if (!token) {
+        Swal.fire("Error", "No hay token, inicia sesión nuevamente", "error");
+        return;
+    }
 
-        if (validar_permisos(8) !== 'S') {
+    if (validar_permisos(8) !== 'S') {
         Swal.fire({
-        title: "Acceso denegado",
-        text: "No tienes permiso para Crear Entregas",
-        icon: "warning",
-        confirmButtonText: "OK"
+            title: "Acceso denegado",
+            text: "No tienes permiso para Crear Entregas",
+            icon: "warning",
+            confirmButtonText: "OK"
         }).then(() => {
-        window.location.href = "inicio.html";
+            window.location.href = "inicio.html";
         });
         return;
     }
 
-        cargarEmpresas();
-        cargarUsuariosEntrega();
-        cargarDetallesPendientes(token);
+    cargarEmpresas();
+    cargarUsuariosEntrega(token);
+    renderTablaDetalles([]);
+
+    $("#cod_empresa").on("change", function () {
+        const codEmpresa = $(this).val();
+
+        // Reiniciar globales al cambiar empresa
+        codEntregaGlobal = null;
+        codEmpresaGlobal = null;
+
+        if (!codEmpresa) {
+            renderTablaDetalles([]);
+            return;
+        }
+
+        codEmpresaGlobal = parseInt(codEmpresa);
+        cargarDetallesPendientes(codEmpresaGlobal);
+    });
 
     $("#btnAsignarDetalles").on("click", function () {
         const seleccionados = obtenerSeleccionados();
@@ -55,7 +71,6 @@ $(document).ready(function () {
                     codEntregaGlobal = resp.cod_entrega;
                     codEmpresaGlobal = resp.cod_empresa;
                     console.log("Encabezado creado:", resp);
-
                     enviarDetalles(seleccionados, token);
                 },
                 error: function (xhr) {
@@ -67,12 +82,44 @@ $(document).ready(function () {
                 }
             });
         } else {
-        
             enviarDetalles(seleccionados, token);
         }
     });
 });
 
+// Función para renderizar tabla de detalles
+function renderTablaDetalles(detalles) {
+    const $tbody = $("#tablaDetalles tbody");
+    $tbody.empty();
+
+    if (!detalles || detalles.length === 0) {
+        $tbody.html('<tr><td colspan="9" class="text-center">No hay detalles disponibles</td></tr>');
+        return;
+    }
+
+    detalles.forEach((d, index) => {
+        $tbody.append(`
+            <tr>
+                <td>
+                    <input type="checkbox" 
+                        class="check-detalle" 
+                        data-index="${index}" 
+                        data-cod-contrasenia="${d.cod_contrasenia}">
+                </td>
+                <td>${d.num_factura || ''}</td>
+                <td>${d.cod_moneda || ''}</td>
+                <td>${d.monto || ''}</td>
+                <td>${d.retension_iva === 'S' ? 'Si Tiene' : (d.retension_iva === 'N' ? 'No Tiene' : '')}</td>
+                <td>${d.retension_isr === 'S' ? 'Si Tiene' : (d.retension_isr === 'N' ? 'No Tiene' : '')}</td>
+                <td>${d.numero_retension_iva || ''}</td>
+                <td>${d.numero_retension_isr || ''}</td>
+                <td>${d.estado || ''}</td>
+            </tr>
+        `);
+    });
+}
+
+// Cargar empresas en el select
 function cargarEmpresas() {
     $.get("/contrasenias/empresas", function (data) {
         const $empresa = $("#cod_empresa");
@@ -83,6 +130,7 @@ function cargarEmpresas() {
     });
 }
 
+// Cargar usuarios en el select
 function cargarUsuariosEntrega(token){
     $.ajax({
         url: "/entregas/usuarios",
@@ -95,55 +143,36 @@ function cargarUsuariosEntrega(token){
                 $select.append(`<option value="${u.cod_usuario}">${u.nombre}</option>`);
             });
         },
-        error: function (xhr) {
+        error: function () {
             Swal.fire("Error", "Error al cargar usuarios", "error");
         }
     });
 }
 
-function cargarDetallesPendientes() {
+// Cargar detalles pendientes de la empresa seleccionada
+function cargarDetallesPendientes(codEmpresa) {
     $.ajax({
         url: "/contrasenias/detalles-pendientes",
         method: "GET",
+        data: { cod_empresa: codEmpresa },
         dataType: "json",
         success: function (response) {
             if (response.success) {
                 detallesPendientes = response.data;
-                const $tbody = $("#tablaDetalles tbody");
-                $tbody.empty();
-
-                detallesPendientes.forEach((d, index) => {
-                    $tbody.append(`
-                        <tr>
-                            <td>
-                                <input type="checkbox" 
-                                    class="check-detalle" 
-                                    data-index="${index}" 
-                                    data-cod-contrasenia="${d.cod_contrasenia}">
-                            </td>
-                            <td>${d.num_factura || ''}</td>
-                            <td>${d.cod_moneda || ''}</td>
-                            <td>${d.monto || ''}</td>
-                            <td>${d.retension_iva === 'S' ? 'Si Tiene' : (d.retension_iva === 'N' ? 'No Tiene' : '')}</td>
-                            <td>${d.retension_isr === 'S' ? 'Si Tiene' : (d.retension_isr === 'N' ? 'No Tiene' : '')}</td>
-                            <td>${d.numero_retension_iva || ''}</td>
-                            <td>${d.numero_retension_isr || ''}</td>
-                            <td>${d.estado || ''}</td>
-                        </tr>
-                    `);
-                });
-                console.log("Total registros:", response.total);
+                renderTablaDetalles(detallesPendientes);
             } else {
                 Swal.fire("Error", "No se pudieron cargar los detalles.", "error");
+                renderTablaDetalles([]);
             }
         },
-        error: function (xhr, status, error) {
-            console.error("Error AJAX:", error);
+        error: function () {
             Swal.fire("Error", "Error al obtener los detalles pendientes.", "error");
+            renderTablaDetalles([]);
         }
     });
 }
 
+// Obtener detalles seleccionados
 function obtenerSeleccionados() {
     let seleccionados = [];
     $("#tablaDetalles tbody .check-detalle:checked").each(function () {
@@ -153,6 +182,7 @@ function obtenerSeleccionados() {
     return seleccionados;
 }
 
+// Enviar detalles a la entrega
 function enviarDetalles(seleccionados, token) {
     if (seleccionados.length === 0) return;
 
@@ -172,27 +202,44 @@ function enviarDetalles(seleccionados, token) {
         cod_empresa: codEmpresaGlobal
     }));
 
-    console.log("Payload a enviar a /entregas/detalles-contrasenia:", payload);
-
-    $.ajax({
-        url: "/entregas/detalles-contrasenia",
-        method: "POST",
-        contentType: "application/json",
-        headers: { "Authorization": "Bearer " + token },
-        data: JSON.stringify(payload),
-        success: function (resp) {
-            Swal.fire("Éxito", resp.mensaje || "Detalles asignados correctamente", "success");
-            cargarDetallesPendientes(); // refresca tabla
-        },
-        error: function (xhr) {
-            let errorMsg = "Error al asignar detalles";
-            if (xhr.responseJSON && xhr.responseJSON.detail) {
-                errorMsg = xhr.responseJSON.detail;
+$.ajax({
+    url: "/entregas/detalles-contrasenia",
+    method: "POST",
+    contentType: "application/json",
+    headers: { "Authorization": "Bearer " + token },
+    data: JSON.stringify(payload),
+    success: function (resp) {
+        Swal.fire({
+            title: "Éxito",
+            text: resp.mensaje || "Detalles asignados correctamente",
+            icon: "success"
+        }).then(() => {
+            // Abrir PDF en otra pestaña
+            if (codEntregaGlobal && codEmpresaGlobal) {
+                window.open(`/entregas/imprimir-entrega/${codEntregaGlobal}/${codEmpresaGlobal}`, '_blank');
             }
-            Swal.fire("Error", errorMsg, "error");
+
+            // Reiniciar variables y limpiar tabla para nueva entrega
+            codEntregaGlobal = null;
+            codEmpresaGlobal = null;
+            detallesPendientes = [];
+            $("#tablaDetalles tbody").empty();
+            $("#cod_empresa").val(""); 
+            $("#fecha_entrega").val(""); 
+            $("#cod_usuario_entrega").val("");
+        });
+    },
+    error: function (xhr) {
+        let errorMsg = "Error al asignar detalles";
+        if (xhr.responseJSON && xhr.responseJSON.detail) {
+            errorMsg = xhr.responseJSON.detail;
         }
-    });
+        Swal.fire("Error", errorMsg, "error");
+    }
+});
 }
+
+
 
 
 

@@ -1,10 +1,11 @@
 from fastapi import HTTPException
 from mysql.connector import Error
 from ..db.connection import get_connection
+from datetime import date
 from ..models.documentos_model import DocumentoVarioCreate
 
 # funcion para obtener documentos varios pendientes
-def obtener_documentos_pendientes():
+def obtener_documentos_pendientes(cod_empresa: int = None):
     conn = None
     cursor = None
     try:
@@ -35,9 +36,15 @@ def obtener_documentos_pendientes():
             JOIN monedas m ON dv.cod_moneda = m.cod_moneda
             JOIN tipo_documentos td ON dv.cod_tipo_documento = td.cod_tipo_documento
             WHERE dv.estado = 'P'
-            ORDER BY dv.cod_documento
         """
-        cursor.execute(sql)
+
+        # Si se pasa cod_empresa, agregamos el filtro
+        if cod_empresa:
+            sql += " AND dv.cod_empresa = %s"
+            cursor.execute(sql, (cod_empresa,))
+        else:
+            cursor.execute(sql)
+
         resultados = cursor.fetchall()
         return resultados
     except Error as e:
@@ -50,7 +57,7 @@ def obtener_documentos_pendientes():
             conn.close()
 
 
-# funcion para obtener documentos varios sin duplicados
+# funcion para obtener documentos varios para la vista
 def obtener_documentos_varios():
     conn = get_connection()
     cursor = conn.cursor()
@@ -58,21 +65,21 @@ def obtener_documentos_varios():
         cursor.execute("""
                 SELECT 
                     d.cod_documento,
+                    DATE_FORMAT(d.fecha_creacion, '%d/%m/%Y') AS fecha_creacion,
                     t.nombre_documento AS tipo_documento,
-                    e.nombre AS empresa_nombre,
                     p.nombre AS proveedor_nombre,
                     d.nombre_solicitud,
                     d.numero_documento,
                     CONCAT(m.cod_moneda, ' ', FORMAT(d.monto, 2)) AS monto_con_moneda,  
-                    COALESCE(d.numero_retension_iva, 'N/A') AS numero_retension_iva,
-                    COALESCE(d.numero_retension_isr, 'N/A') AS numero_retension_isr,
-                    d.observaciones,
                     CASE
                         WHEN d.estado = 'P' THEN 'Pendiente'
                         WHEN d.estado = 'E' THEN 'Entregado'
                         WHEN d.estado = 'R' THEN 'Recibido'
                         WHEN d.estado = 'X' THEN 'Anulado'
-                    END AS estado
+                    END AS estado,
+                    d.observaciones,
+                    COALESCE(d.numero_retension_iva, 'N/A') AS numero_retension_iva,
+                    COALESCE(d.numero_retension_isr, 'N/A') AS numero_retension_isr
                 FROM documentos_varios d
                 JOIN empresas e ON d.cod_empresa = e.cod_empresa
                 JOIN tipo_documentos t ON d.cod_tipo_documento = t.cod_tipo_documento
@@ -85,16 +92,16 @@ def obtener_documentos_varios():
         return [
                 {
                     "cod_documento": r[0],
-                    "tipo_documento": r[1],
-                    "empresa_nombre": r[2],
+                    "fecha_creacion": r[1],
+                    "tipo_documento": r[2],
                     "proveedor_nombre": r[3],
                     "nombre_solicitud": r[4],
                     "numero_documento": r[5],
                     "monto_con_moneda": r[6],
-                    "numero_retension_iva": r[7],
-                    "numero_retension_isr": r[8],
-                    "observaciones": r[9],
-                    "estado": r[10]
+                    "estado": r[7],
+                    "observaciones": r[8],
+                    "numero_retension_iva": r[9],
+                    "numero_retension_isr": r[10],
             }
             for r in rows
         ]
@@ -152,8 +159,8 @@ def crear_documento_vario(doc: DocumentoVarioCreate):
                 cod_documento, cod_empresa, cod_tipo_documento,
                 cod_proveedor, nombre_solicitud, numero_documento,
                 cod_moneda, monto, observaciones, estado, retension_iva, retension_isr,
-                numero_retension_iva, numero_retension_isr
-            ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                numero_retension_iva, numero_retension_isr, fecha_creacion
+            ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """, (
             nuevo_cod,
             doc.cod_empresa,
@@ -168,7 +175,9 @@ def crear_documento_vario(doc: DocumentoVarioCreate):
             doc.retencion_iva,
             doc.retencion_isr,
             doc.numero_retension_iva,
-            doc.numero_retension_isr
+            doc.numero_retension_isr,
+            date.today()
+
         ))
 
         conn.commit()

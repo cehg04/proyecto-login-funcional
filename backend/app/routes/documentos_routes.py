@@ -23,9 +23,9 @@ def listar_tipos_documentos():
 
 # endpoint para obtener documentos pendientes
 @router.get("/pendientes")
-def get_documentos_pendientes():
+def get_documentos_pendientes(cod_empresa: int = None):
     try:
-        documentos = obtener_documentos_pendientes()
+        documentos = obtener_documentos_pendientes(cod_empresa)
         return {
             "success": True,
             "data": documentos,
@@ -37,6 +37,7 @@ def get_documentos_pendientes():
             "data": [],
             "error": f"Error al obtener documentos pendientes: {str(e)}"
         }
+
 
 # end point Listar documentos varios
 @router.get("/varios")

@@ -43,18 +43,20 @@ $(document).ready(function () {
                 else badgeClass = 'bg-secondary text-white'; 
                     tbody.append(`
                         <tr>
+                        <td>${doc.cod_documento}</td>
+                        <td>${doc.fecha_creacion || "N/A"}</td>
                         <td>${doc.tipo_documento}</td>
                         <td>${doc.proveedor_nombre || "N/A"}</td>
                         <td>${doc.nombre_solicitud || "N/A"}</td>
                         <td>${doc.numero_documento}</td>
                         <td>${doc.monto_con_moneda || ''}</td>
-                        <td>${doc.numero_retension_iva || "N/A"}</td>
-                        <td>${doc.numero_retension_isr || "N/A"}</td>
-                        <td title="${doc.observaciones || ''}">${doc.observaciones || "N/A"}</td>
                         <td><span class="badge ${badgeClass}">${doc.estado}</span></td>
                         <td>
                             <button class="btn btn-danger btn-sm btn-anular" data-cod="${doc.cod_documento}">Anular</button>
                         </td>
+                        <td title="${doc.observaciones || ''}">${doc.observaciones || "N/A"}</td>
+                        <td>${doc.numero_retension_iva || "N/A"}</td>
+                        <td>${doc.numero_retension_isr || "N/A"}</td>
                         </tr>
                     `);
                 });
@@ -71,8 +73,8 @@ $(document).ready(function () {
                     pageLength: 10,
                     lengthMenu: [5, 10, 25, 50],
                     columnDefs: [
-                        { orderable: false, targets: [9] },
-                        { className: "text-center", targets: [0, 3, 4, 5, 6, 8, 9] },
+                        { orderable: false, targets: [10] },
+                        { className: "text-center", targets: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] },
                         { className: "truncate", targets: 7 }
                     ]
                 });

@@ -77,18 +77,18 @@ $(document).ready(function () {
     $("#cod_proveedor").val("");
   });
 
-    // --- Validaciones para campos numéricos ---
+  // --- Validaciones para campos numéricos ---
   function esNumeroValido(valor) {
     return /^\d+(\.\d+)?$/.test(valor);  // acepta enteros y decimales
   }
 
-$("#btnGuardarDetalle").click(function () {
+  $("#btnGuardarDetalle").click(function () {
     const numFactura = $("#num_factura").val().trim();
     const monto = $("#monto").val().trim();
     const retIva = $("#numero_retension_iva").val().trim();
     const retIsr = $("#numero_retension_isr").val().trim();
 
-        if (numFactura.length !== 10) {
+    if (numFactura.length !== 10) {
       Swal.fire("Campo inválido", "El número de factura debe tener exactamente 10 caracteres.", "warning");
       return;
     }
@@ -126,7 +126,7 @@ $("#btnGuardarDetalle").click(function () {
     const detalle = {
       cod_contrasenia: codContrasenia,
       num_factura: $("#num_factura").val(),
-      fecha_factura: $("#fecha_factura").val(), 
+      fecha_factura: $("#fecha_factura").val(),
       cod_moneda: $("#cod_moneda").val(),
       monto: parseFloat($("#monto").val()),
       retension_iva: $("#retension_iva").is(":checked"),
@@ -149,15 +149,15 @@ $("#btnGuardarDetalle").click(function () {
     detalles.push(detalle);
     agregarDetalleATabla(detalle);
     $('#formulario-detalle')[0].reset();
-});
+  });
 
   $("#num_factura, #monto, #numero_retension_iva, #numero_retension_isr").on("keypress", function (e) {
     if (!/[0-9.]/.test(e.key)) {
       e.preventDefault();
     }
   });
-  
-function agregarDetalleATabla(detalle) {
+
+  function agregarDetalleATabla(detalle) {
     const fila = `
       <tr>
         <td>${detalle.num_factura}</td>
@@ -179,14 +179,14 @@ function agregarDetalleATabla(detalle) {
       detalles.splice(index, 1);
       $(this).closest("tr").remove();
     });
-}
+  }
 
   // Enviar encabezado + detalles
   $("#btnEnviarTodo").click(function () {
     const $btn = $(this);
 
     if (detalles.length === 0) {
-      Swal.fire("Sin detalles", "No hay detalles para enviar.", "warning");
+      Swal.fire("Advertencia", "No hay detalles para enviar.", "warning");
       return;
     }
 
@@ -225,12 +225,27 @@ function agregarDetalleATabla(detalle) {
           if (i >= detalles.length) {
             $btn.prop('disabled', false).text('Enviar Todo');
             if (errores === 0) {
-              Swal.fire("¡Éxito!", "Encabezado y detalles guardados exitosamente.", "success");
-              detalles = [];
-              $("#tabla-detalles tbody").empty();
-              $("#formulario-contrasenia")[0].reset();
-              $("#formulario-detalle")[0].reset();
-              codContrasenia = null;
+              Swal.fire({
+                icon: "success",
+                title: "¡Éxito!",
+                text: "Encabezado y detalles guardados exitosamente.",
+                showConfirmButton: false,
+                timer: 1500
+              }).then(() => {
+                const urlPdf = `/contrasenias/imprimir-encabezado/${codContrasenia}/${dataEncabezado.cod_empresa}`;
+                window.open(urlPdf, "_blank"); // nueva pestaña
+
+                // limpiar formularios después de abrir PDF
+                detalles = [];
+                $("#tabla-detalles tbody").empty();
+                $("#formulario-contrasenia")[0].reset();
+                $("#formulario-detalle")[0].reset();
+                codContrasenia = null;
+
+                // volver a poner fecha de hoy
+                const hoy = new Date().toISOString().split('T')[0];
+                $("#fecha_contrasenia").val(hoy);
+              });
             } else {
               Swal.fire("Atención", `Proceso completado con ${errores} error(es).`, "warning");
             }
@@ -239,16 +254,16 @@ function agregarDetalleATabla(detalle) {
 
           const det = detalles[i];
           const payload = {
-              cod_contrasenia: codContrasenia,
-              cod_empresa: parseInt(dataEncabezado.cod_empresa),
-              num_factura: parseInt(det.num_factura),
-              fecha_factura: det.fecha_factura,
-              cod_moneda: det.cod_moneda,
-              monto: parseFloat(det.monto),
-              retension_iva: det.retension_iva ? 'S' : 'N',
-              retension_isr: det.retension_isr ? 'S' : 'N',
-              numero_retension_iva: det.numero_retension_iva ? parseInt(det.numero_retension_iva) : null,
-              numero_retension_isr: det.numero_retension_isr ? parseInt(det.numero_retension_isr) : null
+            cod_contrasenia: codContrasenia,
+            cod_empresa: parseInt(dataEncabezado.cod_empresa),
+            num_factura: parseInt(det.num_factura),
+            fecha_factura: det.fecha_factura,
+            cod_moneda: det.cod_moneda,
+            monto: parseFloat(det.monto),
+            retension_iva: det.retension_iva ? 'S' : 'N',
+            retension_isr: det.retension_isr ? 'S' : 'N',
+            numero_retension_iva: det.numero_retension_iva ? parseInt(det.numero_retension_iva) : null,
+            numero_retension_isr: det.numero_retension_isr ? parseInt(det.numero_retension_isr) : null
           };
 
           if (!payload.num_factura || !payload.cod_moneda || isNaN(payload.monto) || !payload.cod_empresa) {
@@ -290,9 +305,9 @@ function agregarDetalleATabla(detalle) {
     });
 
   });
-    const hoy = new Date().toISOString().split('T')[0];
-  $("#fecha_contrasenia").val(hoy);
 
+  const hoy = new Date().toISOString().split('T')[0];
+  $("#fecha_contrasenia").val(hoy);
 
   // Inicialmente deshabilitar los inputs
   $("#numero_retension_iva").prop("disabled", true);

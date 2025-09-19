@@ -403,7 +403,7 @@ def obtener_monedas():
         conn.close()
 
 # funcion para obtener los detalles de las contraseñas
-def obtener_detalles_pendientes():
+def obtener_detalles_pendientes(cod_empresa: int):
     conn = None
     cursor = None
     try:
@@ -433,9 +433,10 @@ def obtener_detalles_pendientes():
             JOIN empresas emp ON dc.cod_empresa = emp.cod_empresa
             JOIN monedas m ON dc.cod_moneda = m.cod_moneda
             WHERE dc.estado = 'P'
+              AND dc.cod_empresa = %s
             ORDER BY dc.cod_contrasenia, dc.linea
         """
-        cursor.execute(sql)
+        cursor.execute(sql, (cod_empresa,))
         resultados = cursor.fetchall()
         return resultados
     except Error as e:
@@ -446,6 +447,7 @@ def obtener_detalles_pendientes():
             cursor.close()
         if conn:
             conn.close()
+
 
 
 

@@ -249,13 +249,16 @@ def imprimir_entrega(cod_entrega: int, cod_empresa: int):
         story.append(table)
         story.append(Spacer(1, 8))
         story.append(Spacer(1, 12))
-        story.append(Paragraph(f"<b>Entrega A:</b> {nombre_emisor}", centrado_style))
+        story.append(Paragraph(f"<b>Usuario Entrega:</b> {nombre_emisor}", centrado_style))
+        story.append(Spacer(1, 25))
+        story.append(Paragraph("____________________________________", centrado_style))
+        story.append(Paragraph("<b>Usuario Recibe</b>", centrado_style))
 
         
         # Tamaño exacto de ticket: 68.75 x 105.1 mm
         doc = SimpleDocTemplate(
             buffer,
-            pagesize=(73*mm, 110*mm),
+            pagesize=(80*mm, 110*mm),
             rightMargin=2, leftMargin=2, topMargin=2, bottomMargin=2
         )
 
