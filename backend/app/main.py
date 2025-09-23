@@ -7,6 +7,7 @@ from .routes import contrasenia_routes
 from .routes import usuario_routes, auth_routes
 from .routes import documentos_routes
 from .routes import entregas_routes
+from .routes import reportes_routes
 from .utils.dependencies import verificar_sesion
 
 app = FastAPI()
@@ -17,6 +18,7 @@ app.include_router(auth_routes.router)
 app.include_router(contrasenia_routes.router)
 app.include_router(documentos_routes.router)
 app.include_router(entregas_routes.router)
+app.include_router(reportes_routes.router)
 
 
 # CORS para permitir peticiones desde el frontend
@@ -113,6 +115,10 @@ def mostrar_documentos_varios(request: Request):
 def mostrar_documentos_varios(request: Request):
     return templates.TemplateResponse("creardocumentos.html", {"request": request})
 
-@app.get("/reportes.html", response_class=HTMLResponse)
+@app.get("/reportecontrasenias.html", response_class=HTMLResponse)
 def mostrar_reportes(request: Request):
-    return templates.TemplateResponse("reportes.html", {"request": request})
+    return templates.TemplateResponse("reportecontrasenias.html", {"request": request})
+
+@app.get("/reportedocumentos.html", response_class=HTMLResponse)
+def mostrar_reportes(request: Request):
+    return templates.TemplateResponse("reportedocumentos.html", {"request": request})

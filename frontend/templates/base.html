@@ -18,7 +18,7 @@
         #sidebar {
             width: 250px;
             height: 100vh;
-            background-color: #1a1a1a;
+            background-color: #ffffff;
             position: fixed;
             top: 0;
             left: 0;
@@ -58,7 +58,7 @@
             border-radius: 4px;
         }
         #sidebar a {
-            color: #e0e0e0;
+            color: #222;
             display: block;
             padding: 12px 20px;
             text-decoration: none;
@@ -67,10 +67,10 @@
         #sidebar a:hover,
         #sidebar a.active {
             background-color: #09af00;
-            color: white;
+            color: black;
         }
         .user-info {
-            background-color: #252525;
+            background-color: #f1f5f9;
             padding: 20px;
             border-bottom: 1px solid #333;
         }
@@ -82,7 +82,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: black;
             font-weight: bold;
             font-size: 1.2rem;
         }
@@ -124,7 +124,7 @@
                     </div>
                 </div>
                 <div>
-                    <h6 id="nombre-usuario" class="mb-0 text-white">Usuario</h6>
+                    <h6 id="nombre-usuario" class="mb-0 text-black">Usuario</h6>
                 </div>
             </div>
         </div>
@@ -146,9 +146,18 @@
         <a href="/recepcionentrega.html" class="menu-item {% if request.url.path == '/recepcion.html' %}active{% endif %}">
             <i class="bi bi-envelope-open me-2"></i> Recepcion de Entregas
         </a>
-        <a href="/reportes.html" class="menu-item {% if request.url.path == '/reportes.html' %}active{% endif %}">
+        <a href="#submenuReportes" class="menu-item {% if request.url.path.startswith('/reporte') %}active{% elif request.url.path == '/reportes.html' %}active{% endif %}" data-bs-toggle="collapse" aria-expanded="false">
             <i class="bi bi-clipboard2-check me-2"></i> Reportes
+            <i class="bi bi-chevron-down float-end"></i>
         </a>
+        <div class="collapse ms-4" id="submenuReportes">
+            <a href="/reportecontrasenias.html" class="menu-item {% if request.url.path == '/reportecontrasenias.html' %}active{% endif %}">
+                <i class="bi bi-key me-2"></i> Reporte Contraseñas
+            </a>
+            <a href="/reportedocumentos.html" class="menu-item {% if request.url.path == '/reportedocumentos.html' %}active{% endif %}">
+                <i class="bi bi-file-earmark-text me-2"></i> Reporte Documentos Varios
+            </a>
+        </div>
 
         <div class="mt-3 px-3">
             <hr class="bg-secondary">
