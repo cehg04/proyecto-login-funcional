@@ -1,9 +1,9 @@
 $(document).ready(function () {
 
-    if (validar_permisos(14) !== 'S') {
+    if (validar_permisos(12) !== 'S') {
     Swal.fire({
       title: "Acceso denegado",
-      text: "No tienes permiso para Crear Contraseñas",
+      text: "No tienes permiso para Crear Documentos",
       icon: "warning",
       confirmButtonText: "OK"
     }).then(() => {

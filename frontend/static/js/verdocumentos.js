@@ -1,7 +1,7 @@
 $(document).ready(function () {
     cargarDocumentosVarios();
 
-    if (validar_permisos(13) !== 'S') {
+    if (validar_permisos(11) !== 'S') {
         Swal.fire({
             title: "Acceso denegado",
             text: "No tienes permiso para ver los Documentos",
@@ -13,7 +13,7 @@ $(document).ready(function () {
         return;
     }
 
-    if (validar_permisos(14) !== 'S') {
+    if (validar_permisos(12) !== 'S') {
         $("#btnCrearDocumento").hide();
     }
 
@@ -92,7 +92,7 @@ $(document).ready(function () {
 
     // Validar si el usuario tiene permiso 15 al dibujar la tabla
 $('#tablaDocumentos').on('draw.dt', function () {
-    if (validar_permisos(15) !== 'S') {
+    if (validar_permisos(13) !== 'S') {
         $(".btn-anular").remove();
     }
 });

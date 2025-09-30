@@ -1,4 +1,17 @@
 $(document).ready(function () {
+    
+    if (validar_permisos(14) !== 'S') {
+    Swal.fire({
+      title: "Acceso denegado",
+      text: "No tienes permiso para ver reportes de contraseñas",
+      icon: "warning",
+      confirmButtonText: "OK"
+    }).then(() => {
+      window.location.href = "inicio.html";
+    });
+    return;
+  }
+
     let dataTable;
     const $tabla = $("#tablaReportesContrasenias");
 
